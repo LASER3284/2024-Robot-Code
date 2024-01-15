@@ -10,6 +10,8 @@
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/CANcoder.hpp>
+#include <frc/controller/SimpleMotorFeedforward.h>
+#include <frc/trajectory/TrapezoidProfile.h>
 
 #include <numbers>
 
@@ -25,6 +27,7 @@ namespace constants {
     constexpr units::inch_t kWHEEL_CIRC = kWHEEL_DIAM * std::numbers::pi;
 
     constexpr units::feet_per_second_t kMAX_WHEEL_SPEED = 18.0_fps;
+    constexpr units::feet_per_second_squared_t kMAX_ROBOT_ACCEL = 24_fps_sq;
 
     constexpr int kDRIVE_ENC_RES = 2048;
 }
@@ -41,7 +44,7 @@ public:
     /// @return The heading in degrees
     units::radian_t get_heading() const;
 
-    units::meters_per_second_t get_velocity() const;
+    units::feet_per_second_t get_velocity() const;
 
     /// @brief Sets the desired state of the module (velocity of the drive and position of the turn)
     /// @param ref_state The reference state to base on
@@ -61,26 +64,35 @@ public:
     /// @see get_position
     frc::SwerveModuleState get_state() const;
 
-private:
     /// @brief Sets the raw voltage of the motor
     /// @param volts The voltage from -12V to 12V
-    void _set_drive_power(const units::volt_t);
+    void set_drive_power(const units::volt_t);
 
+    /// @brief Sets the heading angle to use for SysID of the drive motor
+    /// @param angle The heading angle as units::radian_t
+    void apply_heading_goal(const units::radian_t);
+
+    /// @brief Gets the drive motor voltage
+    /// @return The voltage of the motor
+    units::volt_t get_drive_power() const;
+private:
     /// @brief Sets the raw voltage of the motor
     /// @param volts The voltage from -12V to 12V
     void _set_turn_power(const units::volt_t);
 
     frc::PIDController heading_controller {
-        0.0,
-        0.0,
+        1.75,
+        0.6,
         0.0
     };
 
     frc::PIDController drive_controller {
-        0.0,
+        0.03,
         0.0,
         0.0
     };
+
+    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.19355_V, 0.6182_V / 1_fps, 0.0187071_V / 1_fps_sq};
 
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> drive_motor;
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> turn_motor;

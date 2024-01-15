@@ -5,6 +5,7 @@
 #pragma once
 
 #include <frc/TimedRobot.h>
+#include <frc/SmartDashboard/SendableChooser.h>
 #include "subsystems/drive.h"
 
 class Robot : public frc::TimedRobot {
@@ -30,4 +31,13 @@ public:
 private:
     std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
     subsystems::drive::Drivetrain drive {chassis_controller};
+
+    frc::SendableChooser<int> sysid_chooser;
+    enum SysIdChooser {
+        QsFwd = 0,
+        QsRev,
+        DynFwd,
+        DynRev,
+        None
+    };
 };
