@@ -7,6 +7,7 @@
 #include <frc/TimedRobot.h>
 #include <frc/SmartDashboard/SendableChooser.h>
 #include "subsystems/drive.h"
+#include "subsystems/uselessthing.h"
 
 class Robot : public frc::TimedRobot {
 public:
@@ -31,6 +32,7 @@ public:
 private:
     std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
     subsystems::drive::Drivetrain drive {chassis_controller};
+    subsystems::useless::Useless happy_face{};
 
     frc::SendableChooser<int> sysid_chooser;
     enum SysIdChooser {

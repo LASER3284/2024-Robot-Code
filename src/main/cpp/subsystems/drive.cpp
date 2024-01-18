@@ -85,7 +85,7 @@ void subsystems::drive::Drivetrain::reset_odometry() {
 }
 
 void subsystems::drive::Drivetrain::update_odometry() {
-    pose_estimator.Update(
+    current_pose = pose_estimator.Update(
         gyro->GetRotation2d(),
         {
             front_left.get_position(), front_right.get_position(),
@@ -132,4 +132,44 @@ void subsystems::drive::Drivetrain::cancel_sysid() {
         sysid_command->Cancel();
 
     sysid_command = std::nullopt;
+}
+
+frc::Pose2d subsystems::drive::Drivetrain::get_pose() const {
+    return current_pose;
+}
+
+void subsystems::drive::Drivetrain::set_pose(const frc::Pose2d pose) {
+    pose_estimator.ResetPosition(
+        gyro->GetRotation2d(),
+        {
+            front_left.get_position(), front_right.get_position(),
+            back_left.get_position(), back_right.get_position()
+        },
+        pose
+    );
+}
+
+frc::ChassisSpeeds subsystems::drive::Drivetrain::get_robo_speeds() const {
+    return kinematics.ToChassisSpeeds({
+        front_left.get_state(), front_right.get_state(),
+        back_left.get_state(), back_right.get_state()
+    });
+}
+
+void subsystems::drive::Drivetrain::drive_robo(frc::ChassisSpeeds chassis_speeds) {
+    wpi::array<frc::SwerveModuleState, 4> states = kinematics.ToSwerveModuleStates(chassis_speeds);
+    kinematics.DesaturateWheelSpeeds(
+        &states,
+        chassis_speeds,
+        swerve::constants::kMAX_WHEEL_SPEED,
+        constants::MAX_SPEED,
+        constants::MAX_ROT_SPEED
+    );
+
+    auto [fl, fr, bl, br] = states;
+
+    front_left.set_desired_goal(fl);
+    front_right.set_desired_goal(fr);
+    back_left.set_desired_goal(bl);
+    back_right.set_desired_goal(br);
 }

@@ -23,6 +23,13 @@
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
 
+// Pathplanner stuff
+#include <pathplanner/lib/auto/AutoBuilder.h>
+#include <pathplanner/lib/util/HolonomicPathFollowerConfig.h>
+#include <pathplanner/lib/util/PIDConstants.h>
+#include <pathplanner/lib/util/ReplanningConfig.h>
+#include <frc/DriverStation.h>
+
 namespace subsystems {
 
 namespace drive {
@@ -50,12 +57,22 @@ public:
     /// @brief Runs in the tick in order to estimate the pose of the robot.
     void update_odometry();
 
-    /// @brief Resets the odometry (pose, etc).
+    frc::Pose2d get_pose() const;
+
+    void set_pose(const frc::Pose2d);
+
+    frc::ChassisSpeeds get_robo_speeds() const;
+
+    void drive_robo(const frc::ChassisSpeeds);
+
+    /// @brief Resets the odometry (pose, etc) to be 0 on all values.
     void reset_odometry();
 
     void cancel_sysid();
 private:
     std::shared_ptr<frc::XboxController> joystick;
+
+    frc::Pose2d current_pose;
 
     units::feet_per_second_t max_detected_velocity = 0_fps;
 
