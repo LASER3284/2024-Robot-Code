@@ -35,39 +35,76 @@ namespace subsystems {
 namespace drive {
 
 namespace constants {
+
+    // Locations of the swerve modules
     const frc::Translation2d FRONT_LEFT_LOCATION {11.25_in, 11.25_in};
     const frc::Translation2d FRONT_RIGHT_LOCATION {11.25_in, -11.25_in};
     const frc::Translation2d BACK_LEFT_LOCATION {-11.25_in, 11.25_in};
     const frc::Translation2d BACK_RIGHT_LOCATION {-11.25_in, -11.25_in};
 
+    // Drivetrain parameters based on physical constraints (or practical ones,
+    // optionally)
+
+    /// @brief The maximum allowed speed of the drivetrain, used for calculating
+    /// what speed to give to the swerve modules based on joystick input.
     constexpr units::feet_per_second_t MAX_SPEED = 18_fps;
+
+    /// @brief The maxiumum allowed rotational speed of the drivetrain, used for
+    /// calculating what speed to give to the swerve modules based on the
+    /// joystick input.
     constexpr units::degrees_per_second_t MAX_ROT_SPEED = 720_deg_per_s;
 } // namespace constants
 
+/// @brief The drive train wrapping class that implements the pathplanning and
+/// teleop joystick tracking.
 class Drivetrain : public frc2::SubsystemBase {
 public:
-    Drivetrain(std::shared_ptr<frc::XboxController> joystick);
+    /// @brief Creates the Drivetrain object with the provided joystick
+    /// reference.
+    /// @param joystick The shared_ptr reference to frc::XboxController
+    Drivetrain(std::shared_ptr<frc::XboxController>);
 
-    /// @brief Runs the main loop for the drivetrain. This is what gets the motors in the modules to move and updates odometry.
+    /// @brief Runs the main loop for the drivetrain. This is what gets the
+    /// motors in the modules to move and updates odometry.
     /// @param is_field_oriented Whether or not to use field-oriented drive.
     void tick(bool);
 
+    /// @brief Schedules a SysId command if one is not already scheduled. Does
+    /// nothing otherwise.
+    /// @param test_num The number of the test to run. 0 is
+    /// Quasi-fwd, 1 is Quasi-rev, etc.
+    /// @see Robot::SysIdChooser
     void run_sysid(int);
 
     /// @brief Runs in the tick in order to estimate the pose of the robot.
     void update_odometry();
 
+    /// @brief Returns the translational and rotational components of the robot
+    /// based on known odometry. Used by PathPlanner.
+    /// @return See brief :)
     frc::Pose2d get_pose() const;
 
+    /// @brief Sets the odometry to use the new translational and rotational
+    /// components of robot position. Used by PathPlanner.
+    /// @param pose A constant Pose2d that the odometry should use.
     void set_pose(const frc::Pose2d);
 
+    /// @brief Returns the chassis-relative speeds of the robot. Used by
+    /// PathPlanner.
+    /// @return See brief :)
     frc::ChassisSpeeds get_robo_speeds() const;
 
+    /// @brief Attempts to force the swerve into a speed for the robot to move
+    /// at. Used by PathPlanner.
+    /// @param chassis_speeds Chassis-relative speeds
+    /// to force onto the swerve modules.
     void drive_robo(const frc::ChassisSpeeds);
 
     /// @brief Resets the odometry (pose, etc) to be 0 on all values.
     void reset_odometry();
 
+    /// @brief Cancels the scheduled SysId command, if one is scheduled; does
+    /// nothing otherwise.
     void cancel_sysid();
 private:
     std::shared_ptr<frc::XboxController> joystick;
