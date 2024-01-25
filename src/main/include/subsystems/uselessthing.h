@@ -1,6 +1,9 @@
 #pragma once
 
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc2/command/SubsystemBase.h>
+#include <frc2/command/CommandPtr.h>
+#include <frc2/command/Commands.h>
 
 namespace subsystems {
 
@@ -31,6 +34,10 @@ public:
     /// @return Some integer value based on the counter value.
     int get_count() {
         return counter_thing;
+    }
+
+    frc2::CommandPtr add_one() {
+        return frc2::cmd::RunOnce([this]() {do_count(1);});
     }
 
 private:

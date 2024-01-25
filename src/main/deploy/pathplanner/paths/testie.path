@@ -16,12 +16,28 @@
     },
     {
       "anchor": {
-        "x": 4.49936717276437,
+        "x": 3.0933145995037834,
         "y": 7.0
       },
       "prevControl": {
-        "x": 3.1524673591268977,
+        "x": 1.7464147858663108,
         "y": 7.0
+      },
+      "nextControl": {
+        "x": 4.4402144131412555,
+        "y": 7.0
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.0,
+        "y": 7.0
+      },
+      "prevControl": {
+        "x": 4.1030018575020515,
+        "y": 6.986846382127837
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,11 +49,18 @@
   "eventMarkers": [
     {
       "name": "New Event Marker",
-      "waypointRelativePos": 0,
+      "waypointRelativePos": 0.5,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
-          "commands": []
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "useless"
+              }
+            }
+          ]
         }
       }
     }
@@ -50,7 +73,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0,
+    "rotation": 0.0,
     "rotateFast": false
   },
   "reversed": false,

@@ -6,6 +6,7 @@
 
 #include <frc2/command/CommandScheduler.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <pathplanner/lib/auto/NamedCommands.h>
 
 void Robot::RobotInit() {
     sysid_chooser.SetDefaultOption("No SysID", SysIdChooser::None);
@@ -14,12 +15,21 @@ void Robot::RobotInit() {
     sysid_chooser.AddOption("Dynamic Forward", SysIdChooser::DynFwd);
     sysid_chooser.AddOption("Dynamic Reverse", SysIdChooser::DynRev);
     frc::SmartDashboard::PutData("SysIdChooser", &sysid_chooser);
+
+    pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
 }
 void Robot::RobotPeriodic() {
     frc2::CommandScheduler::GetInstance().Run();
+    happy_face.tick();
+
+    drive.update_odometry();
+    drive.update_nt();
 }
 
-void Robot::AutonomousInit() {}
+void Robot::AutonomousInit() {
+    auto_cmd = drive.get_auto_path("testie-auto");
+    auto_cmd.Schedule();
+}
 void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {

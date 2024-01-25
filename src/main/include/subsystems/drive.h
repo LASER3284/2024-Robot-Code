@@ -4,6 +4,7 @@
 #include <units/velocity.h>
 #include <units/angular_velocity.h>
 #include <memory>
+#include <string>
 #include <frc/XboxController.h>
 #include <frc/geometry/Translation2d.h>
 #include <frc/geometry/Pose2d.h>
@@ -29,6 +30,7 @@
 #include <pathplanner/lib/util/PIDConstants.h>
 #include <pathplanner/lib/util/ReplanningConfig.h>
 #include <frc/DriverStation.h>
+#include <frc/smartdashboard/Field2d.h>
 
 namespace subsystems {
 
@@ -69,6 +71,9 @@ public:
     /// @param is_field_oriented Whether or not to use field-oriented drive.
     void tick(bool);
 
+    /// @brief Updates the Network Tables data.
+    void update_nt();
+
     /// @brief Schedules a SysId command if one is not already scheduled. Does
     /// nothing otherwise.
     /// @param test_num The number of the test to run. 0 is
@@ -106,10 +111,22 @@ public:
     /// @brief Cancels the scheduled SysId command, if one is scheduled; does
     /// nothing otherwise.
     void cancel_sysid();
+
+    /// @brief Fetches the command for the path based on the AutoBuilder and
+    /// path name.
+    /// @param path_name The 'human' name of the path (as seen in the
+    /// PathPlanner GUI).
+    /// @return The generated CommandPtr for the path, which will call the
+    /// associated NamedCommands if they've been registered.
+    frc2::CommandPtr get_auto_path(std::string);
 private:
     std::shared_ptr<frc::XboxController> joystick;
 
     frc::Pose2d current_pose;
+
+    frc::Field2d field_drawing;
+
+    std::string current_traj;
 
     units::feet_per_second_t max_detected_velocity = 0_fps;
 
@@ -140,9 +157,10 @@ private:
     };
 
     photonlib::PhotonPoseEstimator photon_estimator {
-        frc::LoadAprilTagLayoutField(frc::AprilTagField::k2023ChargedUp),
+        frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
         photonlib::LOWEST_AMBIGUITY,
-        std::move(photonlib::PhotonCamera{"mainCam"}), frc::Transform3d{
+        std::move(photonlib::PhotonCamera{"mainCam"}),
+        frc::Transform3d {
             frc::Translation3d{14.75_in, 14.75_in, 5.875_in},
             frc::Rotation3d{0_deg, 67.5_deg, 0_deg}
         }

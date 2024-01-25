@@ -1,15 +1,46 @@
 #include "subsystems/drive.h"
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/DataLogManager.h>
+#include <iostream>
+#include <pathplanner/lib/util/PathPlannerLogging.h>
+
+using namespace pathplanner;
 
 subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> joystick) {
     this->joystick = joystick;
+
+    frc::SmartDashboard::PutData("field", &field_drawing);
+
+    PathPlannerLogging::setLogActivePathCallback([this](std::vector<frc::Pose2d> path) {
+        field_drawing.GetObject("path")->SetPoses(path);
+    });
+
+    AutoBuilder::configureHolonomic(
+        [this]() { return get_pose(); },
+        [this](frc::Pose2d pose) { set_pose(pose); },
+        [this]() { return get_robo_speeds(); },
+        [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
+        HolonomicPathFollowerConfig(
+            PIDConstants(0.1, 0.0, 0.0),
+            PIDConstants(0.1, 0.0, 0.0),
+            constants::MAX_SPEED,
+            16_in,
+            ReplanningConfig()
+        ),
+        []() {
+            auto alliance = frc::DriverStation::GetAlliance();
+            if (alliance) {
+                return alliance.value() == frc::DriverStation::Alliance::kRed;
+            }
+            return false;
+        },
+        this
+    );
 }
 
 void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     if (joystick->GetStartButton()) {
         reset_odometry();
-    } else {
-        update_odometry();
     }
 
     const double fast_mode_mul = joystick->GetLeftTriggerAxis() > 0.60 ? joystick->GetLeftTriggerAxis() : 0.60;
@@ -19,8 +50,8 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
 
     frc::SmartDashboard::PutNumber("Drivetrain_fast_mul", fast_mode_mul);
 
-    double x_axis = -joystick->GetLeftX();
-    double y_axis = joystick->GetLeftY();
+    double x_axis = joystick->GetLeftX();
+    double y_axis = -joystick->GetLeftY();
 
     x_axis = fabs(x_axis) > 0.1 ? x_axis : 0.0;
     y_axis = fabs(y_axis) > 0.1 ? y_axis : 0.0;
@@ -65,9 +96,6 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     back_left.set_desired_goal(bl);
     back_right.set_desired_goal(br);
 
-    frc::SmartDashboard::PutNumber("Drivetrain_speed", units::feet_per_second_t{front_left.get_velocity()}.value());
-    frc::SmartDashboard::PutNumber("Drivetrain_fl_heading", units::degree_t{front_left.get_heading()}.value());
-
     if (units::math::fabs(front_left.get_velocity()) > max_detected_velocity) {
         max_detected_velocity = units::math::fabs(front_left.get_velocity());
     }
@@ -76,22 +104,30 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
 }
 
 void subsystems::drive::Drivetrain::reset_odometry() {
-    front_left.reset_drive_position();
-    front_right.reset_drive_position();
-    back_left.reset_drive_position();
-    back_right.reset_drive_position();
-
-    gyro->SetYaw(0_deg);
+    set_pose(frc::Pose2d {});
 }
 
 void subsystems::drive::Drivetrain::update_odometry() {
-    current_pose = pose_estimator.Update(
+    pose_estimator.Update(
         gyro->GetRotation2d(),
         {
             front_left.get_position(), front_right.get_position(),
             back_left.get_position(), back_right.get_position()
         }
     );
+
+    photon_estimator.SetReferencePose(frc::Pose3d {pose_estimator.GetEstimatedPosition()});
+
+    auto vision_est = photon_estimator.Update();
+
+    if (vision_est) {
+        pose_estimator.AddVisionMeasurement(
+            vision_est.value().estimatedPose.ToPose2d(),
+            vision_est.value().timestamp
+        );
+    }
+
+    current_pose = pose_estimator.GetEstimatedPosition();
 }
 
 void subsystems::drive::Drivetrain::run_sysid(int test_num) {
@@ -125,6 +161,12 @@ void subsystems::drive::Drivetrain::run_sysid(int test_num) {
         }
         }
     }
+}
+
+frc2::CommandPtr subsystems::drive::Drivetrain::get_auto_path(std::string path_name) {
+    current_traj = path_name;
+
+    return AutoBuilder::buildAuto(path_name);
 }
 
 void subsystems::drive::Drivetrain::cancel_sysid() {
@@ -172,4 +214,15 @@ void subsystems::drive::Drivetrain::drive_robo(frc::ChassisSpeeds chassis_speeds
     front_right.set_desired_goal(fr);
     back_left.set_desired_goal(bl);
     back_right.set_desired_goal(br);
+}
+
+void subsystems::drive::Drivetrain::update_nt() {
+    frc::SmartDashboard::PutNumber("Drivetrain_heading", get_pose().Rotation().Degrees().value());
+    frc::SmartDashboard::PutNumber("Drivetrain_xpos", units::foot_t{get_pose().Translation().X()}.value());
+    frc::SmartDashboard::PutNumber("Drivetrain_ypos", units::foot_t{get_pose().Translation().Y()}.value());
+
+    field_drawing.SetRobotPose(get_pose());
+
+    frc::SmartDashboard::PutNumber("Drivetrain_fl_heading", units::degree_t{front_left.get_heading()}.value());
+    frc::SmartDashboard::PutNumber("Drivetrain_speed", units::feet_per_second_t{front_left.get_velocity()}.value());
 }

@@ -42,5 +42,7 @@ private:
     subsystems::drive::Drivetrain drive {chassis_controller};
     subsystems::useless::Useless happy_face{};
 
+    frc2::CommandPtr auto_cmd = frc2::cmd::None();
+
     frc::SendableChooser<int> sysid_chooser;
 };
