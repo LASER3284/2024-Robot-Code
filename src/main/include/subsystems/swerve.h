@@ -53,11 +53,12 @@ public:
     /// @param force_angle Whether or not to force the angle position
     void set_desired_goal(const frc::SwerveModuleState&, bool = false);
 
-    /// @brief Resets the position of the drive motor to 0 encoder counts
+    /// @brief Resets the position of the drive motor to 0 encoder counts.
     void reset_drive_position();
 
     /// @brief Returns the position of the swerve module.
-    /// @return Swerve position based on drive encoder in the motor and the absolute encoder.
+    /// @return Swerve position based on drive encoder in the motor and the
+    /// absolute encoder.
     /// @see get_state
     frc::SwerveModulePosition get_position() const;
 

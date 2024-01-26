@@ -201,8 +201,6 @@ private:
         }
     };
 
-    bool not_scheduled = false;
-
     std::optional<frc2::CommandPtr> sysid_command;
 
 }; // class drivetrain

@@ -50,8 +50,9 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
 
     frc::SmartDashboard::PutNumber("Drivetrain_fast_mul", fast_mode_mul);
 
-    double x_axis = joystick->GetLeftX();
-    double y_axis = -joystick->GetLeftY();
+    // Swapped for now bc ???
+    double x_axis = -joystick->GetLeftY();
+    double y_axis = -joystick->GetLeftX();
 
     x_axis = fabs(x_axis) > 0.1 ? x_axis : 0.0;
     y_axis = fabs(y_axis) > 0.1 ? y_axis : 0.0;
@@ -104,6 +105,8 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
 }
 
 void subsystems::drive::Drivetrain::reset_odometry() {
+    gyro->Reset();
+
     set_pose(frc::Pose2d {});
 }
 
@@ -151,7 +154,6 @@ void subsystems::drive::Drivetrain::run_sysid(int test_num) {
             break;
         }
         case 3: {
-            not_scheduled = true;
             sysid_command = sysid.Dynamic(frc2::sysid::Direction::kReverse);
             break;
         }
@@ -225,4 +227,5 @@ void subsystems::drive::Drivetrain::update_nt() {
 
     frc::SmartDashboard::PutNumber("Drivetrain_fl_heading", units::degree_t{front_left.get_heading()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_speed", units::feet_per_second_t{front_left.get_velocity()}.value());
+    frc::SmartDashboard::PutNumber("Drivetrain_br_heading", units::degree_t{back_right.get_heading()}.value());
 }
