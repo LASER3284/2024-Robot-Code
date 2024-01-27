@@ -51,6 +51,9 @@ namespace constants {
     /// what speed to give to the swerve modules based on joystick input.
     constexpr units::feet_per_second_t MAX_SPEED = 18_fps;
 
+    /// @brief The maximum allowed speed of the drivetrain in auto.
+    constexpr units::feet_per_second_t MAX_AUTO_SPEED = 1_fps;
+
     /// @brief The maxiumum allowed rotational speed of the drivetrain, used for
     /// calculating what speed to give to the swerve modules based on the
     /// joystick input.
@@ -122,8 +125,6 @@ public:
 private:
     std::shared_ptr<frc::XboxController> joystick;
 
-    frc::Pose2d current_pose;
-
     frc::Field2d field_drawing;
 
     std::string current_traj;
@@ -156,7 +157,7 @@ private:
         frc::Pose2d {}
     };
 
-    photonlib::PhotonPoseEstimator photon_estimator {
+    /*photonlib::PhotonPoseEstimator photon_estimator {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
         photonlib::LOWEST_AMBIGUITY,
         std::move(photonlib::PhotonCamera{"mainCam"}),
@@ -164,7 +165,7 @@ private:
             frc::Translation3d{14.75_in, 14.75_in, 5.875_in},
             frc::Rotation3d{0_deg, 67.5_deg, 0_deg}
         }
-    };
+    };*/
 
     frc2::sysid::SysIdRoutine sysid {
         frc2::sysid::Config {std::nullopt, std::nullopt, std::nullopt, std::nullopt},

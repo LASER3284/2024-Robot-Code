@@ -109,6 +109,7 @@ private:
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> turn_motor;
     std::unique_ptr<ctre::phoenix6::hardware::CANcoder> encoder;
 
+    frc::Rotation2d last_angle;
 }; // class module
 
 } // namespace swerve

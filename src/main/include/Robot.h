@@ -45,4 +45,6 @@ private:
     frc2::CommandPtr auto_cmd = frc2::cmd::None();
 
     frc::SendableChooser<int> sysid_chooser;
+
+    frc::SendableChooser<std::string> auto_chooser;
 };
