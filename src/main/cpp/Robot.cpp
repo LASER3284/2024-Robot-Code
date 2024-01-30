@@ -20,8 +20,6 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutData("SysIdChooser", &sysid_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
-    // TODO: Add auto Sendablechooser
-    // - Pull all of the file names from `deploy/pathplanner/autos` and put them into a chooser?
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
 
