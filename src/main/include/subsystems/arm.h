@@ -111,7 +111,7 @@ private:
     units::foot_t last_goal;
 
     frc2::sysid::SysIdRoutine sysid {
-        frc2::sysid::Config {0.35_V, 4_V/1_s, std::nullopt, std::nullopt},
+        frc2::sysid::Config {0.35_V/1_s, 4_V , std::nullopt, std::nullopt},
         frc2::sysid::Mechanism {
         [this](units::volt_t volts) {
             extension_motor1.SetVoltage(volts);
@@ -122,7 +122,7 @@ private:
                 .voltage(extension_motor1.Get() * frc::RobotController::GetBatteryVoltage())
                 .velocity(units::meters_per_second_t{get_velocity1()})
                 .position(units::meter_t {get_position1()});
-            log->Motor("arm-2e")
+            log->Motor("arm-2")
                 .voltage(extension_motor2.Get() * frc::RobotController::GetBatteryVoltage())
                 .velocity(units::meters_per_second_t{get_velocity2()})                    
                 .position(units::meter_t {get_position2()});
