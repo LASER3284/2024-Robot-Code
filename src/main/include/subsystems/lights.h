@@ -15,10 +15,20 @@ namespace lights {
     } // constants
 
     class LightHandler {
-        LightHandler() {
-            // ledstrip.SetLength(Constants::stripLength);
 
+        public:
+
+        LightHandler() {
+            led_strip.SetLength(constants::STRIP_LENGTH);
         }
+
+        void set_color() {
+        }
+
+
+        private:
+
+        frc::AddressableLED led_strip { 0 };
     }; // LightHandler
 
 } // lights
