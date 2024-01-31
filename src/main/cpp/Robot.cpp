@@ -6,6 +6,10 @@
 
 #include <frc2/command/CommandScheduler.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <pathplanner/lib/auto/NamedCommands.h>
+
+#include <filesystem>
+#include <frc/Filesystem.h>
 
 void Robot::RobotInit() {
     sysid_chooser.SetDefaultOption("No SysID", SysIdChooser::None);
@@ -14,12 +18,33 @@ void Robot::RobotInit() {
     sysid_chooser.AddOption("Dynamic Forward", SysIdChooser::DynFwd);
     sysid_chooser.AddOption("Dynamic Reverse", SysIdChooser::DynRev);
     frc::SmartDashboard::PutData("SysIdChooser", &sysid_chooser);
+
+    pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
+
+    std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
+
+    auto_chooser.SetDefaultOption("None", "None");
+
+    for (const auto &file : std::filesystem::directory_iterator(path)) {
+        std::string filename = file.path().string();
+        filename = filename.substr(0, filename.size() - 6);
+        auto_chooser.AddOption(filename, filename);
+    }
 }
+
 void Robot::RobotPeriodic() {
+    drive.update_odometry();
+    drive.update_nt();
+
+    happy_face.tick();
+
     frc2::CommandScheduler::GetInstance().Run();
 }
 
-void Robot::AutonomousInit() {}
+void Robot::AutonomousInit() {
+    auto_cmd = drive.get_auto_path(auto_chooser.GetSelected());
+    auto_cmd.Schedule();
+}
 void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {
