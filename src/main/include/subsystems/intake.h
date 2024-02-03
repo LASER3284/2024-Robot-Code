@@ -93,8 +93,8 @@ public:
         return ccw_plus + constants::THRUBORE_ANGLE_OFFSET;
     }
 private:
-    /// @brief Stops the roller motors completely.
-    void stop_rollers();
+    /// @brief Stops the roller motor completely.
+    void stop_roller();
 
     /// @brief Sets the voltage of the roller motor. 
     /// @param volts The voltage at which the roller motor is set. 
