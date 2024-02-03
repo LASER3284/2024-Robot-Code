@@ -1,7 +1,7 @@
-#include <frc/trajectory/TrapezoidProfile.h>
-#include <units/velocity.h>
 #pragma once
 
+#include <frc/trajectory/TrapezoidProfile.h>
+#include <units/velocity.h>
 #include <memory>
 #include <units/angular_velocity.h>
 #include <units/angular_acceleration.h>
@@ -16,12 +16,23 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/Timer.h>
 #include <ctre/phoenix6/TalonFX.hpp>
+#include <frc2/command/sysid/SysIdRoutine.h>
+#include <frc2/command/SubsystemBase.h>
+#include <frc/Timer.h>
+#include <optional>
 
 namespace subsystems {
 
 namespace intake {
 
 namespace constants {
+    enum DeployStates {
+        DOWN_NOSPIN = 0,
+        DOWN_SPIN,
+        UP_NOSPIN,
+        UP_SPIN
+    };
+
     /// @brief The CAN ID for the roller motor.
     constexpr int ROLLER_ID = 0;
     /// @brief The CAN ID for the deploy motor.
@@ -39,18 +50,6 @@ namespace constants {
     /// @brief The derivative gain for the deploy controller.
     constexpr double DEPLOY_D = 0.0;
 
-    /// @brief The statically applied voltage for the deploy motor.
-    constexpr auto DEPLOY_KS = 0.0_V;
-    /// @brief The applied voltage per velocity unit for the deploy motor.
-    constexpr auto DEPLOY_KV = 0.0_V / 1_deg_per_s;
-    /// @brief The applied voltage per acceleration unit for the deploy motor. 
-    constexpr auto DEPLOY_KA = 0.0_V / 1_deg_per_s_sq;
-
-    /// @brief The gravitationally applied voltage for the deploy motor.
-    constexpr auto DEPLOY_KG = 0.0_V;
-    /// @brief The point at which the intake is horizontal.
-    constexpr units::degree_t DEPLOY_KG_MAX_ANGLE = -0.0_deg;
-
     /// @brief The statically applied voltage for the roller motor.
     constexpr auto ROLLER_KS = 0.0_V;
     /// @brief The applied voltage per velocity unit for the roller motor.
@@ -58,50 +57,69 @@ namespace constants {
     /// @brief The applied voltage per acceleration unit for the roller motor.
     constexpr auto ROLLER_KA = 0.0_V / 1_deg_per_s_sq;
 
-    /// @brief The roller speed in RPM.
-    constexpr units::revolutions_per_minute_t ROLLER_SETPOINT = -0.0_rpm;
     /// @brief The roller intake speed in RPM.
-    constexpr units::revolutions_per_minute_t ROLLER_INTAKE_SETPOINT = 0.0_rpm;
+    constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 5_V;
 
-    constexpr units::degree_t UPPER_LIMIT = 0_deg;
-    constexpr units::degree_t SHOOTING_POS = 0_deg;
+    /// @brief The upper setpoint limit.
+    /// @todo Determine real value on encoder
+    constexpr units::degree_t UPPER_LIMIT = 90_deg;
+    /// @brief The lower setpoint limit.
+    /// @todo Determine real value on encoder
     constexpr units::degree_t LOWER_LIMIT = 0_deg;
 
     constexpr units::second_t ROLLER_DELAY = 0_ms;
-    constexpr units::revolutions_per_minute_t ROLLER_DEADBAND = 0_rpm;
 } // namespace constants
 
-class intake {
+class Intake : public frc2::SubsystemBase {
 public:
     /// @brief Initializes the motors and ensures break mode on the NEO.
     void init();
 
     /// @brief Updates SmartDashboard values, should be called in RobotPeriodic().
+    void update_nt();
+
+    /// @brief Updates the state of the motors and gives new voltages to feed to
+    /// the motors. Should be called every enabled periodic, except
+    /// TestPeriodic().
     void tick();
 
-    /// @brief A boolean for whether the intake was last deployed or retracted.
-    /// @return True if deployed, false otherwise
-    bool is_deployed() {
-        return is_deployed;
+    /// @brief Converts from the enum value to a setpoint for the roller voltage
+    /// and the deploy goal.
+    /// @param state The desired state of the intake. This can only be applied
+    /// through periodic calls to tick().
+    void activate(constants::DeployStates);
+
+    /// @brief Calculates the angle of the intake (i.e, whether it's up or down).
+    /// @return The angle in degrees.
+    units::degree_t get_angle() const {
+        return thrubore_enc.Get() + constants::THRUBORE_ANGLE_OFFSET;
     }
 
-    units::degree_t get_angle() {
-        units::degree_t cw_plus = units::degree_t {thrubore_enc.Get()};
-
-        units::degree_t ccw_plus = 0_deg;
-
-        return ccw_plus + constants::THRUBORE_ANGLE_OFFSET;
+    units::degrees_per_second_t get_angle_vel() {
+        return deploy_velocity;
     }
+
+    void run_sysid(int);
+
+    void cancel_sysid();
 private:
-    /// @brief Stops the roller motor completely.
-    void stop_roller();
+    /// @brief Used to find the delta-theta so we can get d-theta/dt.
+    units::degree_t previous_angle;
 
-    /// @brief Sets the voltage of the roller motor. 
-    /// @param volts The voltage at which the roller motor is set. 
-    void set_roller(units::volt_t volts); 
+    units::second_t previous_time;
+
+    units::degrees_per_second_t deploy_velocity;
+
+    frc::Timer velocity_timer {};
+
     /// @brief Sets the voltage of the deploy motor.
-    /// @param volts The voltage that should be applied to the deploy motor. 
+    /// @param volts The voltage that should be applied to the deploy motor.
     void set_deploy(units::volt_t volts);
+
+    /// @brief Fetches the amount of voltage applied to the motor as a
+    /// percentage of battery voltage.
+    /// @return See brief :)
+    units::volt_t get_deploy_volts();
 
     /// @brief Has the side effect of setting the deploy_setpoint and deploy_goal to the specified position.
     /// @param angle The desired position.
@@ -124,6 +142,8 @@ private:
         constants::DEPLOY_D
     };
 
+    frc::ArmFeedforward deploy_ff {0_V, 0_V, 0_V / 1_deg_per_s, 0_V / 1_deg_per_s_sq};
+
     frc::TrapezoidProfile<units::degrees>::Constraints deploy_constraints {
         0_deg_per_s,
         0_deg_per_s_sq
@@ -138,8 +158,25 @@ private:
         constants::ROLLER_ID,
     };
 
-    /// @brief A boolean for whether or not the intake is deployed. 
-    bool is_deployed = false;
+    units::volt_t roller_voltage = 0_V;
+
+    frc2::sysid::SysIdRoutine sysid {
+        frc2::sysid::Config {0.25_V / 1_s, 4_V, std::nullopt, std::nullopt},
+        frc2::sysid::Mechanism {
+            [this](units::volt_t volts) {
+                deploy_motor.SetVoltage(volts);
+            },
+            [this](auto log) {
+                log->Motor("intake-deploy-motor")
+                    .voltage(get_deploy_volts())
+                    .velocity(units::turns_per_second_t{get_angle_vel()})
+                    .position(units::turn_t{get_angle()});
+            },
+            this
+        }
+    };
+
+    std::optional<frc2::CommandPtr> sysid_command;
 }; // class intake
 
 } // namespace intake
