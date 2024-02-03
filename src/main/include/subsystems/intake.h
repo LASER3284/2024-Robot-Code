@@ -12,10 +12,10 @@
 #include <rev/CANSparkMax.h>
 #include <frc/DutyCycleEncoder.h>
 #include <frc/controller/PIDController.h>
-#include <ctre/phoenix/motorcontrol/can/WPI_TalonFX.h>
 #include <frc/controller/ArmFeedforward.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/Timer.h>
+#include <ctre/phoenix6/TalonFX.hpp>
 
 namespace subsystems {
 
@@ -23,9 +23,9 @@ namespace intake {
 
 namespace constants {
     /// @brief The CAN ID for the roller motor.
-    constexpr int ROLLER_ID = ;
+    constexpr int ROLLER_ID = 0;
     /// @brief The CAN ID for the deploy motor.
-    constexpr int DEPLOY_ID = ;
+    constexpr int DEPLOY_ID = 0;
 
     /// @brief Angle offset for the thru-bore (this is subtracted from the reported angle).
     constexpr units::degree_t THRUBORE_ANGLE_OFFSET = -0_deg;
@@ -67,19 +67,6 @@ namespace constants {
     constexpr units::degree_t SHOOTING_POS = 0_deg;
     constexpr units::degree_t LOWER_LIMIT = 0_deg;
 
-    /// @brief This is a map of GridHeights to degree values where the intake should position itself.
-    const std::map<
-        ::constants::FieldConstants::GridHeights,
-        units::degree_t
-    >   ANGLE_GRID_MAP = {
-        { ::constants::FieldConstants::GridHeights::eUp, UPPER_LIMIT },
-        { ::constants::FieldConstants::GridHeights::eMid, SHOOTING_POS },
-        { ::constants::FieldConstants::GridHeights::eGround, LOWER_LIMIT },
-        { ::constants::FieldConstants::GridHeights::eIntake, LOWER_LIMIT },
-        { ::constants::FieldConstants::GridHeights::eGroundSpit, LOWER_LIMIT },
-        { ::constants::FieldConstants::GridHeights::eStopped, UPPER_LIMIT },
-    };
-
     constexpr units::second_t ROLLER_DELAY = 0_ms;
     constexpr units::revolutions_per_minute_t ROLLER_DEADBAND = 0_rpm;
 } // namespace constants
@@ -98,16 +85,10 @@ public:
         return is_deployed;
     }
 
-    /// @brief A boolean for whether or not the intake has a game element
-    /// @return True if the intake has a game element, false otherwise
-    bool has_element() {
-        return abs(_get_roller_avel().value()) < constants::ROLLER_DEADBAND.value();
-    }
+    units::degree_t get_angle() {
+        units::degree_t cw_plus = units::degree_t {thrubore_enc.Get()};
 
-    units::degree_t get_angle {
-        units::degree_t cw_plus = units::degree_t {thrubore_enc.get()};
-
-        units::degree_t ccw_plus = 0_deg - cw_plus;
+        units::degree_t ccw_plus = 0_deg;
 
         return ccw_plus + constants::THRUBORE_ANGLE_OFFSET;
     }
@@ -117,7 +98,7 @@ private:
 
     /// @brief Sets the voltage of the roller motor. 
     /// @param volts The voltage at which the roller motor is set. 
-    void set_roller(units::volt_t volts) 
+    void set_roller(units::volt_t volts); 
     /// @brief Sets the voltage of the deploy motor.
     /// @param volts The voltage that should be applied to the deploy motor. 
     void set_deploy(units::volt_t volts);
@@ -130,14 +111,14 @@ private:
     /// @brief The deploy motor.
     rev::CANSparkMax deploy_motor {
         constants::DEPLOY_ID,
-        rev::CANSparkMaxLowLevel::MotorType::BRUSHLESS
+        rev::CANSparkMaxLowLevel::MotorType::kBrushless
     };
 
     /// @brief The encoder that measures the absolute angle of the intake.
     frc::DutyCycleEncoder thrubore_enc { 0 };
 
     /// @brief The PID controller for the deploy motor.
-    frc2::PIDController deploy_controller {
+    frc::PIDController deploy_controller {
         constants::DEPLOY_P,
         constants::DEPLOY_I,
         constants::DEPLOY_D
@@ -153,14 +134,13 @@ private:
     frc::TrapezoidProfile<units::degrees>::State deploy_setpoint;
 
     /// @brief The roller motor. 
-    rev::CANSparkMax roller_motor {
+    ctre::phoenix6::hardware::TalonFX roller_motor {
         constants::ROLLER_ID,
-        rev::CANSparkMaxLowLevel::MotorType::BRUSHLESS
     };
 
     /// @brief A boolean for whether or not the intake is deployed. 
     bool is_deployed = false;
-} // class intake
+}; // class intake
 
 } // namespace intake
 

@@ -35,16 +35,15 @@ void intake::intake::shoot(field_constants::grid_heights height) {
     deploy_setpoint = deploy_profile.calculate(0_ms);
     set_deploy(
         units::volt_t { deploy_controller.calculate(get_angle().value(), deploy_setpoint.position.value()) }
-        /*+ deploy_ff.calculate(get_angle(), deploy_setpoint.velocity)*/
     );
 
     if (height == FieldConstants::GridHeights::eStopped) {
         start_shoot = -1_s;
-        set_rollers(0.0_V);
+        set_roller(0.0_V);
     } else {
         if (height != FieldConstants::GridHeights::eIntake) {
             if (deploy_controller.AtSetpoint() || height == FieldConstants::GridHeights::eUp) {
-                set_rollers(
+                set_roller(
                     units::volt_t {
                         roller_controller.calculate(
                             get_roller_avel().value(),
@@ -56,7 +55,7 @@ void intake::intake::shoot(field_constants::grid_heights height) {
         }
     } else {
         if (get_angle() < 0_deg || deploy_controller.AtSetpoint() && !has_element()) {
-            set_rollers(
+            set_roller(
                 units::volt_t {
                     roller_controller.calculate(
                         get_roller_avel().value(),
@@ -66,11 +65,11 @@ void intake::intake::shoot(field_constants::grid_heights height) {
             );
         }
     } else if (has_element()) {
-        set_rollers(0.0_V);
+        set_roller(0.0_V);
     }
 }
 
-void intake::intake::stop_rollers() {
+void intake::intake::stop_roller() {
     roller_motor.SetVoltage(0_V); 
 }
 
