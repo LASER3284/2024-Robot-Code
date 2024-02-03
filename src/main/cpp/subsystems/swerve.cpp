@@ -4,12 +4,14 @@
 using namespace ctre::phoenix6;
 
 subsystems::swerve::Module::Module(const int drive, const int turn, const int enc) {
-    drive_motor = std::make_unique<hardware::TalonFX>(drive);
+    drive_motor = std::make_unique<rev::CANSparkFlex>(drive, rev::CANSparkLowLevel::MotorType::kBrushless);
     turn_motor = std::make_unique<hardware::TalonFX>(turn);
     encoder = std::make_unique<hardware::CANcoder>(enc);
 
-    drive_motor->SetNeutralMode(signals::NeutralModeValue::Brake);
+    drive_motor->SetIdleMode(rev::CANSparkFlex::IdleMode::kBrake);
     turn_motor->SetNeutralMode(signals::NeutralModeValue::Brake);
+
+    drive_enc = std::make_unique<rev::SparkRelativeEncoder>(drive_motor->GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor));
 
     heading_controller.EnableContinuousInput(
         -std::numbers::pi,
@@ -27,7 +29,7 @@ frc::SwerveModuleState subsystems::swerve::Module::get_state() const {
 frc::SwerveModulePosition subsystems::swerve::Module::get_position() const {
     return {
         units::meter_t{
-            drive_motor->GetPosition().GetValue().value() / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC
+            drive_enc->GetPosition() / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC
         },
         get_heading()
     };
@@ -67,12 +69,12 @@ units::radian_t subsystems::swerve::Module::get_heading() const {
 
 units::feet_per_second_t subsystems::swerve::Module::get_velocity() const {
     return units::feet_per_second_t{
-        drive_motor->GetVelocity().GetValue().value() / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC / 1_s
+        drive_enc->GetVelocity() / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC / 60_s
     };
 }
 
 void subsystems::swerve::Module::reset_drive_position() {
-    drive_motor->SetPosition(0_deg);
+    drive_enc->SetPosition(0);
 }
 
 void subsystems::swerve::Module::set_drive_power(const units::volt_t volts) {

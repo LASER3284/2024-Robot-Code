@@ -12,6 +12,7 @@
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/trajectory/TrapezoidProfile.h>
+#include <rev/CANSparkFlex.h>
 
 #include <numbers>
 
@@ -105,7 +106,8 @@ private:
 
     frc::SimpleMotorFeedforward<units::feet> drive_ff {0.19355_V, 0.6182_V / 1_fps, 0.0187071_V / 1_fps_sq};
 
-    std::unique_ptr<ctre::phoenix6::hardware::TalonFX> drive_motor;
+    std::unique_ptr<rev::CANSparkFlex> drive_motor;
+    std::unique_ptr<rev::SparkRelativeEncoder> drive_enc;
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> turn_motor;
     std::unique_ptr<ctre::phoenix6::hardware::CANcoder> encoder;
 
