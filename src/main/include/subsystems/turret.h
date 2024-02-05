@@ -1,21 +1,24 @@
 #include <frc/controller/PIDController.h>
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <frc/DutyCycleEncoder.h>
-namespace subsystems{
 
-namespace turret{
 
-namespace constants{
+namespace subsystems {
+
+namespace turret {
+
+namespace constants {
     /// @brief this is the id of the turret motor
     static constexpr int k_turret_id = 95;  
-};
-class turret{
+}
+
+class turret {
     public:
         /// @brief idle the turret
         void idle_turret();
         /// @brief set setpoint
-        void set_goal_point(units::degree_t);
-        units::degree_t get_position();
+        void set_angle(units::degree_t);
+        units::degree_t get_angle();
         ///@brief checks if a set point
         bool at_goal_point();
         ///@brief enables and disables the turret
@@ -36,5 +39,7 @@ class turret{
             0
         };
 };
+
 }
+
 }
