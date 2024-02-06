@@ -7,6 +7,7 @@
 #include <frc/TimedRobot.h>
 #include <frc/SmartDashboard/SendableChooser.h>
 #include "subsystems/drive.h"
+#include "subsystems/uselessthing.h"
 
 class Robot : public frc::TimedRobot {
 public:
@@ -28,11 +29,6 @@ public:
     void SimulationInit() override;
     void SimulationPeriodic() override;
 
-private:
-    std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
-    subsystems::drive::Drivetrain drive {chassis_controller};
-
-    frc::SendableChooser<int> sysid_chooser;
     enum SysIdChooser {
         QsFwd = 0,
         QsRev,
@@ -40,4 +36,15 @@ private:
         DynRev,
         None
     };
+
+private:
+    std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
+    subsystems::drive::Drivetrain drive {chassis_controller};
+    subsystems::useless::Useless happy_face{};
+
+    frc2::CommandPtr auto_cmd = frc2::cmd::None();
+
+    frc::SendableChooser<int> sysid_chooser;
+
+    frc::SendableChooser<std::string> auto_chooser;
 };
