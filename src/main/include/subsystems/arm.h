@@ -79,11 +79,11 @@ private:
 
     double manual_percentage = 0.0;
 
-    rev::CANSparkMax extension_motor1 {constants::ARM_CAN_ID_1, rev::CANSparkMaxLowLevel::MotorType::kBrushless}; // canid wrong
-    rev::SparkMaxRelativeEncoder relative_encoder1 = extension_motor1.GetEncoder();
+    rev::CANSparkMax extension_motor1 {constants::ARM_CAN_ID_1, rev::CANSparkLowLevel::MotorType::kBrushless}; // canid wrong
+    rev::SparkMaxRelativeEncoder relative_encoder1 = extension_motor1.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
 
-    rev::CANSparkMax extension_motor2 {constants::ARM_CAN_ID_2, rev::CANSparkMaxLowLevel::MotorType::kBrushless}; // canid wrong
-    rev::SparkMaxRelativeEncoder relative_encoder2 = extension_motor2.GetEncoder();
+    rev::CANSparkMax extension_motor2 {constants::ARM_CAN_ID_2, rev::CANSparkLowLevel::MotorType::kBrushless}; // canid wrong
+    rev::SparkMaxRelativeEncoder relative_encoder2 = extension_motor2.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
 
     // same thing with these, but to help myself
 
