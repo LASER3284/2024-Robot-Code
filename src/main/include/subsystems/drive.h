@@ -157,7 +157,7 @@ private:
         frc::Pose2d {}
     };
 
-    /*photonlib::PhotonPoseEstimator photon_estimator {
+    photonlib::PhotonPoseEstimator photon_estimator {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
         photonlib::LOWEST_AMBIGUITY,
         std::move(photonlib::PhotonCamera{"mainCam"}),
@@ -165,7 +165,7 @@ private:
             frc::Translation3d{14.75_in, 14.75_in, 5.875_in},
             frc::Rotation3d{0_deg, 67.5_deg, 0_deg}
         }
-    };*/
+    };
 
     frc2::sysid::SysIdRoutine sysid {
         frc2::sysid::Config {std::nullopt, std::nullopt, std::nullopt, std::nullopt},

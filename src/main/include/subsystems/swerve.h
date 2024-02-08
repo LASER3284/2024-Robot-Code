@@ -14,6 +14,7 @@
 #include <frc/trajectory/TrapezoidProfile.h>
 #include <rev/CANSparkFlex.h>
 
+#include <optional>
 #include <numbers>
 
 namespace subsystems {
@@ -31,6 +32,8 @@ namespace constants {
     constexpr units::feet_per_second_squared_t kMAX_ROBOT_ACCEL = 24_fps_sq;
 
     constexpr int kDRIVE_ENC_RES = 2048;
+
+    constexpr double TURN_RATIO = 12.8;
 }
 
 class Module {
@@ -85,6 +88,10 @@ public:
     /// battery voltage.
     /// @return The voltage of the motor
     units::volt_t get_drive_power() const;
+
+    std::optional<units::degree_t> get_cancoder_heading() const;
+
+    void force_update_azimuth();
 private:
     /// @brief Sets the raw voltage of the motor for azimuth. Private b/c
     /// azimuth angle is important for drive power.

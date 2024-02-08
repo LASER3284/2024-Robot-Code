@@ -17,6 +17,12 @@ subsystems::swerve::Module::Module(const int drive, const int turn, const int en
         -std::numbers::pi,
         std::numbers::pi
     );
+
+    auto cancoder_heading = get_cancoder_heading();
+    if (cancoder_heading) {
+        turn_motor->SetPosition(cancoder_heading.value() * constants::TURN_RATIO);
+    }
+    encoder->OptimizeBusUtilization();
 }
 
 frc::SwerveModuleState subsystems::swerve::Module::get_state() const {
@@ -64,7 +70,7 @@ void subsystems::swerve::Module::set_desired_goal(const frc::SwerveModuleState& 
 }
 
 units::radian_t subsystems::swerve::Module::get_heading() const {
-    return encoder->GetPosition().GetValue();
+    return turn_motor->GetPosition().GetValue() / constants::TURN_RATIO;
 }
 
 units::feet_per_second_t subsystems::swerve::Module::get_velocity() const {
@@ -93,4 +99,18 @@ void subsystems::swerve::Module::apply_heading_goal(const units::radian_t angle)
 
 units::volt_t subsystems::swerve::Module::get_drive_power() const {
     return drive_motor->Get() * frc::RobotController::GetBatteryVoltage();
+}
+
+void subsystems::swerve::Module::force_update_azimuth() {
+    auto cancoder_heading = get_cancoder_heading();
+    if (cancoder_heading)
+        turn_motor->SetPosition(cancoder_heading.value() * constants::TURN_RATIO);
+}
+
+std::optional<units::degree_t> subsystems::swerve::Module::get_cancoder_heading() const {
+    auto status = encoder->GetPosition();
+    if (ctre::phoenix6::BaseStatusSignal::IsAllGood(status)) {
+        return status.GetValue();
+    }
+    return std::nullopt;
 }

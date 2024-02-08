@@ -120,7 +120,6 @@ void subsystems::drive::Drivetrain::update_odometry() {
         }
     );
 
-    /*
     photon_estimator.SetReferencePose(frc::Pose3d {pose_estimator.GetEstimatedPosition()});
 
     auto vision_est = photon_estimator.Update();
@@ -131,7 +130,6 @@ void subsystems::drive::Drivetrain::update_odometry() {
             vision_est.value().timestamp
         );
     }
-    */
 }
 
 void subsystems::drive::Drivetrain::run_sysid(int test_num) {
