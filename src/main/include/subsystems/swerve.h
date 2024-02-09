@@ -39,7 +39,7 @@ namespace constants {
 class Module {
 public:
     /// @brief Swerve module constructor for the various encoder+motors
-    /// @param drive The CAN ID of the drive motor (TalonFX)
+    /// @param drive The CAN ID of the drive motor (SparkFlex)
     /// @param turn The CAN ID of the turn motor (TalonFX)
     /// @param enc The CAN ID of the CANCoder
     Module(const int, const int, const int);
