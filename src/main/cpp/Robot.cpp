@@ -21,7 +21,6 @@ void Robot::RobotInit() {
 
     mech_chooser.SetDefaultOption("No Mechanism", MechanismChooser::MechNone);
     mech_chooser.AddOption("Drive Train", MechanismChooser::Drivetrain);
-    mech_chooser.AddOption("Intake Deploy", MechanismChooser::Intake);
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
@@ -35,12 +34,13 @@ void Robot::RobotInit() {
         filename = filename.substr(0, filename.size() - 6);
         auto_chooser.AddOption(filename, filename);
     }
+
+    intake.init();
 }
 
 void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
-    intake.update_nt();
 
     happy_face.tick();
 
@@ -60,12 +60,18 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
     // snip
 
+    if (chassis_controller->GetRightBumper()) {
+        intake.activate(subsystems::intake::constants::DeployStates::SPIN);
+    } else {
+        intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+    }
+
+    intake.tick();
     drive.tick(true);
 }
 
 void Robot::DisabledInit() {
     drive.cancel_sysid();
-    intake.cancel_sysid();
 }
 void Robot::DisabledPeriodic() {}
 
@@ -76,9 +82,6 @@ void Robot::TestPeriodic() {
     switch (selected_mech) {
     case MechanismChooser::Drivetrain:
         drive.run_sysid(sysid_chooser.GetSelected());
-        break;
-    case MechanismChooser::Intake:
-        intake.run_sysid(sysid_chooser.GetSelected());
         break;
     default:
         break;

@@ -32,7 +32,7 @@ namespace constants {
     };
 
     /// @brief The CAN ID for the roller motor.
-    constexpr int ROLLER_ID = 0;
+    constexpr int ROLLER_ID = 15;
 
     /// @brief The roller intake speed in RPM.
     constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 5_V;

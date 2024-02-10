@@ -46,6 +46,7 @@ public:
 
 private:
     std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
+    frc::XboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};
     subsystems::useless::Useless happy_face{};
     subsystems::intake::Intake intake{};
