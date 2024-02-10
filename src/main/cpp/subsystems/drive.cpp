@@ -119,7 +119,6 @@ void subsystems::drive::Drivetrain::update_odometry() {
             back_left.get_position(), back_right.get_position()
         }
     );
-
     /*
     photon_estimator.SetReferencePose(frc::Pose3d {pose_estimator.GetEstimatedPosition()});
 
@@ -135,31 +134,26 @@ void subsystems::drive::Drivetrain::update_odometry() {
 }
 
 void subsystems::drive::Drivetrain::run_sysid(int test_num) {
-    if (sysid_command && !sysid_command->IsScheduled()) {
-        sysid_command->Schedule();
-    } else if (sysid_command && sysid_command->IsScheduled()) {
-        // empty code :)
-        // wait for something else to cancel the scheduled command
-    } else {
+    if (!sysid_command) {
         switch (test_num) {
         case 0: {
             sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
             break;
         }
         case 1: {
             sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kReverse);
+            sysid_command->Schedule();
             break;
         }
         case 2: {
             sysid_command = sysid.Dynamic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
             break;
         }
         case 3: {
             sysid_command = sysid.Dynamic(frc2::sysid::Direction::kReverse);
-            break;
-        }
-        default: {
-            cancel_sysid();
+            sysid_command->Schedule();
             break;
         }
         }
@@ -181,8 +175,14 @@ frc2::CommandPtr subsystems::drive::Drivetrain::get_auto_path(std::string path_n
 }
 
 void subsystems::drive::Drivetrain::cancel_sysid() {
-    if (sysid_command)
+    if (sysid_command) {
         sysid_command->Cancel();
+
+        front_left.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d()}, true);
+        front_right.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
+        back_left.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
+        back_right.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
+    }
 
     sysid_command = std::nullopt;
 }
