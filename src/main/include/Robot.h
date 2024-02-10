@@ -46,5 +46,7 @@ private:
 
     frc::SendableChooser<int> sysid_chooser;
 
+    int sysid_routine = SysIdChooser::None;
+
     frc::SendableChooser<std::string> auto_chooser;
 };
