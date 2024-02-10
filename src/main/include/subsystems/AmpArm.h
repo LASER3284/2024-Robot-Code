@@ -44,8 +44,9 @@ namespace subsystems {
             double AmpShoulderManualPercentage = 0.0;
 
 
-            rev::CANSparkMax extensionMotor { Constants::AmpShotCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+            rev::CANSparkMax AmpExtensionMotor { Constants::AmpExtentionCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
             frc::DutyCycleEncoder thruboreEnc { 0 };
+            rev::CANSparkMax AmpShotMotor { Constants::AmpShotCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushed};
             
 
             /// Copy

@@ -1,7 +1,7 @@
 #include "subsystems/AmpArm.h"
 
 subsystems::Ampshot::AmpArm(){
-    deploy_motor.SetIdleMode(rev::CANSparkMax::IdleMode::BRAKE);
+    AmpShotMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
     AmpExtensionEncoder.SetPosition(0);
 }
 
@@ -33,6 +33,14 @@ void subsystems::AmpArm::SetRotationGoal(units::degree_t shoulder_goal) {
     angleController.SetSetpoint(shoulder_goal.value());
 }
 
+void subsystems::AmpArm::SetPositionAmpShot(unit::meter_t extention_ampshot){
+    positionController.SetSetpoint(extention_AmpShot.value());
+}
+
+void subsystems::AmpArm::SetPositionTrap(unit::meter_t extention_trap){
+    positionController.SetSetpoint(extention_trap.value());
+}
+
 void subsystems::AmpArm::AmpExtention(){
     frc::SmartDashboard::PutNumber("amp_extension_m", GetExtentionPosition().value());
     if(AmpExtentionManualPercentage != 0.0){
@@ -46,8 +54,6 @@ void subsystems::AmpArm::AmpExtention(){
             
     }else {
         ///@brief STOP Amp Extention
-        //I haven't understand this yet
-        ///Just a copy from last year's program
         frc::TrapezoidProfile<units::meters> AmpExtensionProfile { 
             constraints, 
             extensionGoal,
@@ -67,8 +73,6 @@ void subsystems::AmpArm::AmpExtention(){
 }
 
 void subsystems::AmpArm::AmpShoulder() {
-    /// I haven't understand this yet
-    ///Copy
     if(AmpShoulderManualPercentage != 0.0) {
             AmpShoulderMotor.SetVoltage(12_V * AmpShoulderManualPercentage);
             AmpShoulderSet = { GetShoulderRotation(), 0_deg_per_s };
@@ -110,7 +114,17 @@ void subsystems::AmpArm::AmpShoulder() {
     }
 }
 
+void subsystems::AmpArm::Send() {
+    ///if (NotesDetector) {
+    ///DC brushed SPARK MAX 
+    ///}else{
+    ///wait
+    ///stop
+    ///}
+}
+
 void subsystems::AmpArm::AmpIntake() {
+    ///They are going to change the LimitSwitch to a sensor
     frc::DigitalInput input{0};
     auto NotesDetector = (input.Get());
 
@@ -121,28 +135,20 @@ void subsystems::AmpArm::AmpIntake() {
     }
 }
 
-void subsystems::AmpArm::SetPosition() {
-    subsystems::AmpArm::AmpShoulder();
-    subsystems::AmpArm::AmpExtention();
+void subsystems::AmpArm::SetPositionAmp() {
+    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
+    
 }
 
-void subsystems::AmpArm::AmpShot(){
+void subsystems::AmpArm::Shot(){
     AmpshotMotor.Set(0.00 * AmpshotPower);
 }
 
-void subsystems::AmpArm::TrapShot(){
-
-/// I will copy this from AmpShot
-
+void subsystems::AmpArm::SetPositionTrapShot(){
+    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
 }
     
 void subsystems::AmpArm::Reset() {
-    if (/*Encoder or Limit Switch*/){
-        AmpShoulderMotor.Set(-1.00 * AmpRotatePower);
-        AmpExtensionMotor.Set(-1.00 * AmpExtentionPower);
-    }else if (/*Encoder or Limit Switch*/){
-        AmpShoulderMotor.Set(0.00 * AmpRotatePower);
-        AmpExtensionMotor.Set(0.00 * AmpExtentionPower);
-    }
+    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
     
 }
