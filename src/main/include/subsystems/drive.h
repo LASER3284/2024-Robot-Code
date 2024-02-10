@@ -23,6 +23,7 @@
 // SysID stuff
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
 // Pathplanner stuff
 #include <pathplanner/lib/auto/AutoBuilder.h>
@@ -157,7 +158,8 @@ private:
         frc::Pose2d {}
     };
 
-    /*photonlib::PhotonPoseEstimator photon_estimator {
+    /*
+    photonlib::PhotonPoseEstimator photon_estimator {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
         photonlib::LOWEST_AMBIGUITY,
         std::move(photonlib::PhotonCamera{"mainCam"}),
@@ -165,7 +167,8 @@ private:
             frc::Translation3d{14.75_in, 14.75_in, 5.875_in},
             frc::Rotation3d{0_deg, 67.5_deg, 0_deg}
         }
-    };*/
+    };
+    */
 
     frc2::sysid::SysIdRoutine sysid {
         frc2::sysid::Config {std::nullopt, std::nullopt, std::nullopt, std::nullopt},
@@ -185,18 +188,6 @@ private:
                     .voltage(front_left.get_drive_power())
                     .velocity(units::meters_per_second_t{front_left.get_velocity()})
                     .position(front_left.get_position().distance);
-                log->Motor("front-right-drive")
-                    .voltage(front_right.get_drive_power())
-                    .velocity(units::meters_per_second_t{front_right.get_velocity()})
-                    .position(front_right.get_position().distance);
-                log->Motor("back-left-drive")
-                    .voltage(back_left.get_drive_power())
-                    .velocity(units::meters_per_second_t{back_left.get_velocity()})
-                    .position(back_left.get_position().distance);
-                log->Motor("back-right-drive")
-                    .voltage(back_right.get_drive_power())
-                    .velocity(units::meters_per_second_t{back_right.get_velocity()})
-                    .position(back_right.get_position().distance);
             },
             this
         }

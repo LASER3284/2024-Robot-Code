@@ -56,5 +56,7 @@ private:
     frc::SendableChooser<int> mech_chooser;
     int selected_mech = MechanismChooser::MechNone;
 
+    int sysid_routine = SysIdChooser::None;
+
     frc::SendableChooser<std::string> auto_chooser;
 };
