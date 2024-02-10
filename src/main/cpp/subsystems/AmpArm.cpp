@@ -1,73 +1,78 @@
 #include "subsystems/AmpArm.h"
 
-using namespace ctre::phoenix6;
-
-subsystems::AmpArm::AmpArm::AmpArm() {
-    // shootMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-    // extensionMotor.SetPosition(0);
+subsystems::Ampshot::AmpArm(){
+    AmpShotMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+    AmpExtensionEncoder.SetPosition(0);
 }
 
-void subsystems::AmpArm::AmpArm::tick() {
-    lastShoulderVelocity = getShoulderVelocity();
-    lastExtensionVelocity = getExtensionVelocity();
-
-    lastTime = frc::Timer::GetFPGATimestamp();   
+void intake::intake::tick() {
+    frc::SmartDashboard::PutNumber("amp_shoulder_rotation", GetShoulderRotation().value());
+    frc::SmartDashboard::PutNumber("amp_extention_position", GetExtentionPosition().value());
+    frc::SmartDashboard::PutNumber("amp_shoulder_velocity", GetShoulderVelocity().value());
+    frc::SmartDashboard::PutNumber("amp_extention_velocity", GetExtentionVelocity().value());
 }
 
-units::degree_t subsystems::AmpArm::AmpArm::getShoulderRotation() {
-    return thruboreEnc.Get();
+units::degree_t subsystems::AmpArm::GetShoulderRotation() {
+    units::degree_t shoulder_deg = thruboreEnc.Get();
+    return Shoulder_deg;
 }
 
-// TODO: WRITE THIS FUNCTION :)
-units::degrees_per_second_t subsystems::AmpArm::AmpArm::getShoulderVelocity() {
-    return 0_deg_per_s;
+units::meter_t subsystems::AmpArm::GetExtentionPosition() {
+    auto value = (AmpExtentionEncoder.GetPosition());
+    return value;
 }
 
-units::meter_t subsystems::AmpArm::AmpArm::getExtensionPosition() {
-    auto rot = extensionMotor.GetPosition().GetValue();
-    return units::meter_t { (rot / constants::Extension_Ratio) * constants::Extension_Diameter };
+units::inch_per_second_t subsystems::AmpArm::GetExtentionVelocity() {
+    const units::inch_per_second_t velocity = units::inch_per_second_t
+        (((AmpExtensionEncoder.GetVelocity() / Constants::Extention_Ratio) * Constants::Extention_Diameter/*3.14?*/).value()
+    );
+    return velocity;
 }
 
-units::meters_per_second_t subsystems::AmpArm::AmpArm::getExtensionVelocity() {
-    auto rotVelocity = extensionMotor.GetVelocity().GetValue();
-    return units::meters_per_second_t { 
-        ((rotVelocity / constants::Extension_Ratio) * constants::Extension_Diameter)
-    };
+void subsystems::AmpArm::SetRotationGoal(units::degree_t shoulder_goal) {
+    angleController.SetSetpoint(shoulder_goal.value());
 }
 
-void subsystems::AmpArm::AmpArm::setRotationalGoal(units::degree_t shoulder_goal) {
-    shoulderController.SetGoal(shoulder_goal);
+void subsystems::AmpArm::SetPositionAmpShot(unit::meter_t extention_ampshot){
+    positionController.SetSetpoint(extention_AmpShot.value());
 }
 
-void subsystems::AmpArm::AmpArm::SetPositionAmpShot(unit::meter_t Extension_ampshot){
-    positionController.SetSetpoint(Extension_AmpShot.value());
+void subsystems::AmpArm::SetPositionTrap(unit::meter_t extention_trap){
+    positionController.SetSetpoint(extention_trap.value());
 }
 
-void subsystems::AmpArm::SetPositionTrap(unit::meter_t Extension_trap){
-    positionController.SetSetpoint(Extension_trap.value());
-}
-
-void subsystems::AmpArm::AmpArm::AmpExtension() {
-    frc::SmartDashboard::PutNumber("amp_extension_m", GetExtensionPosition().value());
-    if(AmpExtensionManualPercentage != 0.0) {
-        ///@brief Amp Extension
-        if (getExtensionPosition() < 0.05m && manualPercentage == 0.0) {
-            AmpExtensionMotor.Set(0.0);
+void subsystems::AmpArm::AmpExtention(){
+    frc::SmartDashboard::PutNumber("amp_extension_m", GetExtentionPosition().value());
+    if(AmpExtentionManualPercentage != 0.0){
+        ///@brief Amp Extention
+        if (GetPosition() < 0.05m && manualPercentage == 0.0) {
+                AmpExtensionMotor.Set(0.0);
         } else {
-            frc::SmartDashboard::PutNumber("extension_output", AmpExtensionMotor.GetAppliedOutput() * 12);
+            frc::SmartDashboard::PutNumber("AmpArm_extention_volts", AmpExtensionMotor.GetAppliedOutput() * 12);
             AmpExtensionMotor.SetVoltage(units::volt_t { 12 * manualPercentage });
         }
-    }
-    else {
-        auto pidResult = extensionController.Calculate(getExtensionPosition(), armExtensionGoal);
-        auto acceleration = (controller.GetSetpoint().velocity - lastSpeed) / (frc2::Timer::GetFPGATimestamp() - lastTime);
-        auto feedforwardCalc = extensionFeedforward.Calculate(controller.GetSetpoint().velocity, acceleration);
+            
+    }else {
+        ///@brief STOP Amp Extention
+        frc::TrapezoidProfile<units::meters> AmpExtensionProfile { 
+            constraints, 
+            extensionGoal,
+            extensionSetpoint,
+        };
 
-        extensionMotor.SetVoltage(pidResult + feedforwardCalc.Calculate(controller.GetSetpoint().velocity, acceleration));
+        extensionSetpoint = AmpExtensionProfile.Calculate(0_ms);
+        frc::SmartDashboard::PutNumber("extensionSetpoint_vel", extensionSetpoint.velocity.value());
+        frc::SmartDashboard::PutNumber("extensionSetpoint_pos", extensionSetpoint.position.value());
+        const auto output_voltage = feedforward.Calculate(extensionSetpoint.velocity);
+        frc::SmartDashboard::PutNumber("extensionF_v", output_voltage.value());
+        AmpExtensionMotor.SetVoltage(
+            units::volt_t(positionController.Calculate(GetExtentionPosition().value(), extensionSetpoint.position.value()))
+            + output_voltage
+        );
     }
 }
 
-void subsystems::AmpArm::AmpArm::AmpShoulder() {
+void subsystems::AmpArm::AmpShoulder() {
     if(AmpShoulderManualPercentage != 0.0) {
             AmpShoulderMotor.SetVoltage(12_V * AmpShoulderManualPercentage);
             AmpShoulderSet = { GetShoulderRotation(), 0_deg_per_s };
@@ -109,7 +114,7 @@ void subsystems::AmpArm::AmpArm::AmpShoulder() {
     }
 }
 
-void subsystems::AmpArm::AmpArm::Send() {
+void subsystems::AmpArm::Send() {
     ///if (NotesDetector) {
     ///DC brushed SPARK MAX 
     ///}else{
@@ -118,32 +123,32 @@ void subsystems::AmpArm::AmpArm::Send() {
     ///}
 }
 
-void subsystems::AmpArm::AmpArm::AmpIntake() {
+void subsystems::AmpArm::AmpIntake() {
     ///They are going to change the LimitSwitch to a sensor
     frc::DigitalInput input{0};
     auto NotesDetector = (input.Get());
 
-    if (!NotesDetector) {
+    if (!NotesDetector){
         AmpshotMotor.Set(1.00 * AmpIntakePower);  
     }else {
         AmpshotMotor.Set(0.00 * AmpIntakePower); 
     }
 }
 
-void subsystems::AmpArm::AmpArm::SetPositionAmp() {
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtension"
+void subsystems::AmpArm::SetPositionAmp() {
+    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
     
 }
 
-void subsystems::AmpArm::AmpArm::Shot(){
+void subsystems::AmpArm::Shot(){
     AmpshotMotor.Set(0.00 * AmpshotPower);
 }
 
-void subsystems::AmpArm::AmpArm::SetPositionTrapShot(){
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtension"
+void subsystems::AmpArm::SetPositionTrapShot(){
+    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
 }
     
-void subsystems::AmpArm::AmpArm::Reset() {
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtension"
+void subsystems::AmpArm::Reset() {
+    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
     
 }
