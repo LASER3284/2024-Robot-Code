@@ -14,6 +14,8 @@ namespace constants {
 
 class pivot {
 public:
+    /// @brief 
+    void tick();
     /// @brief set the point for the angle of the turn
     void set_angle(units::degree_t);
     units::degree_t get_angle();

@@ -39,7 +39,7 @@ class Shooter {
 public:
     Shooter(
         std::shared_ptr<turret::turret>,
-        std::shared_ptr<flywheel::flywheel>,
+        std::shared_ptr<flywheel::Flywheel>,
         std::shared_ptr<pivot::pivot>
     );
 
@@ -53,7 +53,7 @@ private:
     constants::ShooterStates state = constants::ShooterStates::Stopped;
 
     std::shared_ptr<turret::turret> turret_control;
-    std::shared_ptr<flywheel::flywheel> flywheel_control;
+    std::shared_ptr<flywheel::Flywheel> flywheel_control;
     std::shared_ptr<pivot::pivot> pivot_control;
 };
 
