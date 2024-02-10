@@ -98,7 +98,7 @@ void subsystems::swerve::Module::apply_heading_goal(const units::radian_t angle)
 }
 
 units::volt_t subsystems::swerve::Module::get_drive_power() const {
-    return drive_motor->Get() * frc::RobotController::GetBatteryVoltage();
+    return drive_motor->GetAppliedOutput() * frc::RobotController::GetBatteryVoltage();
 }
 
 void subsystems::swerve::Module::force_update_azimuth() {

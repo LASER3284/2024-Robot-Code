@@ -106,12 +106,12 @@ private:
     };
 
     frc::PIDController drive_controller {
-        0.03,
+        0.0,
         0.0,
         0.0
     };
 
-    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.19355_V, 0.6182_V / 1_fps, 0.0187071_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.24991_V, 0.6175_V / 1_fps, 0.02664_V / 1_fps_sq};
 
     std::unique_ptr<rev::CANSparkFlex> drive_motor;
     std::unique_ptr<rev::SparkRelativeEncoder> drive_enc;
