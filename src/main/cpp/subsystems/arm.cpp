@@ -44,19 +44,8 @@ void subsystems::arm::Arm::set_position_goal2(units::foot_t distance) {
 }
 
 void subsystems::arm::Arm::tick() { 
-    frc::TrapezoidProfile<units::feet> extension_profile1 {
-        constraints,
-        extension_goal1,
-        extension_setpoint1,
-    };
-    frc::TrapezoidProfile<units::feet> extension_profile2 {
-        constraints,
-        extension_goal2,
-        extension_setpoint2,
-
-    };
-    extension_setpoint1 = extension_profile1.Calculate(20_ms);
-    extension_setpoint2 = extension_profile2.Calculate(20_ms);
+    extension_setpoint1 = extension_profile1.Calculate(20_ms, extension_setpoint1, extension_goal1);
+    extension_setpoint2 = extension_profile2.Calculate(20_ms, extension_setpoint2, extension_goal2);
     const auto output_voltage1 = feedforward.Calculate(extension_setpoint1.velocity);
     const auto output_voltage2 = feedforward.Calculate(extension_setpoint2.velocity);
 
@@ -69,4 +58,39 @@ void subsystems::arm::Arm::tick() {
         units::volt_t(position_controller2.Calculate(get_position2().value(), extension_setpoint2.position.value()))
         + output_voltage2
     );
+}
+
+void subsystems::arm::Arm::run_sysid(int test_num) {
+    if (!sysid_command) {
+        switch (test_num) {
+        case 0: {
+            sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
+            break;
+        }
+        case 1: {
+            sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kReverse);
+            sysid_command->Schedule();
+            break;
+        }
+        case 2: {
+            sysid_command = sysid.Dynamic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
+            break;
+        }
+        case 3: {
+            sysid_command = sysid.Dynamic(frc2::sysid::Direction::kReverse);
+            sysid_command->Schedule();
+            break;
+        }
+        }
+    }
+}
+
+void subsystems::arm::Arm::cancel_sysid() {
+    if (sysid_command) {
+        sysid_command->Cancel();
+    }
+
+    sysid_command = std::nullopt;
 }

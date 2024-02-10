@@ -35,12 +35,6 @@ namespace constants {
     /// @brief The outer diameter of the pulley * pi in order to convert to linear units
     constexpr units::inch_t PULLEY_DIAMETER = (1_in * 3.14); // to be changed
 
-    /// @brief The constant kG value for the arm extension This value is
-    /// defined here rather than in the feedforward because we need to do
-    /// custom math with it due to the extension being on the pivot Since
-    /// the effect of gravity would change based on the shoulder angle
-    /// rather than be a constant value
-
 } // namespace constants
 
 class Arm : public frc2::SubsystemBase {
@@ -55,35 +49,46 @@ public:
     units::feet_per_second_t get_velocity1();
     units::feet_per_second_t get_velocity2();
 
+    /// @brief Sets the goal for the first arm.
+    /// @param distance The goal :)
     void set_position_goal1(units::foot_t distance);
+
+    /// @brief Sets the goal for the second arm.
+    /// @param distance The goal :)
     void set_position_goal2(units::foot_t distance);
 
-    units::foot_t get_position_goal1() {}
-    units::foot_t get_position_goal2() {}
+    units::foot_t get_position_goal1() {
+        return units::foot_t{};
+    }
+    units::foot_t get_position_goal2() {
+        return units::foot_t{};
+    }
 
-    void manual_control(double percentage) { manual_percentage = percentage; }
-
+    /// @brief Cancel the SysID command if it hasn't been already.
     void cancel_sysid();
 
-    void refresh_controller()
-    {
+    /// @brief Schedules a SysId command if one is not already scheduled. Does
+    /// nothing otherwise.
+    /// @param test_num The number of the test to run. 0 is
+    /// Quasi-fwd, 1 is Quasi-rev, etc.
+    /// @see Robot::SysIdChooser
+    void run_sysid(int);
+
+    void refresh_controller() {
         position_controller1.Reset();
         position_controller2.Reset();
-        extension_setpoint1 = {get_position1(), 0_fps};
-        extension_setpoint2 = {get_position2(), 0_fps};
-        extension_goal1 = {get_position1(), 0_fps};
-        extension_goal2 = {get_position2(), 0_fps};
+        extension_setpoint1 = { get_position1(), 0_fps };
+        extension_setpoint2 = { get_position2(), 0_fps };
+        extension_goal1 = { get_position1(), 0_fps };
+        extension_goal2 = { get_position2(), 0_fps };
     }
 
 private:
+    rev::CANSparkMax extension_motor1 { constants::ARM_CAN_ID_1, rev::CANSparkLowLevel::MotorType::kBrushless }; // canid wrong
+    rev::SparkRelativeEncoder relative_encoder1 = extension_motor1.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
 
-    double manual_percentage = 0.0;
-
-    rev::CANSparkMax extension_motor1 {constants::ARM_CAN_ID_1, rev::CANSparkLowLevel::MotorType::kBrushless}; // canid wrong
-    rev::SparkMaxRelativeEncoder relative_encoder1 = extension_motor1.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
-
-    rev::CANSparkMax extension_motor2 {constants::ARM_CAN_ID_2, rev::CANSparkLowLevel::MotorType::kBrushless}; // canid wrong
-    rev::SparkMaxRelativeEncoder relative_encoder2 = extension_motor2.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
+    rev::CANSparkMax extension_motor2 { constants::ARM_CAN_ID_2, rev::CANSparkLowLevel::MotorType::kBrushless }; // canid wrong
+    rev::SparkRelativeEncoder relative_encoder2 = extension_motor2.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
 
     // same thing with these, but to help myself
 
@@ -104,6 +109,9 @@ private:
     frc::TrapezoidProfile<units::feet>::State extension_setpoint1;
     frc::TrapezoidProfile<units::feet>::State extension_setpoint2;
 
+    frc::TrapezoidProfile<units::feet> extension_profile1 { constraints };
+    frc::TrapezoidProfile<units::feet> extension_profile2 { constraints };
+
     /// @brief A timer used for overriding the manual percentage vs the
     /// feedforward calculations
     frc::Timer control_timer;
@@ -111,7 +119,7 @@ private:
     units::foot_t last_goal;
 
     frc2::sysid::SysIdRoutine sysid {
-        frc2::sysid::Config {0.35_V/1_s, 4_V , std::nullopt, std::nullopt},
+        frc2::sysid::Config { 0.35_V / 1_s, 4_V, std::nullopt, std::nullopt },
         frc2::sysid::Mechanism {
         [this](units::volt_t volts) {
             extension_motor1.SetVoltage(volts);
@@ -129,10 +137,9 @@ private:
         },
         this
         }
-
     };
 
-    std::optional<frc2::CommandPtr> sysid_command; 
+    std::optional<frc2::CommandPtr> sysid_command;
 
 }; // class Arm
 
