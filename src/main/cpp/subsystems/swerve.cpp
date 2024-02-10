@@ -38,6 +38,13 @@ void subsystems::swerve::Module::set_desired_goal(const frc::SwerveModuleState& 
 
     auto state = frc::SwerveModuleState::Optimize(ref_state, encoder_rotation);
 
+    if (!force && units::math::abs(state.speed) < constants::kMAX_WHEEL_SPEED * 0.01) {
+        state.angle = last_angle;
+    }
+    else {
+        last_angle = state.angle;
+    }
+
     state.speed *= (state.angle - encoder_rotation).Cos();
 
     const units::volt_t drive_power = units::volt_t{drive_controller.Calculate(
