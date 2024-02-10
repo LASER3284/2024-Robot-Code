@@ -28,30 +28,14 @@ namespace intake {
 namespace constants {
     enum DeployStates {
         NOSPIN = 0,
-        SPIN = 0
+        SPIN
     };
 
     /// @brief The CAN ID for the roller motor.
     constexpr int ROLLER_ID = 0;
 
-    /// @brief The statically applied voltage for the roller motor.
-    constexpr auto ROLLER_KS = 0.0_V;
-    /// @brief The applied voltage per velocity unit for the roller motor.
-    constexpr auto ROLLER_KV = 0.0_V / 1_deg_per_s;
-    /// @brief The applied voltage per acceleration unit for the roller motor.
-    constexpr auto ROLLER_KA = 0.0_V / 1_deg_per_s_sq;
-
     /// @brief The roller intake speed in RPM.
     constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 5_V;
-
-    /// @brief The upper setpoint limit.
-    /// @todo Determine real value on encoder
-    constexpr units::degree_t UPPER_LIMIT = 90_deg;
-    /// @brief The lower setpoint limit.
-    /// @todo Determine real value on encoder
-    constexpr units::degree_t LOWER_LIMIT = 0_deg;
-
-    constexpr units::second_t ROLLER_DELAY = 0_ms;
 } // namespace constants
 
 class Intake : public frc2::SubsystemBase {
