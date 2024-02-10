@@ -1,4 +1,25 @@
-#include "Constants.h"
+#include <units/length.h>
+#include <units/velocity.h>
+#include <units/angular_velocity.h>
+#include <memory>
+#include <string>
+#include <frc/XboxController.h>
+#include <frc/geometry/Translation2d.h>
+#include <frc/geometry/Pose2d.h>
+#include <frc/geometry/Rotation2d.h>
+#include <frc/kinematics/SwerveDriveKinematics.h>
+#include <frc/estimator/SwerveDrivePoseEstimator.h>
+#include <ctre/phoenix6/TalonFX.hpp>
+#include <ctre/phoenix6/CANcoder.hpp>
+#include <frc/controller/SimpleMotorFeedforward.h>
+#include <frc/trajectory/TrapezoidProfile.h>
+#include <frc/controller/ElevatorFeedforward.h>
+#include <frc/controller/ArmFeedforward.h>
+#include <frc2/command/sysid/SysIdRoutine.h>
+#include <frc2/command/SubsystemBase.h>
+#include <frc/controller/ProfiledPIDController.h>
+#include <frc/Timer.h>
+
 #include <rev/CANSparkMax.h>
 #include <units/length.h>
 #include <units/angle.h>
@@ -7,93 +28,111 @@
 #include <units/acceleration.h>
 #include <frc/DutyCycleEncoder.h>
 #include <frc/controller/ElevatorFeedforward.h>
+#include <frc/AnalogEncoder.h>
 
 namespace subsystems {
     namespace AmpArm {
-        class Constants{
-        public:
+        namespace constants {
             /// @brief The CAN ID for rotating the AmpShoulder
-            static constexpr int AmpShoulderCANID = 0;
+            constexpr int AmpShoulderCANID = 0;
             
-            /// @brief The CAN ID for the AmpExtention
-            static constexpr int AmpExtentionCANID = 0;
+            /// @brief The CAN ID for the AmpExtension
+            constexpr int AmpExtensionCANID = 0;
             
             /// @brief The CAN ID for the AmpShot
-            static constexpr int AmpShotCANID = 0;
+            constexpr int AmpShotCANID = 0;
 
             /// @brief PWM Slot ID for the encoder to be used to measure the angle of the arm on the shoulder.
-            static constexpr int AmpShoulderPortID = 0;
+            constexpr int AmpShoulderPortID = 0;
 
-            /// @brief Gear Ratio of the Amp Extention
-            static constexpr double Extention_Ratio = 14.198;
+            /// @brief Gear Ratio of the Amp Extension
+            constexpr double Extension_Ratio = 14.198;
 
             /// @brief 
-            static constexpr double Extention_Diameter = 1.88;
+            constexpr double Extension_Diameter = 1.88;
 
+            /// @brief Gear Ratio of the amp rotation
+            constexpr double rotationRatio = (1 / 66.96);
         };
 
-        class AmpArm : public frc2::SubsystemBase{
+        class AmpArm : public frc2::SubsystemBase {
             public:
                 AmpArm();
 
-                units::meter_t GetPosition();
-                ///
+                void tick();
 
+                void setRotationalGoal(units::degree_t);
+
+                units::degree_t getShoulderRotation();
+
+                units::degrees_per_second_t getShoulderVelocity();
+
+                units::meter_t getExtensionPosition();
+            
+                units::meters_per_second_t getExtensionVelocity();
             private:
-            double AmpExtentionManualPercentage = 0.0;
-            double AmpShoulderManualPercentage = 0.0;
+                units::degree_t shoulderRotationGoal = 0_deg;
+                units::meter_t armExtensionGoal = 0_m;
 
+                ctre::phoenix6::hardware::TalonFX extensionMotor { constants::AmpExtensionCANID };
+                frc::DutyCycleEncoder thruboreEnc { 0 };
+                
+                rev::CANSparkMax shootMotor { constants::AmpShotCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushed};
+                
+                /// @brief The main motor for driving the rotation of the shoulder
+                ctre::phoenix6::hardware::TalonFX shoulderMotor { constants::AmpShoulderCANID };
 
-            rev::CANSparkMax AmpExtensionMotor { Constants::AmpExtentionCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-            frc::DutyCycleEncoder thruboreEnc { 0 };
-            rev::CANSparkMax AmpShotMotor { Constants::AmpShotCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushed};
-            
+                /// @brief The absolute encoder used for locating the shoulder
+                frc::AnalogEncoder encoder { constants::AmpShoulderPortID };
 
-            /// Copy
-            /// @brief The main motor for driving the rotation of the shoulder
-            ctre::phoenix::motorcontrol::can::WPI_TalonFX motor { Constants::AmpShoulderMotorID };
+                /// I haven't understand below yet
+                frc::ProfiledPIDController<units::degrees> shoulderController {
+                    0, 0, 0,
+                    frc::TrapezoidProfile<units::degrees>::Constraints { 0_deg, 0_deg_per_s_sq }
+                };
+                frc::ArmFeedforward shoulderFeedforward { 0_V, 0_V, 0_V / 1_deg_per_s, 0_V / 1_deg_per_s_sq };
+                units::degrees_per_second_t lastShoulderVelocity = 0_deg_per_s;
 
-            /// @brief The absolute encoder used for locating the shoulder
-            frc::AnalogEncoder encoder { Constants::AmpShoulderPortID };
+                frc::ProfiledPIDController<units::meters> extensionController {
+                    0, 0, 0,
+                    frc::TrapezoidProfile<units::meters>::Constraints { 0_mps, 0_mps_sq }
+                };
+                frc::ElevatorFeedforward extensionFeedforward { 0_V, 0_V, 0_V / 1_fps, 0_V / 1_fps_sq };
+                units::meters_per_second_t lastExtensionVelocity = 0_mps;
 
-            /// I haven't understand below yet
-            /// @brief The trapezoidal profile constraints for the arm extension
-            frc::TrapezoidProfile<units::meters>::Constraints constraints { 0_mps, 0_mps_sq };
+                units::second_t lastTime = frc::Timer::GetFPGATimestamp();
 
-            /// @brief The current goal to rotate the shoulder to
-            frc::TrapezoidProfile<units::meters>::State extensionGoal;
+                frc2::sysid::SysIdRoutine rotationSysId {
+                    frc2::sysid::Config { std::nullopt, std::nullopt, std::nullopt, std::nullopt },
+                    frc2::sysid::Mechanism {
+                        [this](units::volt_t volts) {
+                            shoulderMotor.SetVoltage(volts);
+                        },
+                        [this](auto log) {
+                            log->Motor("ampShoulder")
+                                .voltage(shoulderMotor.Get() * shoulderMotor.GetMotorVoltage().GetValue())
+                                .velocity(shoulderMotor.GetVelocity().GetValue())
+                                .position(units::turn_t { getShoulderRotation() });
+                        },
+                        this
+                    }
+                };
 
-            /// @brief The current setpoint for the shoulder rotation
-            frc::TrapezoidProfile<units::meters>::State extensionSetpoint;
-
-
-
-            frc2::sysid::SysIdRoutine sysid {
-            frc2::sysid::Config {std::nullopt, std::nullopt, std::nullopt, std::nullopt},
-            frc2::sysid::Mechanism {
-            [this](units::volt_t volts) {
-                AmpShoulder.set_drive_power(volts);
-                AmpExtention.set_drive_power(volts);
-                AmpShot.set_drive_power(volts);
-            },
-            [this](auto log) {
-                log->Motor("AmpShoulder")
-                    .voltage(AmpShoulder.get_drive_power())
-                    .velocity(units::meters_per_second_t{AmpShoulder.get_velocity()})
-                    .position(AmpShoulder.get_position().distance);
-                log->Motor("AmpExtention")
-                    .voltage(AmpExtention.get_drive_power())
-                    .velocity(units::meters_per_second_t{AmpExtention.get_velocity()})
-                    .position(AmpExtention.get_position().distance);
-                log->Motor("AmpShot")
-                    .voltage(AmpShot.get_drive_power())
-                    .velocity(units::meters_per_second_t{AmpShot.get_velocity()})
-                    .position(AmpShot.get_position().distance);
-            },
-            
-            
-              
-        }
-
-    }
+                frc2::sysid::SysIdRoutine extensionSysId {
+                    frc2::sysid::Config { std::nullopt, std::nullopt, std::nullopt, std::nullopt },
+                    frc2::sysid::Mechanism {
+                        [this](units::volt_t volts) {
+                            extensionMotor.SetVoltage(volts);
+                        },
+                        [this](auto log) {
+                            log->Motor("ampExtension")
+                                .voltage(extensionMotor.Get() * extensionMotor.GetMotorVoltage().GetValue())
+                                .velocity(extensionMotor.GetVelocity().GetValue())
+                                .position( getExtensionPosition() );
+                        },
+                        this
+                    }
+                };
+        };
+    } // class AmpArm
 }
