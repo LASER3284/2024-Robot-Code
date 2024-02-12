@@ -13,16 +13,16 @@ namespace subsystems {
         class Constants{
         public:
             /// @brief The CAN ID for rotating the AmpShoulder
-            static constexpr int AmpShoulderCANID = 0;
+            static constexpr int AmpShoulderMotor_CANID = 0;
             
             /// @brief The CAN ID for the AmpExtention
-            static constexpr int AmpExtentionCANID = 0;
+            static constexpr int AmpExtentionMotor_CANID = 0;
             
             /// @brief The CAN ID for the AmpShot
-            static constexpr int AmpShotCANID = 0;
+            static constexpr int AmpShotMotor_CANID = 0;
 
             /// @brief PWM Slot ID for the encoder to be used to measure the angle of the arm on the shoulder.
-            static constexpr int AmpShoulderPortID = 0;
+            static constexpr int AmpShoulderEncoder_CANID = 0;
 
             /// @brief Gear Ratio of the Amp Extention
             static constexpr double Extention_Ratio = 14.198;
@@ -90,6 +90,8 @@ namespace subsystems {
                     .velocity(units::meters_per_second_t{AmpShot.get_velocity()})
                     .position(AmpShot.get_position().distance);
             },
+            }
+            }
             
             
               

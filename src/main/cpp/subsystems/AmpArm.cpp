@@ -1,8 +1,9 @@
 #include "subsystems/AmpArm.h"
 
-subsystems::Ampshot::AmpArm(){
+subsystems::arm::Arm::Arm() {
     AmpShotMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-    AmpExtensionEncoder.SetPosition(0);
+    set_position_goal1(get_position1());
+    set_position_goal2(get_position2());
 }
 
 void intake::intake::tick() {
@@ -29,22 +30,34 @@ units::inch_per_second_t subsystems::AmpArm::GetExtentionVelocity() {
     return velocity;
 }
 
+units::degrees_per_second_t subsystems::AmpArm::GetRotationVelocity() {
+    const units::degree_per_second_t velocity = units::inch_per_second_t
+        ((AmpExtensionEncoder.GetVelocity())
+    );
+    return velocity;
+}
+
 void subsystems::AmpArm::SetRotationGoal(units::degree_t shoulder_goal) {
-    angleController.SetSetpoint(shoulder_goal.value());
+    if (shoulder_goal > 0_degree) {shoulder_goal = 0_degree; } ///put value
+    ///controler
+    AmpShoulderMotor = { shoulder_goal, 0_fps };
 }
 
-void subsystems::AmpArm::SetPositionAmpShot(unit::meter_t extention_ampshot){
-    positionController.SetSetpoint(extention_AmpShot.value());
+void subsystems::AmpArm::SetPositionAmpShot(unit::inch_t extention_ampshot){
+    if (extention_ampshot > 0_in) {extention_ampshot = 0_in; } ///put value
+    positionController.SetSetpoint(extention_ampshot.value());
+    AmpShoulderMotor = { extention_ampshot, 0_fps };
 }
 
-void subsystems::AmpArm::SetPositionTrap(unit::meter_t extention_trap){
+void subsystems::AmpArm::SetPositionTrap(unit::inch_t extention_trapshot){
+    if (extention_trapshot > 0_in) {extention_trapshot = 0_in; } ///put value
     positionController.SetSetpoint(extention_trap.value());
+    AmpShoulderMotor = { extention_trapshot, 0_fps };
 }
 
 void subsystems::AmpArm::AmpExtention(){
     frc::SmartDashboard::PutNumber("amp_extension_m", GetExtentionPosition().value());
     if(AmpExtentionManualPercentage != 0.0){
-        ///@brief Amp Extention
         if (GetPosition() < 0.05m && manualPercentage == 0.0) {
                 AmpExtensionMotor.Set(0.0);
         } else {
@@ -53,7 +66,6 @@ void subsystems::AmpArm::AmpExtention(){
         }
             
     }else {
-        ///@brief STOP Amp Extention
         frc::TrapezoidProfile<units::meters> AmpExtensionProfile { 
             constraints, 
             extensionGoal,
@@ -73,6 +85,7 @@ void subsystems::AmpArm::AmpExtention(){
 }
 
 void subsystems::AmpArm::AmpShoulder() {
+    /// I'm going to add limit switch that override the encoder program
     if(AmpShoulderManualPercentage != 0.0) {
             AmpShoulderMotor.SetVoltage(12_V * AmpShoulderManualPercentage);
             AmpShoulderSet = { GetShoulderRotation(), 0_deg_per_s };
@@ -136,7 +149,7 @@ void subsystems::AmpArm::AmpIntake() {
 }
 
 void subsystems::AmpArm::SetPositionAmp() {
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
+    ///put values to "subsystems::AmpArm::AmpShoulder" and "subsystems::AmpArm::AmpExtention"
     
 }
 
@@ -145,10 +158,9 @@ void subsystems::AmpArm::Shot(){
 }
 
 void subsystems::AmpArm::SetPositionTrapShot(){
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
+    ///put values to "subsystems::AmpArm::AmpShoulder" and "subsystems::AmpArm::AmpExtention"
 }
     
 void subsystems::AmpArm::Reset() {
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
-    
+    ///put values to "subsystems::AmpArm::AmpShoulder" and "subsystems::AmpArm::AmpExtention"
 }
