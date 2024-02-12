@@ -19,6 +19,10 @@ void Robot::RobotInit() {
     sysid_chooser.AddOption("Dynamic Reverse", SysIdChooser::DynRev);
     frc::SmartDashboard::PutData("SysIdChooser", &sysid_chooser);
 
+    mech_chooser.SetDefaultOption("No Mechanism", MechanismChooser::MechNone);
+    mech_chooser.AddOption("Drive Train", MechanismChooser::Drivetrain);
+    frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
+
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
@@ -30,6 +34,8 @@ void Robot::RobotInit() {
         filename = filename.substr(0, filename.size() - 6);
         auto_chooser.AddOption(filename, filename);
     }
+
+    intake.init();
 }
 
 void Robot::RobotPeriodic() {
@@ -54,6 +60,13 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
     // snip
 
+    if (chassis_controller->GetRightBumper()) {
+        intake.activate(subsystems::intake::constants::DeployStates::SPIN);
+    } else {
+        intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+    }
+
+    intake.tick();
     drive.tick(true);
 }
 
@@ -63,10 +76,16 @@ void Robot::DisabledInit() {
 void Robot::DisabledPeriodic() {}
 
 void Robot::TestInit() {
-    sysid_routine = sysid_chooser.GetSelected();
+    selected_mech = mech_chooser.GetSelected();
 }
 void Robot::TestPeriodic() {
-    drive.run_sysid(sysid_routine);
+    switch (selected_mech) {
+    case MechanismChooser::Drivetrain:
+        drive.run_sysid(sysid_chooser.GetSelected());
+        break;
+    default:
+        break;
+    }
 }
 
 void Robot::SimulationInit() {}
