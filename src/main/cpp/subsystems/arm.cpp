@@ -31,16 +31,24 @@ units::feet_per_second_t subsystems::arm::Arm::get_velocity2() {
 
 void subsystems::arm::Arm::set_position_goal1(units::foot_t distance) {
     if (distance > 0_in) { distance = 0_in; } // distances to be determined
-    position_controller1.SetSetpoint(distance.value());
         extension_goal1 = { distance, 0_fps };
 
 }
 
 void subsystems::arm::Arm::set_position_goal2(units::foot_t distance) {
     if (distance > 0_in) { distance = 0_in; } // tbd
-    position_controller2.SetSetpoint(distance.value());
         extension_goal2 = { distance, 0_fps};
 
+}
+
+void subsystems::arm::Arm::safety_1(units::foot_t distance) {
+    if (distance < 2_in) { distance = 2_in; }
+    if (distance > 47_in) { distance = 47_in; }
+}
+
+void subsystems::arm::Arm::safety_2(units::foot_t distance) {
+    if (distance < 2_in) { distance = 2_in; }
+    if (distance > 47_in) { distance = 47_in; }
 }
 
 void subsystems::arm::Arm::tick() { 

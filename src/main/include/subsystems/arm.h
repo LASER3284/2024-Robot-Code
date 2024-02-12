@@ -57,6 +57,12 @@ public:
     /// @param distance The goal :)
     void set_position_goal2(units::foot_t distance);
 
+    /// @brief Corrects the first arm if it has retracted too much or gone too far.
+    void safety_1(units::foot_t distance);
+
+    /// @brief Corrects the second arm if it has retracted too much or gone too far.
+    void safety_2(units::foot_t distance);
+
     units::foot_t get_position_goal1() {
         return units::foot_t{};
     }
