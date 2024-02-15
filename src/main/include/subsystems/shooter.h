@@ -38,9 +38,9 @@ namespace constants {
 class Shooter {
 public:
     Shooter(
-        std::shared_ptr<turret::turret>,
+        std::shared_ptr<turret::Turret>,
         std::shared_ptr<flywheel::Flywheel>,
-        std::shared_ptr<pivot::pivot>
+        std::shared_ptr<pivot::Pivot>
     );
 
     void tick(frc::Pose2d);
@@ -52,9 +52,9 @@ public:
 private:
     constants::ShooterStates state = constants::ShooterStates::Stopped;
 
-    std::shared_ptr<turret::turret> turret_control;
+    std::shared_ptr<turret::Turret> turret_control;
     std::shared_ptr<flywheel::Flywheel> flywheel_control;
-    std::shared_ptr<pivot::pivot> pivot_control;
+    std::shared_ptr<pivot::Pivot> pivot_control;
 };
 
 }

@@ -1,11 +1,13 @@
 #include <frc/controller/PIDController.h>
-#include <ctre/phoenix6/TalonFX.hpp>
 #include <frc/DutyCycleEncoder.h>
 #include <frc/RobotController.h>
+#include <rev/CANSparkMax.h>
+#include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
 #include <units/velocity.h>
 #include <frc/Timer.h>
+#include <rev/CANSparkFlex.h>
 
 namespace subsystems {
  
@@ -22,8 +24,9 @@ namespace constants {
     constexpr double TRT_KD= 0.0;
 }
 
-class Turret {
+class Turret : frc2::SubsystemBase {
     public:
+
         /// @brief idle the turret
         void idle_turret();
         /// @brief set setpoint
@@ -35,10 +38,15 @@ class Turret {
         bool turret_power();
         /// @brief get the turn val 
         units::degrees_per_second_t get_vel(){};
+       
         void cancel_sysid();
+
+        void run_sysid(int);
 
         void tick();
 
+        bool TRT_Saftey();
+        
         /// @brief used to find the delta theta so can get d-theta/dt
         units::degree_t previous_angle;
 
@@ -48,35 +56,44 @@ class Turret {
 
         frc::Timer velocity_timer{};
 
+        units::degree_t cur_angle;
+
+
     private:
-        /// @brief varuale for the point that the turret is going to
-        int set_point = 0;
-        /// @brief this will be the value of where the turrent is 
-        int at_point = 0;
-        /// @brief this is the motor that spins the turret
-        ctre::phoenix6::hardware::TalonFX TRT_motor{93,"idk"};
-        /// @brief absolute incoder for th turret
-        frc::DutyCycleEncoder turret_encoder { 0 };
+
+        units::degree_t goal_angle;
+
+        bool Is_Safe = true;
         
-        frc::PIDController TRT_PID{ constants::TRT_KP,constants::TRT_KI,constants::TRT_KD};
+        /// @brief this is the motor that spins the turret
+        rev::CANSparkFlex Turret_motor{97,rev::CANSparkLowLevel::MotorType::kBrushless};
+        /// @brief this is the pid contrller
+        frc::PIDController Turret_PID{ constants::TRT_KP,constants::TRT_KI,constants::TRT_KD};
+        /// @brief this is the encoder for the turret 
+        rev::SparkRelativeEncoder turret_encoder = Turret_motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
+        /// @brief this is the feed forward for the turret
+        frc::SimpleMotorFeedforward<units::degree_t> turret_ff  {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
+
 
         /// this is my atempt at sysid with my very limited knowledge
     frc2::sysid::SysIdRoutine sysid{
-        frc2::sysid::Config{0.25_V / 1-s, 4_V, std::nullopt, std::nullopt},
+        frc2::sysid::Config{0.25_V / 1_s, 4_V, std::nullopt, std::nullopt},
         frc2::sysid::Mechanism{
         [this](units::volt_t volts) {
-            TRT_motor.SetVoltage(volts);
+            Turret_motor.SetVoltage(volts);
         },
         [this](auto log){
             log->Motor("turret-1")
-                .voltage(TRT_motor.Get()* frc::RobotController::GetBatteryVoltage())
-                .velocity(units::degrees_per_second_t{get_vel()})
-                .position(units::degree_t{get_angle()});
+                .voltage(Turret_motor.Get()* frc::RobotController::GetBatteryVoltage())
+                .velocity(units::turns_per_second_t{get_vel()})
+                .position(units::turn_t{get_angle()});
 
         },
         this
         }
     };
+        std::optional<frc2::CommandPtr> sysid_command;
+
 };
 
 }

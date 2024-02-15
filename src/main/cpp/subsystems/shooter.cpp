@@ -7,9 +7,9 @@ int constants::sgn(double x) {
 }
 
 Shooter::Shooter(
-    std::shared_ptr<turret::turret>turret_control,
+    std::shared_ptr<turret::Turret>turret_control,
     std::shared_ptr<flywheel::Flywheel>flywheel_control,
-    std::shared_ptr<pivot::pivot>pivot_control
+    std::shared_ptr<pivot::Pivot>pivot_control
 ) {
     this->flywheel_control = flywheel_control;
     this->turret_control = turret_control;

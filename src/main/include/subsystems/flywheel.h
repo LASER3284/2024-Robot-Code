@@ -7,8 +7,7 @@
 #include <frc/RobotController.h>
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
-
-
+#include <frc/DigitalInput.h>
 namespace subsystems{
 
 namespace flywheel{
@@ -24,15 +23,22 @@ namespace constants {
     constexpr double FLY_KI = 0.0; 
     /// @brief derivative gain (kd)
     constexpr double FLY_KD= 0.0;
-
-}
+    /// @brief this is the gear ratio of the flywheel
+    constexpr double fly_ratio = 1.66;
+    /// @brief this is the bool for if there is a disk to shoot
+    bool fly_has_ring = false;
+    
+}  
 
 class Flywheel : public frc2::SubsystemBase{
 public:
     
     /// @brief ticks 
     void tick();
-
+    ///@brief this will set the flywheel to a constant low speed mode
+    void idle();
+    /// @brief this will turn on the feed motor 
+    void feed();
     /// @brief sets the exit fly volocity goal
     void set_exit_vel(units::feet_per_second_t);
     units::feet_per_second_t get_exit_vel();
@@ -41,24 +47,27 @@ public:
     units::foot_t get_fly_position();
     /// @brief this like the name say resets the sysid.
     void cancel_sysid();
+    
+    void run_sysid(int);
 
-
+    bool check_if_ring();
+    
 private:
-    /// @brief the value of the shooter motor power(this is to be changed later)
-    int shoot_power = 1;
-    /// @brief the value of the feed wheel motor power(this is to be changed later)
-    int feed_power = 0;
-
+    /// @brief set the exit vel for the flywheel
+    units::feet_per_second_t fly_speed = 0_ft; 
+    
     frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
     rev::CANSparkFlex flywheel_motor{97,rev::CANSparkLowLevel::MotorType::kBrushless};
     /// @brief this is the feedwheel motor
     rev::CANSparkMax feedwheel_motor{99,rev::CANSparkLowLevel::MotorType::kBrushless};
-    
-    // Creates a PIDController with gains kP, kI, and kD
+    /// @brief this is the can spark flex encoder
+    rev::SparkRelativeEncoder flywheel_encoder = flywheel_motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
+    /// @brief Creates a PIDController with gains kP, kI, and kD
     frc::PIDController Flywheel_PID{constants::FLY_KP, constants::FLY_KI, constants::FLY_KD};
-
+    /// @brief this is the sensor for the shooter
+    frc::DigitalInput Fly_sense;
     /// this is my atempt at sysid with my very limited knowledge
     frc2::sysid::SysIdRoutine sysid{
         frc2::sysid::Config{0.25_V / 1-s, 4_V, std::nullopt, std::nullopt},
@@ -76,6 +85,7 @@ private:
         this
         }
     };
+    std::optional<frc2::CommandPtr> sysid_command;
 };
 
 }
