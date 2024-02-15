@@ -9,6 +9,7 @@
 #include "subsystems/drive.h"
 #include "subsystems/uselessthing.h"
 #include "subsystems/intake.h"
+#include "subsystems/amparm.h"
 
 class Robot : public frc::TimedRobot {
 public:
@@ -41,13 +42,16 @@ public:
     enum MechanismChooser {
         MechNone = 0,
         Drivetrain,
-        Intake,
+        AmpArmShoulder,
+        AmpArmExtension
     };
 
 private:
     std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
     frc::XboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};
+    subsystems::amparm::AmpArm amp_arm{};
+
     subsystems::useless::Useless happy_face{};
     subsystems::intake::Intake intake{};
 

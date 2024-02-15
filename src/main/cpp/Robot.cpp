@@ -21,6 +21,8 @@ void Robot::RobotInit() {
 
     mech_chooser.SetDefaultOption("No Mechanism", MechanismChooser::MechNone);
     mech_chooser.AddOption("Drive Train", MechanismChooser::Drivetrain);
+    mech_chooser.AddOption("Amp Arm Shoulder", MechanismChooser::AmpArmShoulder);
+    mech_chooser.AddOption("Amp Arm Extension", MechanismChooser::AmpArmExtension);
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
@@ -36,11 +38,14 @@ void Robot::RobotInit() {
     }
 
     intake.init();
+    amp_arm.init();
 }
 
 void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
+
+    amp_arm.update_nt();
 
     happy_face.tick();
 
@@ -58,20 +63,26 @@ void Robot::TeleopInit() {
 }
 
 void Robot::TeleopPeriodic() {
-    // snip
-
     if (chassis_controller->GetRightBumper()) {
         intake.activate(subsystems::intake::constants::DeployStates::SPIN);
     } else {
         intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
     }
 
+    if (aux_controller.GetAButton()) {
+        amp_arm.activate(subsystems::amparm::constants::States::AmpScore);
+    } else {
+        amp_arm.activate(subsystems::amparm::constants::States::Stopped);
+    }
+
+    amp_arm.tick();
     intake.tick();
     drive.tick(true);
 }
 
 void Robot::DisabledInit() {
     drive.cancel_sysid();
+    amp_arm.cancel_sysid();
 }
 void Robot::DisabledPeriodic() {}
 
@@ -82,6 +93,12 @@ void Robot::TestPeriodic() {
     switch (selected_mech) {
     case MechanismChooser::Drivetrain:
         drive.run_sysid(sysid_chooser.GetSelected());
+        break;
+    case MechanismChooser::AmpArmShoulder:
+        amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ShoulderMech);
+        break;
+    case MechanismChooser::AmpArmExtension:
+        amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ExtensionMech);
         break;
     default:
         break;

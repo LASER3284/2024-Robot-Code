@@ -1,4 +1,9 @@
-#include "Constants.h"
+#pragma once
+
+#include "amparm/extension.h"
+#include "amparm/roller.h"
+#include "amparm/shoulder.h"
+
 #include <rev/CANSparkMax.h>
 #include <units/length.h>
 #include <units/angle.h>
@@ -9,91 +14,56 @@
 #include <frc/controller/ElevatorFeedforward.h>
 
 namespace subsystems {
-    namespace AmpArm {
-        class Constants{
-        public:
-            /// @brief The CAN ID for rotating the AmpShoulder
-            static constexpr int AmpShoulderCANID = 0;
-            
-            /// @brief The CAN ID for the AmpExtention
-            static constexpr int AmpExtentionCANID = 0;
-            
-            /// @brief The CAN ID for the AmpShot
-            static constexpr int AmpShotCANID = 0;
 
-            /// @brief PWM Slot ID for the encoder to be used to measure the angle of the arm on the shoulder.
-            static constexpr int AmpShoulderPortID = 0;
+namespace amparm {
 
-            /// @brief Gear Ratio of the Amp Extention
-            static constexpr double Extention_Ratio = 14.198;
+namespace constants {
+    enum AmpArmSubmechs {
+        ShoulderMech,
+        ExtensionMech
+    };
 
-            /// @brief 
-            static constexpr double Extention_Diameter = 1.88;
+    enum States {
+        Stopped = 0,
+        Feed,
+        ReverseFeed,
+        AmpScore,
+        TrapScore
+    };
 
-        };
+    constexpr units::degree_t DOWN_ANGLE = 0_deg;
+    constexpr units::inch_t DOWN_EXTENSION = 0_in;
+    constexpr units::degree_t AMPSCORE_ANGLE = 90_deg;
+    constexpr units::inch_t AMPSCORE_EXTENSION = 6_in;
+    constexpr units::degree_t TRAPSCORE_ANGLE = 90_deg;
+    constexpr units::inch_t TRAPSCORE_EXTESNION = 20_in;
+}
 
-        class AmpArm : public frc2::SubsystemBase{
-            public:
-                AmpArm();
+class AmpArm {
+public:
+    void init();
 
-                units::meter_t GetPosition();
-                ///
+    void tick();
 
-            private:
-            double AmpExtentionManualPercentage = 0.0;
-            double AmpShoulderManualPercentage = 0.0;
+    void update_nt();
 
+    void run_sysid(int, constants::AmpArmSubmechs);
 
-            rev::CANSparkMax AmpExtensionMotor { Constants::AmpExtentionCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-            frc::DutyCycleEncoder thruboreEnc { 0 };
-            rev::CANSparkMax AmpShotMotor { Constants::AmpShotCANID, rev::CANSparkMaxLowLevel::MotorType::kBrushed};
-            
+    void cancel_sysid();
 
-            /// Copy
-            /// @brief The main motor for driving the rotation of the shoulder
-            ctre::phoenix::motorcontrol::can::WPI_TalonFX motor { Constants::AmpShoulderMotorID };
+    void activate(constants::States);
 
-            /// @brief The absolute encoder used for locating the shoulder
-            frc::AnalogEncoder encoder { Constants::AmpShoulderPortID };
+    bool has_piece() { return roller.has_piece(); }
 
-            /// I haven't understand below yet
-            /// @brief The trapezoidal profile constraints for the arm extension
-            frc::TrapezoidProfile<units::meters>::Constraints constraints { 0_mps, 0_mps_sq };
+    bool in_place() { return shoulder.in_place() && extension.in_place();}
 
-            /// @brief The current goal to rotate the shoulder to
-            frc::TrapezoidProfile<units::meters>::State extensionGoal;
+private:
+    constants::States state;
+    Roller roller;
+    Shoulder shoulder;
+    Extension extension;
+};
 
-            /// @brief The current setpoint for the shoulder rotation
-            frc::TrapezoidProfile<units::meters>::State extensionSetpoint;
+}
 
-
-
-            frc2::sysid::SysIdRoutine sysid {
-            frc2::sysid::Config {std::nullopt, std::nullopt, std::nullopt, std::nullopt},
-            frc2::sysid::Mechanism {
-            [this](units::volt_t volts) {
-                AmpShoulder.set_drive_power(volts);
-                AmpExtention.set_drive_power(volts);
-                AmpShot.set_drive_power(volts);
-            },
-            [this](auto log) {
-                log->Motor("AmpShoulder")
-                    .voltage(AmpShoulder.get_drive_power())
-                    .velocity(units::meters_per_second_t{AmpShoulder.get_velocity()})
-                    .position(AmpShoulder.get_position().distance);
-                log->Motor("AmpExtention")
-                    .voltage(AmpExtention.get_drive_power())
-                    .velocity(units::meters_per_second_t{AmpExtention.get_velocity()})
-                    .position(AmpExtention.get_position().distance);
-                log->Motor("AmpShot")
-                    .voltage(AmpShot.get_drive_power())
-                    .velocity(units::meters_per_second_t{AmpShot.get_velocity()})
-                    .position(AmpShot.get_position().distance);
-            },
-            
-            
-              
-        }
-
-    }
 }

@@ -1,154 +1,217 @@
-#include "subsystems/AmpArm.h"
+#include "subsystems/amparm.h"
+#include <units/angle.h>
+#include <numbers>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/Timer.h>
 
-subsystems::Ampshot::AmpArm(){
-    AmpShotMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-    AmpExtensionEncoder.SetPosition(0);
+// AMPARM SECTION //
+void subsystems::amparm::AmpArm::init() {
+    roller.init();
+    shoulder.init();
+    extension.init();
 }
 
-void intake::intake::tick() {
-    frc::SmartDashboard::PutNumber("amp_shoulder_rotation", GetShoulderRotation().value());
-    frc::SmartDashboard::PutNumber("amp_extention_position", GetExtentionPosition().value());
-    frc::SmartDashboard::PutNumber("amp_shoulder_velocity", GetShoulderVelocity().value());
-    frc::SmartDashboard::PutNumber("amp_extention_velocity", GetExtentionVelocity().value());
+void subsystems::amparm::AmpArm::tick() {
+    shoulder.tick();
+    extension.tick();
 }
 
-units::degree_t subsystems::AmpArm::GetShoulderRotation() {
-    units::degree_t shoulder_deg = thruboreEnc.Get();
-    return Shoulder_deg;
+void subsystems::amparm::AmpArm::update_nt() {
+    shoulder.update_nt();
+    extension.update_nt();
 }
 
-units::meter_t subsystems::AmpArm::GetExtentionPosition() {
-    auto value = (AmpExtentionEncoder.GetPosition());
-    return value;
+void subsystems::amparm::AmpArm::activate(constants::States state) {
+    switch (state) {
+        default:
+        case constants::States::Stopped:
+            shoulder.set_goal(constants::DOWN_ANGLE);
+            roller.stop();
+            extension.set_goal(constants::DOWN_EXTENSION);
+            break;
+        case constants::States::Feed:
+            shoulder.set_goal(constants::DOWN_ANGLE);
+            roller.spin();
+            extension.set_goal(constants::DOWN_EXTENSION);
+            break;
+        case constants::States::ReverseFeed:
+            shoulder.set_goal(constants::DOWN_ANGLE);
+            roller.reverse();
+            extension.set_goal(constants::DOWN_EXTENSION);
+            break;
+    }
 }
 
-units::inch_per_second_t subsystems::AmpArm::GetExtentionVelocity() {
-    const units::inch_per_second_t velocity = units::inch_per_second_t
-        (((AmpExtensionEncoder.GetVelocity() / Constants::Extention_Ratio) * Constants::Extention_Diameter/*3.14?*/).value()
+void subsystems::amparm::AmpArm::run_sysid(int test_num, subsystems::amparm::constants::AmpArmSubmechs mech) {
+    switch (mech) {
+        case constants::AmpArmSubmechs::ShoulderMech:
+            shoulder.run_sysid(test_num);
+            break;
+        case constants::AmpArmSubmechs::ExtensionMech:
+            extension.run_sysid(test_num);
+            break;
+        default:
+            break;
+    }
+}
+
+void subsystems::amparm::AmpArm::cancel_sysid() {
+    shoulder.cancel_sysid();
+    extension.cancel_sysid();
+}
+
+// ROLLER SECTION //
+void subsystems::amparm::Roller::init() {
+    motor.SetInverted(true);
+}
+
+// SHOULDER SECTION //
+void subsystems::amparm::Shoulder::init() {
+    using namespace subsystems::amparm::constants::shoulder;
+    motor.SetInverted(DIRECTION);
+}
+
+units::degree_t subsystems::amparm::Shoulder::get_position() const {
+    return (encoder.Get() - 153_deg);
+}
+
+void subsystems::amparm::Shoulder::update_nt() {
+    // Calculate dtheta/dt
+    units::second_t dt = frc::Timer::GetFPGATimestamp() - last_time;
+    units::degree_t dtheta = get_position() - last_angle;
+    velocity = dtheta / dt;
+
+    // Do other things
+    frc::SmartDashboard::PutNumber("amparm_shoulder_pos", get_position().value());
+
+    // Set last_position and last_time
+    last_time = frc::Timer::GetFPGATimestamp();
+    last_angle = get_position();
+}
+
+void subsystems::amparm::Shoulder::tick() {
+    setpoint = profile.Calculate(20_ms, setpoint, goal);
+
+    motor.SetVoltage(units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
+        + ff.Calculate(get_position(), setpoint.velocity)
     );
-    return velocity;
 }
 
-void subsystems::AmpArm::SetRotationGoal(units::degree_t shoulder_goal) {
-    angleController.SetSetpoint(shoulder_goal.value());
+void subsystems::amparm::Shoulder::set_goal(units::degree_t goal) {
+    this->goal = {goal, 0_deg_per_s};
 }
 
-void subsystems::AmpArm::SetPositionAmpShot(unit::meter_t extention_ampshot){
-    positionController.SetSetpoint(extention_AmpShot.value());
+bool subsystems::amparm::Shoulder::in_place() {
+    using namespace subsystems::amparm::constants::shoulder;
+    return units::math::abs(goal.position - get_position()) < TOLERANCE;
 }
 
-void subsystems::AmpArm::SetPositionTrap(unit::meter_t extention_trap){
-    positionController.SetSetpoint(extention_trap.value());
-}
-
-void subsystems::AmpArm::AmpExtention(){
-    frc::SmartDashboard::PutNumber("amp_extension_m", GetExtentionPosition().value());
-    if(AmpExtentionManualPercentage != 0.0){
-        ///@brief Amp Extention
-        if (GetPosition() < 0.05m && manualPercentage == 0.0) {
-                AmpExtensionMotor.Set(0.0);
-        } else {
-            frc::SmartDashboard::PutNumber("AmpArm_extention_volts", AmpExtensionMotor.GetAppliedOutput() * 12);
-            AmpExtensionMotor.SetVoltage(units::volt_t { 12 * manualPercentage });
+void subsystems::amparm::Shoulder::run_sysid(int test_num) {
+    if (!sysid_command) {
+        switch (test_num) {
+        case 0: {
+            sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
+            break;
         }
-            
-    }else {
-        ///@brief STOP Amp Extention
-        frc::TrapezoidProfile<units::meters> AmpExtensionProfile { 
-            constraints, 
-            extensionGoal,
-            extensionSetpoint,
-        };
-
-        extensionSetpoint = AmpExtensionProfile.Calculate(0_ms);
-        frc::SmartDashboard::PutNumber("extensionSetpoint_vel", extensionSetpoint.velocity.value());
-        frc::SmartDashboard::PutNumber("extensionSetpoint_pos", extensionSetpoint.position.value());
-        const auto output_voltage = feedforward.Calculate(extensionSetpoint.velocity);
-        frc::SmartDashboard::PutNumber("extensionF_v", output_voltage.value());
-        AmpExtensionMotor.SetVoltage(
-            units::volt_t(positionController.Calculate(GetExtentionPosition().value(), extensionSetpoint.position.value()))
-            + output_voltage
-        );
+        case 1: {
+            sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kReverse);
+            sysid_command->Schedule();
+            break;
+        }
+        case 2: {
+            sysid_command = sysid.Dynamic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
+            break;
+        }
+        case 3: {
+            sysid_command = sysid.Dynamic(frc2::sysid::Direction::kReverse);
+            sysid_command->Schedule();
+            break;
+        }
+        }
     }
 }
 
-void subsystems::AmpArm::AmpShoulder() {
-    if(AmpShoulderManualPercentage != 0.0) {
-            AmpShoulderMotor.SetVoltage(12_V * AmpShoulderManualPercentage);
-            AmpShoulderSet = { GetShoulderRotation(), 0_deg_per_s };
-            AmpShoulderReset = { GetShoulderRotation(), 0_deg_per_s };
+void subsystems::amparm::Shoulder::cancel_sysid() {
+    if (sysid_command) {
+        sysid_command->Cancel();
+    }
+
+    sysid_command = std::nullopt;
+}
+
+// EXTENSION SECTION //
+void subsystems::amparm::Extension::init() {
+    using namespace subsystems::amparm::constants::extension;
+    motor.SetInverted(DIRECTION);
+}
+
+units::inch_t subsystems::amparm::Extension::get_position() {
+    using namespace subsystems::amparm::constants::extension;
+    // Multiply by 2 at the end bc of the cascading effect where one pulley rotation is extension of 2 pulley circumference
+    return (motor.GetPosition().GetValue() / units::turn_t{1}) * GEAR_RATIO * PULLEY_DIAMETER * std::numbers::pi * 2;
+}
+
+units::feet_per_second_t subsystems::amparm::Extension::get_velocity() {
+    using namespace subsystems::amparm::constants::extension;
+    // Multiply by 2 at the end bc of the cascading effect. See get_position.
+    return (motor.GetVelocity().GetValue() / units::turn_t{1}) * GEAR_RATIO * PULLEY_DIAMETER * std::numbers::pi * 2;
+}
+
+void subsystems::amparm::Extension::set_goal(units::inch_t goal) {
+    this->goal = {goal, 0_in / 1_s};
+}
+
+void subsystems::amparm::Extension::tick() {
+    setpoint = profile.Calculate(20_ms, setpoint, goal);
+
+    motor.SetVoltage(
+        units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
+        + ff.Calculate(setpoint.velocity)
+    );
+}
+
+bool subsystems::amparm::Extension::in_place() {
+    using namespace subsystems::amparm::constants::extension;
+    return units::math::abs(goal.position - get_position()) < TOLERANCE;
+}
+
+void subsystems::amparm::Extension::update_nt() {
+    frc::SmartDashboard::PutNumber("amparm_extension", get_position().value());
+}
+
+void subsystems::amparm::Extension::run_sysid(int test_num) {
+    if (!sysid_command) {
+        switch (test_num) {
+        case 0: {
+            sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
+            break;
         }
-    else {
-        if(units::math::abs(AmpShoulderGoal.position - GetShoulderRotation()) > 0_deg) {
-            frc::TrapezoidProfile<units::radians> rotationalProfile { 
-                rotationalConstraints, 
-                AmpShoulderGoal,
-                AmpShoulderSetpoint,
-                };
-
-            AmpShoulderSetpoint = rotationalProfile.Calculate(20_ms);
-            }
-        else {
-            AmpShoulderSetpoint = { GetSHoulderRotation(), 0_deg_per_s };
-            AmpShoulderGoal = { GetShoulderRotation(), 0_deg_per_s };
+        case 1: {
+            sysid_command = sysid.Quasistatic(frc2::sysid::Direction::kReverse);
+            sysid_command->Schedule();
+            break;
         }
-
-        frc::SmartDashboard::PutNumber("AmpShoulderSetpoint_velocity", units::degrees_per_second_t(AmpShoulderSetpoint.velocity).value());
-        frc::SmartDashboard::PutNumber("AmpShoulderSetpoint_position", units::degree_t(AmpShoulderSetpoint.position).value());
-        frc::SmartDashboard::PutNumber("AmpShoulderGoal_position", units::degree_t(AmpShoulderGoal.position).value());
-
-        AdjustFeedforward(
-            kinematics::Kinematics::CalculateShoulderFeedforward(AmpShoulderSetpoint.position, AmpShoulderSetpoint.velocity)
-        );
-
-        const auto control_effort_v = angleController.Calculate(
-            units::radian_t(GetShoulderRotation()).value(), 
-            AmpShoulderGoal.position.value()
-        );
-
-        frc::SmartDashboard::PutNumber("AmpShoulder_effort_v", control_effort_v);
-        frc::SmartDashboard::PutNumber("AmpShoulder_measurement", units::radian_t(GetShoulderRotation()).value());
-        frc::SmartDashboard::PutNumber("AmpShoulder_setpoint", AmpShoulderSetpoint.position.value());
-
-        motor.SetVoltage(feedforward);
+        case 2: {
+            sysid_command = sysid.Dynamic(frc2::sysid::Direction::kForward);
+            sysid_command->Schedule();
+            break;
+        }
+        case 3: {
+            sysid_command = sysid.Dynamic(frc2::sysid::Direction::kReverse);
+            sysid_command->Schedule();
+            break;
+        }
+        }
     }
 }
 
-void subsystems::AmpArm::Send() {
-    ///if (NotesDetector) {
-    ///DC brushed SPARK MAX 
-    ///}else{
-    ///wait
-    ///stop
-    ///}
-}
-
-void subsystems::AmpArm::AmpIntake() {
-    ///They are going to change the LimitSwitch to a sensor
-    frc::DigitalInput input{0};
-    auto NotesDetector = (input.Get());
-
-    if (!NotesDetector){
-        AmpshotMotor.Set(1.00 * AmpIntakePower);  
-    }else {
-        AmpshotMotor.Set(0.00 * AmpIntakePower); 
+void subsystems::amparm::Extension::cancel_sysid() {
+    if (sysid_command) {
+        sysid_command->Cancel();
     }
-}
 
-void subsystems::AmpArm::SetPositionAmp() {
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
-    
-}
-
-void subsystems::AmpArm::Shot(){
-    AmpshotMotor.Set(0.00 * AmpshotPower);
-}
-
-void subsystems::AmpArm::SetPositionTrapShot(){
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
-}
-    
-void subsystems::AmpArm::Reset() {
-    ///put values to "subsystems::AmpArm::AmpShoulde" and "subsystems::AmpArm::AmpExtention"
-    
+    sysid_command = std::nullopt;
 }
