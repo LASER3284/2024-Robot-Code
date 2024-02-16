@@ -13,6 +13,9 @@
 #include <frc/DutyCycleEncoder.h>
 #include <frc/controller/ElevatorFeedforward.h>
 
+#include <frc2/command/Commands.h>
+#include <frc2/command/CommandPtr.h>
+
 namespace subsystems {
 
 namespace amparm {
@@ -28,7 +31,8 @@ namespace constants {
         Feed,
         ReverseFeed,
         AmpScore,
-        TrapScore
+        TrapScore,
+        Spit
     };
 
     constexpr units::degree_t DOWN_ANGLE = 0_deg;
@@ -45,6 +49,8 @@ public:
 
     void tick();
 
+    void reset();
+
     void update_nt();
 
     void run_sysid(int, constants::AmpArmSubmechs);
@@ -56,6 +62,23 @@ public:
     bool has_piece() { return roller.has_piece(); }
 
     bool in_place() { return shoulder.in_place() && extension.in_place();}
+
+    frc2::CommandPtr score() {
+        return frc2::cmd::Sequence(
+            frc2::cmd::WaitUntil([this]() {
+                activate(constants::States::AmpScore);
+                return in_place();
+            }),
+            frc2::cmd::RunOnce([this]() {
+                activate(constants::States::Spit);
+            }),
+            frc2::cmd::Wait(1_s),
+            frc2::cmd::WaitUntil([this]() {
+                activate(constants::States::Stopped);
+                return in_place();
+            })
+        );
+    }
 
 private:
     constants::States state;

@@ -37,6 +37,8 @@ class Shoulder : public frc2::SubsystemBase {
 public:
     void init();
 
+    void reset();
+
     void update_nt();
 
     void tick();
@@ -65,25 +67,27 @@ private:
     units::second_t last_time = frc::Timer::GetFPGATimestamp();
     units::degree_t last_angle = get_position();
 
-    frc::TrapezoidProfile<units::degrees>::Constraints constraints {45_deg / 1_s, 45_deg / 1_s / 1_s};
+    frc::TrapezoidProfile<units::degrees>::Constraints constraints {180_deg / 1_s, 180_deg / 1_s / 1_s};
 
     frc::TrapezoidProfile<units::degrees>::State goal;
     frc::TrapezoidProfile<units::degrees>::State setpoint;
 
     frc::TrapezoidProfile<units::degrees> profile {constraints};
 
-    frc::ArmFeedforward ff {0.43219_V, 0.31952_V, 0.08937_V / 1_deg_per_s, 0.017_V / 1_deg_per_s_sq};
+    /// @brief Ks, Kg, Kv, Ka
+    /// 0.42348_V, 0.35706_V, 0.10168_V / 1_deg_per_s, 0.01509_V / 1_deg_per_s_sq
+    frc::ArmFeedforward ff {0.43219_V, 0.31952_V, 0.065_V / 1_deg_per_s, 0.017_V / 1_deg_per_s_sq};
 
-    frc::PIDController pid {0, 0, 0};
+    frc::PIDController pid {0.7, 0, 0};
 
     frc2::sysid::SysIdRoutine sysid {
-        frc2::sysid::Config {0.25_V / 1_s, 3_V, std::nullopt, std::nullopt},
+        frc2::sysid::Config {0.5_V / 1_s, 3_V, std::nullopt, std::nullopt},
         frc2::sysid::Mechanism {
             [this](units::volt_t volts) {
                 motor.SetVoltage(volts);
             },
             [this](auto log) {
-                log->Motor("amp-extension-motor")
+                log->Motor("amp-shoulder-motor")
                     .position(units::turn_t{get_position()})
                     .velocity(units::turns_per_second_t{get_velocity()})
                     .voltage(motor.Get() * frc::RobotController::GetBatteryVoltage());

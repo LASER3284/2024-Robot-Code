@@ -60,6 +60,9 @@ void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {
     drive.reset_odometry();
+    amp_arm.reset();
+
+    aux_controller.A().OnTrue(amp_arm.score());
 }
 
 void Robot::TeleopPeriodic() {
@@ -67,12 +70,6 @@ void Robot::TeleopPeriodic() {
         intake.activate(subsystems::intake::constants::DeployStates::SPIN);
     } else {
         intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
-    }
-
-    if (aux_controller.GetAButton()) {
-        amp_arm.activate(subsystems::amparm::constants::States::AmpScore);
-    } else {
-        amp_arm.activate(subsystems::amparm::constants::States::Stopped);
     }
 
     amp_arm.tick();

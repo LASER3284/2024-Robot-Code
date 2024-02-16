@@ -21,14 +21,14 @@ namespace amparm {
 namespace constants {
 
 namespace extension {
-    constexpr double GEAR_RATIO = 14.198;
-    constexpr units::inch_t PULLEY_DIAMETER = 1.88_in;
+    constexpr double GEAR_RATIO = 8.519;
+    constexpr units::inch_t PULLEY_DIAMETER = 2.256_in;
 
     /// @brief The direction to use on the Falcon (argument provided to
     /// SetInverted)
     constexpr bool DIRECTION = false;
 
-    constexpr units::inch_t TOLERANCE = 0.5_in;
+    constexpr units::inch_t TOLERANCE = 1_in;
 }
 
 }
@@ -56,19 +56,20 @@ public:
 private:
     ctre::phoenix6::hardware::TalonFX motor {18};
 
-    frc::TrapezoidProfile<units::inches>::Constraints constraints {12_in / 1_s, 6_in / 1_s / 1_s};
+    frc::TrapezoidProfile<units::inches>::Constraints constraints {24_in / 1_s, 24_in / 1_s / 1_s};
 
     frc::TrapezoidProfile<units::inches>::State goal;
     frc::TrapezoidProfile<units::inches>::State setpoint;
 
     frc::TrapezoidProfile<units::inches> profile {constraints};
 
-    frc::ElevatorFeedforward ff {0.62335_V, 0.35502_V, 0.00606_V / 1_fps, 0.00056_V / 1_fps_sq};
+    /// @brief Ks, Kg, Kv, Ka
+    frc::ElevatorFeedforward ff {0.47055_V, 0.37605_V, 1.5945_V / 1_fps, 0.10519_V / 1_fps_sq};
 
-    frc::PIDController pid {0, 0, 0};
+    frc::PIDController pid {0.5, 0, 0};
 
     frc2::sysid::SysIdRoutine sysid {
-        frc2::sysid::Config {0.25_V / 1_s, 3_V, std::nullopt, std::nullopt},
+        frc2::sysid::Config {0.5_V / 1_s, 3_V, std::nullopt, std::nullopt},
         frc2::sysid::Mechanism {
             [this](units::volt_t volts) {
                 motor.SetVoltage(volts);

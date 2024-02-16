@@ -10,6 +10,7 @@
 #include "subsystems/uselessthing.h"
 #include "subsystems/intake.h"
 #include "subsystems/amparm.h"
+#include <frc2/command/button/CommandXboxController.h>
 
 class Robot : public frc::TimedRobot {
 public:
@@ -31,6 +32,16 @@ public:
     void SimulationInit() override;
     void SimulationPeriodic() override;
 
+    void teleop_schedule() {
+        if (!teleop_cmd.IsScheduled()) {
+            teleop_cmd.Schedule();
+        }
+    }
+
+    void teleop_cancel() {
+        teleop_cmd.Cancel();
+    }
+
     enum SysIdChooser {
         QsFwd = 0,
         QsRev,
@@ -48,13 +59,14 @@ public:
 
 private:
     std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
-    frc::XboxController aux_controller {1};
+    frc2::CommandXboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};
     subsystems::amparm::AmpArm amp_arm{};
 
     subsystems::useless::Useless happy_face{};
     subsystems::intake::Intake intake{};
 
+    frc2::CommandPtr teleop_cmd = frc2::cmd::None();
     frc2::CommandPtr auto_cmd = frc2::cmd::None();
 
     frc::SendableChooser<int> sysid_chooser;

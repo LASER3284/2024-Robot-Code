@@ -25,19 +25,30 @@ void subsystems::amparm::AmpArm::activate(constants::States state) {
     switch (state) {
         default:
         case constants::States::Stopped:
-            shoulder.set_goal(constants::DOWN_ANGLE);
             roller.stop();
             extension.set_goal(constants::DOWN_EXTENSION);
+            if (extension.in_place())
+                shoulder.set_goal(constants::DOWN_ANGLE);
             break;
         case constants::States::Feed:
             shoulder.set_goal(constants::DOWN_ANGLE);
-            roller.spin();
+            if (!has_piece())
+                roller.spin();
             extension.set_goal(constants::DOWN_EXTENSION);
             break;
         case constants::States::ReverseFeed:
             shoulder.set_goal(constants::DOWN_ANGLE);
-            roller.reverse();
+            if (!has_piece())
+                roller.reverse();
             extension.set_goal(constants::DOWN_EXTENSION);
+            break;
+        case constants::States::AmpScore:
+            shoulder.set_goal(constants::AMPSCORE_ANGLE);
+            if (shoulder.in_place())
+                extension.set_goal(constants::AMPSCORE_EXTENSION);
+            break;
+        case constants::States::Spit:
+            roller.spin();
             break;
     }
 }
@@ -60,6 +71,10 @@ void subsystems::amparm::AmpArm::cancel_sysid() {
     extension.cancel_sysid();
 }
 
+void subsystems::amparm::AmpArm::reset() {
+    shoulder.reset();
+}
+
 // ROLLER SECTION //
 void subsystems::amparm::Roller::init() {
     motor.SetInverted(true);
@@ -73,6 +88,11 @@ void subsystems::amparm::Shoulder::init() {
 
 units::degree_t subsystems::amparm::Shoulder::get_position() const {
     return (encoder.Get() - 153_deg);
+}
+
+void subsystems::amparm::Shoulder::reset() {
+    setpoint = {get_position(), 0_deg_per_s};
+    goal = {get_position(), 0_deg_per_s};
 }
 
 void subsystems::amparm::Shoulder::update_nt() {
@@ -92,8 +112,13 @@ void subsystems::amparm::Shoulder::update_nt() {
 void subsystems::amparm::Shoulder::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
+    frc::SmartDashboard::PutNumber("amp_shoulder_pos_setp", setpoint.position.value());
+    frc::SmartDashboard::PutNumber("amp_shoulder_vel_setp", setpoint.velocity.value());
+
+    frc::SmartDashboard::PutNumber("amp_shoulder_volts", ff.Calculate(setpoint.position, setpoint.velocity).value());
+
     motor.SetVoltage(units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
-        + ff.Calculate(get_position(), setpoint.velocity)
+        + ff.Calculate(setpoint.position, setpoint.velocity)
     );
 }
 
@@ -150,13 +175,13 @@ void subsystems::amparm::Extension::init() {
 units::inch_t subsystems::amparm::Extension::get_position() {
     using namespace subsystems::amparm::constants::extension;
     // Multiply by 2 at the end bc of the cascading effect where one pulley rotation is extension of 2 pulley circumference
-    return (motor.GetPosition().GetValue() / units::turn_t{1}) * GEAR_RATIO * PULLEY_DIAMETER * std::numbers::pi * 2;
+    return (motor.GetPosition().GetValue() / units::turn_t{1}) / GEAR_RATIO * PULLEY_DIAMETER * std::numbers::pi * 2;
 }
 
 units::feet_per_second_t subsystems::amparm::Extension::get_velocity() {
     using namespace subsystems::amparm::constants::extension;
     // Multiply by 2 at the end bc of the cascading effect. See get_position.
-    return (motor.GetVelocity().GetValue() / units::turn_t{1}) * GEAR_RATIO * PULLEY_DIAMETER * std::numbers::pi * 2;
+    return (motor.GetVelocity().GetValue() / units::turn_t{1}) / GEAR_RATIO * PULLEY_DIAMETER * std::numbers::pi * 2;
 }
 
 void subsystems::amparm::Extension::set_goal(units::inch_t goal) {
