@@ -15,7 +15,7 @@ void subsystems::turret::Turret::set_angle(units::degree_t goal){
 };
 units::degree_t subsystems::turret::Turret::get_angle(){
     
-   /// return turret_encoder.get();
+   ///turret_encoder.get();
 };
 bool subsystems::turret::Turret::at_goal_point(){
 

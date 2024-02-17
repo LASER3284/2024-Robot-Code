@@ -20,7 +20,6 @@ namespace constants {
     constexpr double PIV_KI = 0.0; 
     /// @brief derivative gain (kd)
     constexpr double PIV_KD= 0.0;
-    /// @brief 
 }
 
 class Pivot : frc2::SubsystemBase {
@@ -54,7 +53,7 @@ private:
     /// @brief this is the aboslute incoder
     frc::DutyCycleEncoder Pivot_encoder { 0 };
     /// @brief pivot feed forward
-     frc::SimpleMotorFeedforward<units::degree_t> pivot_ff  {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::degree_t> pivot_ff  {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
 
 
     frc::PIDController PIV_PID{ constants::PIV_KP,constants::PIV_KI,constants::PIV_KD};

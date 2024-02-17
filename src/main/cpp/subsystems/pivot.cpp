@@ -3,10 +3,12 @@
 using namespace subsystems::pivot;
 
 void subsystems::pivot::Pivot::tick(){
-
+///units::volt_t piv_vol = pivot_ff.Calculate();
 };
 void subsystems::pivot::Pivot::set_angle(units::degree_t){
+    if(pivot::Pivot::set_pivot <= 90_deg && pivot::Pivot::set_pivot >= 0_deg){
 
+    }
 };
 units::degree_t subsystems::pivot::Pivot::get_angle(){
 
