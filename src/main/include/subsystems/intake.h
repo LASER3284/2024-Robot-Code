@@ -8,6 +8,10 @@
 #include <units/voltage.h>
 #include <ctre/phoenix6/TalonFX.hpp>
 
+#include <frc2/command/CommandPtr.h>
+#include <frc2/command/Commands.h>
+#include <frc2/command/SubsystemBase.h>
+
 namespace subsystems {
 
 namespace intake {
@@ -25,7 +29,7 @@ namespace constants {
     constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 5_V;
 } // namespace constants
 
-class Intake {
+class Intake : public frc2::SubsystemBase {
 public:
     /// @brief Initializes the motors and ensures break mode on the NEO.
     void init();
@@ -40,6 +44,17 @@ public:
     /// @param state The desired state of the intake. This can only be applied
     /// through periodic calls to tick().
     void activate(constants::DeployStates);
+
+    frc2::CommandPtr intake() {
+        return this->StartEnd(
+            [this]() {
+                activate(constants::DeployStates::SPIN);
+            },
+            [this]() {
+                activate(constants::DeployStates::NOSPIN);
+            }
+        );
+    }
 private:
     /// @brief The roller motor. 
     ctre::phoenix6::hardware::TalonFX roller_motor {

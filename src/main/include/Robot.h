@@ -32,14 +32,11 @@ public:
     void SimulationInit() override;
     void SimulationPeriodic() override;
 
-    void teleop_schedule() {
-        if (!teleop_cmd.IsScheduled()) {
-            teleop_cmd.Schedule();
-        }
-    }
-
-    void teleop_cancel() {
-        teleop_cmd.Cancel();
+    frc2::CommandPtr intake_cmd() {
+        return frc2::cmd::Parallel(
+            intake.intake(),
+            amp_arm.intake()
+        );
     }
 
     enum SysIdChooser {
@@ -58,7 +55,7 @@ public:
     };
 
 private:
-    std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
+    std::shared_ptr<frc2::CommandXboxController> chassis_controller = std::make_shared<frc2::CommandXboxController>(0);
     frc2::CommandXboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};
     subsystems::amparm::AmpArm amp_arm{};
@@ -66,7 +63,6 @@ private:
     subsystems::useless::Useless happy_face{};
     subsystems::intake::Intake intake{};
 
-    frc2::CommandPtr teleop_cmd = frc2::cmd::None();
     frc2::CommandPtr auto_cmd = frc2::cmd::None();
 
     frc::SendableChooser<int> sysid_chooser;

@@ -64,6 +64,7 @@ private:
     frc::TrapezoidProfile<units::inches> profile {constraints};
 
     /// @brief Ks, Kg, Kv, Ka
+    /// Units in feet b/c no inches per second unit literal
     frc::ElevatorFeedforward ff {0.47055_V, 0.37605_V, 1.5945_V / 1_fps, 0.10519_V / 1_fps_sq};
 
     frc::PIDController pid {0.5, 0, 0};

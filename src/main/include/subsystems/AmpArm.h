@@ -15,6 +15,7 @@
 
 #include <frc2/command/Commands.h>
 #include <frc2/command/CommandPtr.h>
+#include <frc2/command/SubsystemBase.h>
 
 namespace subsystems {
 
@@ -43,7 +44,7 @@ namespace constants {
     constexpr units::inch_t TRAPSCORE_EXTESNION = 20_in;
 }
 
-class AmpArm {
+class AmpArm : public frc2::SubsystemBase {
 public:
     void init();
 
@@ -65,18 +66,41 @@ public:
 
     frc2::CommandPtr score() {
         return frc2::cmd::Sequence(
-            frc2::cmd::WaitUntil([this]() {
+            this->Run([this]() {
                 activate(constants::States::AmpScore);
+            }
+            ).Until([this]() {
                 return in_place();
+            }).BeforeStarting([this]() {
+                activate(constants::States::AmpScore);
             }),
-            frc2::cmd::RunOnce([this]() {
-                activate(constants::States::Spit);
+            this->RunOnce([this]() {
+                activate(constants::States::AmpScore);
             }),
-            frc2::cmd::Wait(1_s),
-            frc2::cmd::WaitUntil([this]() {
+            frc2::cmd::Sequence(
+                this->RunOnce([this]() {
+                    activate(constants::States::Spit);
+                }),
+                frc2::cmd::Wait(1_s)
+            ),
+            this->Run([this]() {
                 activate(constants::States::Stopped);
+            }).Unless([this]() {
                 return in_place();
+            }).BeforeStarting([this]() {
+                activate(constants::States::Stopped);
             })
+        );
+    }
+
+    frc2::CommandPtr intake() {
+        return frc2::cmd::StartEnd(
+        [this]() {
+            activate(constants::States::Feed);
+        },
+        [this]() {
+            activate(constants::States::Stopped);
+        }
         );
     }
 

@@ -63,15 +63,10 @@ void Robot::TeleopInit() {
     amp_arm.reset();
 
     aux_controller.A().OnTrue(amp_arm.score());
+    chassis_controller->RightBumper().WhileTrue(intake_cmd());
 }
 
 void Robot::TeleopPeriodic() {
-    if (chassis_controller->GetRightBumper()) {
-        intake.activate(subsystems::intake::constants::DeployStates::SPIN);
-    } else {
-        intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
-    }
-
     amp_arm.tick();
     intake.tick();
     drive.tick(true);
@@ -88,17 +83,17 @@ void Robot::TestInit() {
 }
 void Robot::TestPeriodic() {
     switch (selected_mech) {
-    case MechanismChooser::Drivetrain:
-        drive.run_sysid(sysid_chooser.GetSelected());
-        break;
-    case MechanismChooser::AmpArmShoulder:
-        amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ShoulderMech);
-        break;
-    case MechanismChooser::AmpArmExtension:
-        amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ExtensionMech);
-        break;
-    default:
-        break;
+        case MechanismChooser::Drivetrain:
+            drive.run_sysid(sysid_chooser.GetSelected());
+            break;
+        case MechanismChooser::AmpArmShoulder:
+            amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ShoulderMech);
+            break;
+        case MechanismChooser::AmpArmExtension:
+            amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ExtensionMech);
+            break;
+        default:
+            break;
     }
 }
 

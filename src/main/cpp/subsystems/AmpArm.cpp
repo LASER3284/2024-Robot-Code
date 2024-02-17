@@ -19,6 +19,9 @@ void subsystems::amparm::AmpArm::tick() {
 void subsystems::amparm::AmpArm::update_nt() {
     shoulder.update_nt();
     extension.update_nt();
+
+    frc::SmartDashboard::PutBoolean("amparm_inplace", in_place());
+    frc::SmartDashboard::PutBoolean("amparm_haspiece", has_piece());
 }
 
 void subsystems::amparm::AmpArm::activate(constants::States state) {
@@ -87,7 +90,7 @@ void subsystems::amparm::Shoulder::init() {
 }
 
 units::degree_t subsystems::amparm::Shoulder::get_position() const {
-    return (encoder.Get() - 153_deg);
+    return (encoder.Get() - 155_deg);
 }
 
 void subsystems::amparm::Shoulder::reset() {
@@ -103,6 +106,7 @@ void subsystems::amparm::Shoulder::update_nt() {
 
     // Do other things
     frc::SmartDashboard::PutNumber("amparm_shoulder_pos", get_position().value());
+    frc::SmartDashboard::PutBoolean("amp_shoulder_inplace", in_place());
 
     // Set last_position and last_time
     last_time = frc::Timer::GetFPGATimestamp();
@@ -116,6 +120,8 @@ void subsystems::amparm::Shoulder::tick() {
     frc::SmartDashboard::PutNumber("amp_shoulder_vel_setp", setpoint.velocity.value());
 
     frc::SmartDashboard::PutNumber("amp_shoulder_volts", ff.Calculate(setpoint.position, setpoint.velocity).value());
+
+
 
     motor.SetVoltage(units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
         + ff.Calculate(setpoint.position, setpoint.velocity)
@@ -170,6 +176,7 @@ void subsystems::amparm::Shoulder::cancel_sysid() {
 void subsystems::amparm::Extension::init() {
     using namespace subsystems::amparm::constants::extension;
     motor.SetInverted(DIRECTION);
+    motor.SetPosition(0_deg);
 }
 
 units::inch_t subsystems::amparm::Extension::get_position() {
@@ -204,6 +211,7 @@ bool subsystems::amparm::Extension::in_place() {
 
 void subsystems::amparm::Extension::update_nt() {
     frc::SmartDashboard::PutNumber("amparm_extension", get_position().value());
+    frc::SmartDashboard::PutBoolean("amp_extension_inplace", in_place());
 }
 
 void subsystems::amparm::Extension::run_sysid(int test_num) {
