@@ -1,3 +1,5 @@
+#pragma once
+
 #include <frc/controller/PIDController.h>
 #include <units/velocity.h>
 #include <ctre/phoenix6/TalonFX.hpp>
@@ -28,6 +30,7 @@ namespace constants {
 
 class flywheel{
 public:
+    
     void tick();
     /// @brief shoot/ go burrrrr at the desired speed
     void shoot();
@@ -35,7 +38,7 @@ public:
     void low_spit();
     /// @brief this will turn on and off the feed wheel
     bool feed_pow();
-    /// @brief sets the exit volocity goal
+    /// @brief sets the exit velocity goal
     void set_exit_vel(units::feet_per_second_t exit_vel) {
         setpoint = exit_vel;
     };
