@@ -4,6 +4,7 @@
 #include <frc/controller/PIDController.h>
 #include <frc/DutyCycleEncoder.h>
 
+// sysid
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
 
@@ -17,7 +18,7 @@ namespace constants {
     constexpr int PIVOT_ID = 94;
 }
 
-class pivot {
+class pivot : public frc2::SubsystemBase {
 public:
     /// @brief set the point for the angle of the turn
     void set_angle(units::degree_t);

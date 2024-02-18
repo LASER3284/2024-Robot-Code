@@ -2,6 +2,11 @@
 #include "subsystems/pivot.h"
 #include "subsystems/turret.h"
 
+#include <units/angle.h>
+#include <units/time.h>
+
+#include <frc/smartdashboard/SmartDashboard.h>
+
 using namespace subsystems::shooter;
 
 int constants::sgn(double x) {
@@ -74,8 +79,31 @@ inline void subsystems::shooter::Shooter::activate()
 
 // turret
 void subsystems::turret::turret::idle_turret() {}
-void subsystems::turret::turret::set_angle(units::degree_t) {}
-units::degree_t subsystems::turret::turret::get_angle() {}
+
+void subsystems::turret::turret::set_angle(units::degree_t) {
+
+}
+units::degree_t subsystems::turret::turret::get_angle() {
+    //units::degree_t turret_angle = turret_encoder.GetVelocity() 
+}
+
+
+
+void subsystems::turret::turret::update_nt() {
+    // Calculate dtheta/dt
+    units::second_t dt = frc::Timer::GetFPGATimestamp() - last_time;
+    units::degree_t dtheta = get_pose() - last_angle;
+    velocity = dtheta / dt;
+
+    // Do other things
+    frc::SmartDashboard::PutNumber("turret_pos", get_pose().value());
+    frc::SmartDashboard::PutBoolean("turret_inplace", at_goal_point());
+
+    // Set last_position and last_time
+    last_time = frc::Timer::GetFPGATimestamp();
+    last_angle = get_pose();
+
+}
 bool subsystems::turret::turret::at_goal_point() {}
 bool subsystems::turret::turret::turret_power() {}
 

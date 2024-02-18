@@ -4,6 +4,9 @@
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <frc/DutyCycleEncoder.h>
 
+// sysid
+#include <frc2/command/sysid/SysIdRoutine.h>
+#include <frc2/command/SubsystemBase.h>
 
 namespace subsystems {
 
@@ -14,7 +17,7 @@ namespace constants {
     static constexpr int k_turret_id = 95;  
 }
 
-class turret {
+class turret : public frc2::SubsystemBase{
     public:
         /// @brief idle the turret
         void idle_turret();
@@ -25,6 +28,8 @@ class turret {
         bool at_goal_point();
         ///@brief enables and disables the turret
         bool turret_power();
+
+        void update_nt();
 
         units::degrees_per_second_t get_vel();
 
@@ -62,6 +67,6 @@ class turret {
     };
 };
 
-}
+};
 
-}
+};

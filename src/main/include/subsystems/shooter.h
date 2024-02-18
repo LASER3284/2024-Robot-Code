@@ -64,6 +64,10 @@ private:
     turret::turret turret;
     flywheel::flywheel flywheel;
     pivot::pivot pivot;
+
+    units::second_t last_time = frc::Timer::GetFPGATimestamp();
+    units::degree_t last_angle = get_pose();
+
 };
 
 }
