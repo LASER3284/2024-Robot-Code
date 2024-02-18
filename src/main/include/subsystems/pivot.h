@@ -27,9 +27,9 @@ private:
     ///@brief this will be the angle the pivot wants to go to
     int set_pivot = 0;
     ///@brief this is the value of the voltage/power needed to keep the angle
-    int hold_pivot =0;
-    /// @brief this is the aboslute incoder
-    frc::DutyCycleEncoder Pivot_encoder { 0 };
+    int hold_pivot = 0;
+    /// @brief this is the absolute encoder
+    frc::DutyCycleEncoder pivot_encoder { 0 };
 
 };
 

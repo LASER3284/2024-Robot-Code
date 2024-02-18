@@ -1,4 +1,6 @@
 #include "subsystems/shooter.h"
+#include "subsystems/pivot.h"
+#include "subsystems/turret.h"
 
 using namespace subsystems::shooter;
 
@@ -6,22 +8,14 @@ int constants::sgn(double x) {
     return x >= 0 ? 1 : -1;
 }
 
-Shooter::Shooter(
-    std::shared_ptr<turret::turret>turret_control,
-    std::shared_ptr<flywheel::flywheel>flywheel_control,
-    std::shared_ptr<pivot::pivot>pivot_control
-) {
-    this->flywheel_control = flywheel_control;
-    this->turret_control = turret_control;
-    this->pivot_control = pivot_control;
-}
+Shooter::Shooter() {}
 
 void Shooter::tick(frc::Pose2d pose){
     frc::Translation2d robot_position_rel = pose.Translation() - constants::GOAL_POSITION;
     frc::Rotation2d robot_heading = pose.Rotation();
 
-    units::degree_t theta = pivot_control->get_angle();
-    units::degree_t alpha = turret_control->get_angle();
+    units::degree_t theta = pivot.get_angle();
+    units::degree_t alpha = turret.get_angle();
 
     units::feet_per_second_t exit_vel = constants::IDLE_VELOCITY;
 
@@ -48,7 +42,44 @@ void Shooter::tick(frc::Pose2d pose){
         exit_vel = constants::SHOT_VELOCITY;
     }
 
-    pivot_control->set_angle(theta);
-    turret_control->set_angle(alpha);
-    flywheel_control->set_exit_vel(exit_vel);
+    pivot.set_angle(theta);
+    turret.set_angle(alpha);
+    flywheel.set_exit_vel(exit_vel);
 }
+
+void Shooter::update_nt() {
+
+
+};
+
+inline void subsystems::shooter::Shooter::activate()
+{
+    switch ( state )
+        case constants::ShooterStates::TrackingIdle:
+
+        case constants::ShooterStates::TrackShot:
+
+        case constants::ShooterStates::StableIdle:
+
+        case constants::ShooterStates::StableShot:
+
+        case constants::ShooterStates::LowStableShot:
+
+        case constants::ShooterStates::PrepFeeding:
+
+        case constants::ShooterStates::Stopped:
+
+
+};
+
+// turret
+void subsystems::turret::turret::idle_turret() {}
+void subsystems::turret::turret::set_angle(units::degree_t) {}
+units::degree_t subsystems::turret::turret::get_angle() {}
+bool subsystems::turret::turret::at_goal_point() {}
+bool subsystems::turret::turret::turret_power() {}
+
+// pivot
+void subsystems::pivot::pivot::set_angle(units::degree_t) {};
+void subsystems::pivot::pivot::idle_angle() {}
+bool subsystems::pivot::pivot::at_angle() {}

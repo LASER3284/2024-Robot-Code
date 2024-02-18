@@ -1,4 +1,3 @@
-
 #include <frc/geometry/Translation2d.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Pose2d.h>
@@ -9,6 +8,10 @@
 #include <units/velocity.h>
 #include <units/acceleration.h>
 #include <units/angle.h>
+
+// sysid
+#include <frc2/command/sysid/SysIdRoutine.h>
+#include <frc2/command/SubsystemBase.h>
 
 namespace subsystems {
 
@@ -35,26 +38,30 @@ namespace constants {
     int sgn(double);
 }
 
-class Shooter {
+class Shooter : public frc2::SubsystemBase {
 public:
-    Shooter(
-        std::shared_ptr<turret::turret>,
-        std::shared_ptr<flywheel::flywheel>,
-        std::shared_ptr<pivot::pivot>
-    );
+    Shooter();
 
     void tick(frc::Pose2d);
 
     void set_state(constants::ShooterStates s) { state = s; }
 
+    void update_nt() {}
+
+    void activate() {} 
+
     constants::ShooterStates get_state() const { return state; }
+
+    frc2::CommandPtr shoot() {
+    // turning everything on i suppose
+    }
 
 private:
     constants::ShooterStates state = constants::ShooterStates::Stopped;
 
-    std::shared_ptr<turret::turret> turret_control;
-    std::shared_ptr<flywheel::flywheel> flywheel_control;
-    std::shared_ptr<pivot::pivot> pivot_control;
+    turret::turret turret;
+    flywheel::flywheel flywheel;
+    pivot::pivot pivot;
 };
 
 }

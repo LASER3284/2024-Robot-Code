@@ -8,6 +8,7 @@
 #include <frc/SmartDashboard/SendableChooser.h>
 #include "subsystems/drive.h"
 #include "subsystems/uselessthing.h"
+#include "subsystems/shooter.h"
 
 class Robot : public frc::TimedRobot {
 public:
@@ -41,6 +42,7 @@ private:
     std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
     subsystems::drive::Drivetrain drive {chassis_controller};
     subsystems::useless::Useless happy_face{};
+    subsystems::shooter::Shooter shooter{};
 
     frc2::CommandPtr auto_cmd = frc2::cmd::None();
 

@@ -35,6 +35,7 @@ void Robot::RobotInit() {
 void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
+    shooter.update_nt();
 
     happy_face.tick();
 
