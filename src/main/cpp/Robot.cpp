@@ -21,6 +21,9 @@ void Robot::RobotInit() {
 
     mech_chooser.SetDefaultOption("No Mechanism", MechanismChooser::MechNone);
     mech_chooser.AddOption("Drive Train", MechanismChooser::Drivetrain);
+    mech_chooser.AddOption("Shooter Pivot", MechanismChooser::ShooterPivot);
+    mech_chooser.AddOption("Shooter Flywheel", MechanismChooser::ShooterFlywheel);
+    mech_chooser.AddOption("Shooter Turret", MechanismChooser::ShooterTurret);
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
@@ -83,6 +86,15 @@ void Robot::TestPeriodic() {
     switch (selected_mech) {
     case MechanismChooser::Drivetrain:
         drive.run_sysid(sysid_chooser.GetSelected());
+        break;
+    case MechanismChooser::ShooterFlywheel:
+        shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Flywheel);
+        break;
+    case MechanismChooser::ShooterPivot:
+        shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Pivot);
+        break;
+    case MechanismChooser::ShooterTurret:
+        shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Turret);
         break;
     default:
         break;

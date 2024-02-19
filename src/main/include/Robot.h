@@ -42,7 +42,9 @@ public:
     enum MechanismChooser {
         MechNone = 0,
         Drivetrain,
-        Intake,
+        ShooterPivot,
+        ShooterFlywheel,
+        ShooterTurret,
     };
 
 private:
