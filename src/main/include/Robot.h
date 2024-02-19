@@ -5,11 +5,11 @@
 #pragma once
 
 #include <frc/TimedRobot.h>
-#include <frc/SmartDashboard/SendableChooser.h>
+#include <frc/smartdashboard/SendableChooser.h>
 #include "subsystems/drive.h"
 #include "subsystems/uselessthing.h"
 #include "subsystems/intake.h"
-#include "subsystems/amparm.h"
+#include "subsystems/AmpArm.h"
 #include <frc2/command/button/CommandXboxController.h>
 
 class Robot : public frc::TimedRobot {

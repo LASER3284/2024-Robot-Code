@@ -1,4 +1,4 @@
-#include "subsystems/amparm.h"
+#include "subsystems/AmpArm.h"
 #include <units/angle.h>
 #include <numbers>
 #include <frc/smartdashboard/SmartDashboard.h>
