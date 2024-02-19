@@ -2,16 +2,14 @@
 #include <numbers>
 #include <frc/smartdashboard/SmartDashboard.h>
 
-using namespace subsystems::turret;
-
 void subsystems::turret::Turret::init() {
-    turret.SetInverted(constants::DIRECTION);
+    motor.SetInverted(constants::DIRECTION);
 }
 
 void subsystems::turret::Turret::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    turret.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
+    motor.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
 }
 
 void subsystems::turret::Turret::set_angle(units::degree_t goal) {

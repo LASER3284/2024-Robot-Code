@@ -61,21 +61,18 @@ public:
 
     bool has_piece();
     
-private:
-    /// @brief set the exit vel for the flywheel
-    units::feet_per_second_t fly_speed = 0_fps; 
-    
+private:    
     frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
-    rev::CANSparkFlex flywheel {20, rev::CANSparkLowLevel::MotorType::kBrushless};
+    rev::CANSparkFlex motor {20, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     units::feet_per_second_t setpoint;
 
     /// @brief this is the feedwheel motor
     rev::CANSparkMax feedwheel_motor {22, rev::CANSparkLowLevel::MotorType::kBrushless};
     /// @brief this is the can spark flex encoder
-    rev::SparkRelativeEncoder flywheel_encoder = flywheel.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
+    rev::SparkRelativeEncoder flywheel_encoder = motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
     /// @brief Creates a PIDController with gains kP, kI, and kD
      
     /// @brief this is the sensor for the shooter
@@ -91,11 +88,11 @@ private:
         frc2::sysid::Config{0.25_V / 1_s, 4_V, std::nullopt, std::nullopt},
         frc2::sysid::Mechanism{
         [this](units::volt_t volts) {
-            flywheel.SetVoltage(volts);
+            motor.SetVoltage(volts);
         },
         [this](auto log){
-            log->Motor("flywheel-1")
-                .voltage(flywheel.Get()* frc::RobotController::GetBatteryVoltage())
+            log->Motor("shooter-flywheel")
+                .voltage(motor.Get()* frc::RobotController::GetBatteryVoltage())
                 .velocity(units::meters_per_second_t{get_exit_vel()})
                 .position(units::meter_t {get_fly_position()});
 

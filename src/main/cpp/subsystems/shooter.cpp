@@ -21,13 +21,13 @@ void subsystems::shooter::Shooter::update_nt() {
 
 void subsystems::shooter::Shooter::run_sysid(int test_num, subsystems::shooter::constants::SubMech mech) {
     switch (mech) {
-        constants::SubMech::Flywheel:
+        case subsystems::shooter::constants::SubMech::Flywheel:
             flywheel.run_sysid(test_num);
             break;
-        constants::SubMech::Pivot:
+        case subsystems::shooter::constants::SubMech::Pivot:
             pivot.run_sysid(test_num);
             break;
-        constants::SubMech::Turret:
+        case subsystems::shooter::constants::SubMech::Turret:
             turret.run_sysid(test_num);
             break;
         default:

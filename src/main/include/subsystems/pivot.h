@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ctre/phoenix6/TalonFX.hpp>
+#include <rev/CANSparkMax.h>
 #include <frc/controller/PIDController.h>
 #include <frc/DutyCycleEncoder.h>
 #include <frc/RobotController.h>
@@ -61,7 +61,7 @@ private:
 
     frc::ArmFeedforward ff {0_V, 0_V, 0_V / 1_deg_per_s, 0_V / 1_deg_per_s_sq};
 
-    ctre::phoenix6::hardware::TalonFX pivot {23};
+    rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     frc::PIDController pid {
         0,
@@ -73,11 +73,11 @@ private:
         frc2::sysid::Config { 0.35_V / 1_s, 4_V, std::nullopt, std::nullopt },
         frc2::sysid::Mechanism {
         [this](units::volt_t volts) {
-            pivot.SetVoltage(volts);
+            motor.SetVoltage(volts);
         },
         [this](auto log) {
-            log->Motor("pivot")
-                .voltage(pivot.Get() * frc::RobotController::GetBatteryVoltage())
+            log->Motor("shooter-pivot")
+                .voltage(motor.Get() * frc::RobotController::GetBatteryVoltage())
                 .velocity(units::turns_per_second_t{velocity})
                 .position(units::turn_t{get_angle()});
         },

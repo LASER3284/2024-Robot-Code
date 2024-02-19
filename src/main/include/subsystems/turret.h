@@ -61,7 +61,7 @@ private:
     /// @brief this will be the value of where the turret is 
     int at_point = 0;
     /// @brief this is the motor that spins the turret
-    rev::CANSparkMax turret {21, rev::CANSparkLowLevel::MotorType::kBrushless};
+    rev::CANSparkMax motor {21, rev::CANSparkLowLevel::MotorType::kBrushless};
     /// @brief absolute encoder for the turret
     frc::DutyCycleEncoder turret_encoder {8};
     
@@ -75,11 +75,11 @@ private:
         frc2::sysid::Config { 0.4_V / 1_s, 3_V, std::nullopt, std::nullopt },
         frc2::sysid::Mechanism {
             [this](units::volt_t volts) {
-                turret.SetVoltage(volts);
+                motor.SetVoltage(volts);
             },
             [this](auto log) {
-                log->Motor("turret")
-                    .voltage(turret.Get() * frc::RobotController::GetBatteryVoltage())
+                log->Motor("shooter-turret")
+                    .voltage(motor.Get() * frc::RobotController::GetBatteryVoltage())
                     .velocity(units::turns_per_second_t{velocity})
                     .position(units::turn_t{get_angle()});
             },

@@ -2,7 +2,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 void subsystems::flywheel::Flywheel::init() {
-    flywheel.SetInverted(constants::FLYWHEEL_DIRECTION);
+    motor.SetInverted(constants::FLYWHEEL_DIRECTION);
     feedwheel_motor.SetInverted(constants::FEED_DIRECTION);
 }
 
@@ -12,7 +12,7 @@ void subsystems::flywheel::Flywheel::update_nt() {
 
 
 void subsystems::flywheel::Flywheel::tick() {
-    flywheel.SetVoltage(units::volt_t{pid.Calculate(get_exit_vel().value(), setpoint.value())}
+    motor.SetVoltage(units::volt_t{pid.Calculate(get_exit_vel().value(), setpoint.value())}
         + flywheel_ff.Calculate(setpoint));
 };
 

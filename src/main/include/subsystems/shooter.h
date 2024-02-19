@@ -69,9 +69,9 @@ public:
 
 private:
     constants::ShooterStates state = constants::ShooterStates::Stopped;
-    turret::Turret turret;
-    flywheel::Flywheel flywheel;
-    pivot::Pivot pivot;
+    subsystems::turret::Turret turret;
+    subsystems::flywheel::Flywheel flywheel;
+    subsystems::pivot::Pivot pivot;
 };
 
 }

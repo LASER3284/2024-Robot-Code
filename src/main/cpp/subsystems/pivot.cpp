@@ -1,11 +1,8 @@
 #include "subsystems/pivot.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 
-
-using namespace subsystems::pivot;
-
 void subsystems::pivot::Pivot::init() {
-    pivot.SetInverted(constants::DIRECTION);
+    motor.SetInverted(constants::DIRECTION);
 }
 
 void subsystems::pivot::Pivot::update_nt() {
@@ -23,7 +20,7 @@ void subsystems::pivot::Pivot::update_nt() {
 void subsystems::pivot::Pivot::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    pivot.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
+    motor.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
 }
 
 void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
