@@ -1,24 +1,43 @@
 #include "subsystems/pivot.h"
+#include <frc/smartdashboard/SmartDashboard.h>
+
 
 using namespace subsystems::pivot;
 
-void subsystems::pivot::Pivot::tick(){
-///units::volt_t piv_vol = pivot_ff.Calculate();
-};
-void subsystems::pivot::Pivot::set_angle(units::degree_t){
-   // if(pivot::Pivot::set_pivot <= 90_deg && pivot::Pivot::set_pivot >= 0_deg){
+void subsystems::pivot::Pivot::init() {
+    pivot.SetInverted(constants::DIRECTION);
+}
 
-    
-};
-units::degree_t subsystems::pivot::Pivot::get_angle(){
+void subsystems::pivot::Pivot::update_nt() {
+    units::degree_t dtheta = last_angle - get_angle();
+    units::second_t dt = last_time - frc::Timer::GetFPGATimestamp();
+    velocity = dtheta / dt;
 
-};
-bool subsystems::pivot::Pivot::at_angle(){
+    // update nt
+    frc::SmartDashboard::PutNumber("shooter_pivot_angle", get_angle().value());
 
-};
-void subsystems::pivot::Pivot::idle_angle(){
+    last_angle = get_angle();
+    last_time = frc::Timer::GetFPGATimestamp();
+}
 
-};
+void subsystems::pivot::Pivot::tick() {
+    setpoint = profile.Calculate(20_ms, setpoint, goal);
+
+    pivot.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
+}
+
+void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
+    this->goal = {goal, 0_deg_per_s};
+}
+
+units::degree_t subsystems::pivot::Pivot::get_angle() {
+    return pivot_encoder.Get() - 0_deg;
+    //                           ^---- CHANGE THIS
+}
+
+bool subsystems::pivot::Pivot::at_angle() {
+    return units::math::abs(goal.position - get_angle()) < constants::TOLERANCE;
+}
 
 // sysid
 void subsystems::pivot::Pivot::run_sysid(int test_num) {

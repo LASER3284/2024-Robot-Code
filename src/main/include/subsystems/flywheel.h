@@ -1,4 +1,5 @@
 #pragma once
+
 #include <frc/controller/PIDController.h>
 #include <units/velocity.h>
 #include <ctre/phoenix6/TalonFX.hpp>
@@ -14,6 +15,12 @@ namespace subsystems{
 namespace flywheel{
 
 namespace constants {
+    /// @brief The value to give to SetInverted
+    constexpr bool FLYWHEEL_DIRECTION = true;
+
+    /// @brief The value to give to SetInverted
+    constexpr bool FEED_DIRECTION = false;
+
     /// @brief this is the id of the shooter flywheel motor
     constexpr int FLYWHEEL_ID = 97;
     /// @brief this is the id of the shooter feedwheel motor
@@ -31,11 +38,14 @@ namespace constants {
 
 class Flywheel : public frc2::SubsystemBase{
 public:
-    
+    void init();
+    void update_nt();
     /// @brief ticks 
     void tick();
-    ///@brief this will set the flywheel to a constant low speed mode
-    void idle();
+    /// @brief this will set the flywheel to a constant low speed mode
+    void stop_feed();
+
+    void reverse_feed();
     /// @brief this will turn on the feed motor 
     void feed();
     /// @brief sets the exit fly volocity goal
@@ -49,32 +59,29 @@ public:
     
     void run_sysid(int);
 
-    bool check_if_ring();
+    bool has_piece();
     
 private:
-    bool fly_has_ring = false;
     /// @brief set the exit vel for the flywheel
-    units::feet_per_second_t fly_speed = 0_ft; 
+    units::feet_per_second_t fly_speed = 0_fps; 
     
     frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
-    rev::CANSparkFlex flywheel{97,rev::CANSparkLowLevel::MotorType::kBrushless};
+    rev::CANSparkFlex flywheel {20, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     units::feet_per_second_t setpoint;
 
     /// @brief this is the feedwheel motor
-    rev::CANSparkMax feedwheel_motor{99,rev::CANSparkLowLevel::MotorType::kBrushless};
+    rev::CANSparkMax feedwheel_motor {22, rev::CANSparkLowLevel::MotorType::kBrushless};
     /// @brief this is the can spark flex encoder
     rev::SparkRelativeEncoder flywheel_encoder = flywheel.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
     /// @brief Creates a PIDController with gains kP, kI, and kD
      
-    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
-    frc::PIDController Flywheel_PID{constants::FLY_KP, constants::FLY_KI, constants::FLY_KD};
     /// @brief this is the sensor for the shooter
-    frc::DigitalInput Fly_sense;
+    frc::DigitalInput piece_sensor {9};
 
-     frc::PIDController velocity_controller {
+     frc::PIDController pid {
         0,
         0,
         0

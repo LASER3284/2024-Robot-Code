@@ -3,6 +3,9 @@
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <frc/controller/PIDController.h>
 #include <frc/DutyCycleEncoder.h>
+#include <frc/RobotController.h>
+#include <frc/trajectory/TrapezoidProfile.h>
+#include <frc/controller/ArmFeedforward.h>
 
 // sysid
 #include <frc2/command/sysid/SysIdRoutine.h>
@@ -14,12 +17,19 @@ namespace subsystems {
 namespace pivot {
 
 namespace constants {
-    /// @brief this is the id of the pivot motor
-    constexpr int PIVOT_ID = 94;
+    /// @brief The value to give to SetInverted
+    constexpr bool DIRECTION = false;
+    // CHANGE THIS IF INVERTED ^----
+
+    constexpr units::degree_t TOLERANCE = 2_deg;
 }
 
 class Pivot : public frc2::SubsystemBase {
 public:
+    void init();
+
+    void update_nt();
+
     void tick();
 
     void run_sysid(int);
@@ -29,27 +39,35 @@ public:
     /// @brief set the point for the angle of the turn
     void set_angle(units::degree_t);
     units::degree_t get_angle();
-    /// @brief keeps the idle position
-    void idle_angle();
     /// @brief checks if at angle
     bool at_angle();
-
-    units::turns_per_second_t get_vel();
-
-    units::turn_t get_pose();
 private:
     std::optional<frc2::CommandPtr> sysid_command;
     
-    ///@brief this will be the angle to pivot is currently at 
-    int at_pivot = 0;
-    ///@brief this will be the angle the pivot wants to go to
-    int set_pivot = 0;
-    ///@brief this is the value of the voltage/power needed to keep the angle
-    int hold_pivot = 0;
     /// @brief this is the absolute encoder
-    frc::DutyCycleEncoder pivot_encoder { 0 };
+    frc::DutyCycleEncoder pivot_encoder {7};
 
-    ctre::phoenix6::hardware::TalonFX pivot{54};
+    units::degree_t last_angle;
+    units::second_t last_time;
+
+    units::degrees_per_second_t velocity;
+
+    frc::TrapezoidProfile<units::degrees>::Constraints constraints {0_deg_per_s, 0_deg_per_s_sq};
+
+    frc::TrapezoidProfile<units::degrees>::State goal;
+    frc::TrapezoidProfile<units::degrees>::State setpoint;
+
+    frc::TrapezoidProfile<units::degrees> profile {constraints};
+
+    frc::ArmFeedforward ff {0_V, 0_V, 0_V / 1_deg_per_s, 0_V / 1_deg_per_s_sq};
+
+    ctre::phoenix6::hardware::TalonFX pivot {23};
+
+    frc::PIDController pid {
+        0,
+        0,
+        0
+    };
 
     frc2::sysid::SysIdRoutine sysid {
         frc2::sysid::Config { 0.35_V / 1_s, 4_V, std::nullopt, std::nullopt },
@@ -60,8 +78,8 @@ private:
         [this](auto log) {
             log->Motor("pivot")
                 .voltage(pivot.Get() * frc::RobotController::GetBatteryVoltage())
-                .velocity(units::turns_per_second_t{get_vel()})
-                .position(units::turn_t{get_pose()});
+                .velocity(units::turns_per_second_t{velocity})
+                .position(units::turn_t{get_angle()});
         },
         this
         }

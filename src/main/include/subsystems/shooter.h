@@ -30,48 +30,48 @@ namespace constants {
         Stopped
     };
 
+    enum SubMech {
+        Flywheel = 0,
+        Pivot,
+        Turret
+    };
+
     constexpr units::feet_per_second_squared_t GRAVITY = 32.175_fps_sq;
     constexpr frc::Translation2d GOAL_POSITION { 12_ft, 10_ft};
     constexpr units::foot_t DELTA_Y = 5_ft;
 
     constexpr units::feet_per_second_t SHOT_VELOCITY = 72_fps;
     constexpr units::feet_per_second_t IDLE_VELOCITY = 20_fps;
-
-    int sgn(double);
 }
 
 class Shooter : public frc2::SubsystemBase {
 public:
-    Shooter();
+    void init();
 
-    void tick(frc::Pose2d);
+    /// @brief Supposed to make the thing move according to the state.
+    /// @param robot_pose The pose of the robot according to the drive train.
+    /// @todo All of it.
+    void tick(frc::Pose2d) {}
 
     void set_state(constants::ShooterStates s) { state = s; }
 
-    void update_nt() {}
+    void update_nt();
 
-    void activate() {} 
+    void run_sysid(int, constants::SubMech);
+
+    void cancel_sysid() {
+        turret.cancel_sysid();
+        flywheel.cancel_sysid();
+        pivot.cancel_sysid();
+    }
 
     constants::ShooterStates get_state() const { return state; }
 
-    frc2::CommandPtr shoot() {
-    // turning everything on i suppose
-    }
-
-    void run_sysid();
-    void cancel_sysid();
-
-    units::meters_per_second_t get_vel();
-    units::meter_t get_pose();
-
 private:
-    
     constants::ShooterStates state = constants::ShooterStates::Stopped;
-
     turret::Turret turret;
     flywheel::Flywheel flywheel;
     pivot::Pivot pivot;
-
 };
 
 }
