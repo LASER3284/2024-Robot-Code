@@ -12,7 +12,9 @@
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/trajectory/TrapezoidProfile.h>
+#include <rev/CANSparkFlex.h>
 
+#include <optional>
 #include <numbers>
 
 namespace subsystems {
@@ -30,12 +32,14 @@ namespace constants {
     constexpr units::feet_per_second_squared_t kMAX_ROBOT_ACCEL = 24_fps_sq;
 
     constexpr int kDRIVE_ENC_RES = 2048;
+
+    constexpr double TURN_RATIO = 12.8;
 }
 
 class Module {
 public:
     /// @brief Swerve module constructor for the various encoder+motors
-    /// @param drive The CAN ID of the drive motor (TalonFX)
+    /// @param drive The CAN ID of the drive motor (SparkFlex)
     /// @param turn The CAN ID of the turn motor (TalonFX)
     /// @param enc The CAN ID of the CANCoder
     Module(const int, const int, const int);
@@ -84,6 +88,10 @@ public:
     /// battery voltage.
     /// @return The voltage of the motor
     units::volt_t get_drive_power() const;
+
+    std::optional<units::degree_t> get_cancoder_heading() const;
+
+    void force_update_azimuth();
 private:
     /// @brief Sets the raw voltage of the motor for azimuth. Private b/c
     /// azimuth angle is important for drive power.
@@ -98,14 +106,15 @@ private:
     };
 
     frc::PIDController drive_controller {
-        0.03,
+        0.0,
         0.0,
         0.0
     };
 
-    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.19355_V, 0.6182_V / 1_fps, 0.0187071_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.24991_V, 0.6175_V / 1_fps, 0.02664_V / 1_fps_sq};
 
-    std::unique_ptr<ctre::phoenix6::hardware::TalonFX> drive_motor;
+    std::unique_ptr<rev::CANSparkFlex> drive_motor;
+    std::unique_ptr<rev::SparkRelativeEncoder> drive_enc;
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> turn_motor;
     std::unique_ptr<ctre::phoenix6::hardware::CANcoder> encoder;
 

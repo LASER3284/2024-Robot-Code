@@ -63,9 +63,11 @@ void Robot::DisabledInit() {
 }
 void Robot::DisabledPeriodic() {}
 
-void Robot::TestInit() {}
+void Robot::TestInit() {
+    sysid_routine = sysid_chooser.GetSelected();
+}
 void Robot::TestPeriodic() {
-    drive.run_sysid(sysid_chooser.GetSelected());
+    drive.run_sysid(sysid_routine);
 }
 
 void Robot::SimulationInit() {}
