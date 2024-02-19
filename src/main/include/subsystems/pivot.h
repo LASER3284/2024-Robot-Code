@@ -18,8 +18,14 @@ namespace constants {
     constexpr int PIVOT_ID = 94;
 }
 
-class pivot : public frc2::SubsystemBase {
+class Pivot : public frc2::SubsystemBase {
 public:
+    void tick();
+
+    void run_sysid(int);
+
+    void cancel_sysid();
+    
     /// @brief set the point for the angle of the turn
     void set_angle(units::degree_t);
     units::degree_t get_angle();
@@ -32,6 +38,8 @@ public:
 
     units::turn_t get_pose();
 private:
+    std::optional<frc2::CommandPtr> sysid_command;
+    
     ///@brief this will be the angle to pivot is currently at 
     int at_pivot = 0;
     ///@brief this will be the angle the pivot wants to go to

@@ -1,5 +1,4 @@
 #pragma once
-
 #include <frc/controller/PIDController.h>
 #include <units/velocity.h>
 #include <ctre/phoenix6/TalonFX.hpp>
@@ -7,11 +6,9 @@
 #include <rev/CANSparkMax.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/RobotController.h>
-
-// sysid
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
-
+#include <frc/DigitalInput.h>
 namespace subsystems{
 
 namespace flywheel{
@@ -21,72 +18,85 @@ namespace constants {
     constexpr int FLYWHEEL_ID = 97;
     /// @brief this is the id of the shooter feedwheel motor
     constexpr int FEED_ID = 96;
+    /// @brief this is the pid values for proportional gain(kp)
+     constexpr double FLY_KP = 0.0;
+    /// @brief intergral gain(ki)
+    constexpr double FLY_KI = 0.0; 
+    /// @brief derivative gain (kd)
+    constexpr double FLY_KD= 0.0;
+    /// @brief this is the gear ratio of the flywheel
+    constexpr double fly_ratio = 1.66;
+    
+}  
 
-    constexpr float GEAR_RATIO = 1.33;
-
-    constexpr units::feet_per_second_t SHOOT_SPEED = 0_fps;
-
-    constexpr units::foot_t WHEEL_DIAMETER = 3_in;
-}
-
-class flywheel{
+class Flywheel : public frc2::SubsystemBase{
 public:
     
+    /// @brief ticks 
     void tick();
-    /// @brief shoot/ go burrrrr at the desired speed
-    void shoot();
-    /// @brief this will spit at a low speed
-    void low_spit();
-    /// @brief this will turn on and off the feed wheel
-    bool feed_pow();
-    /// @brief sets the exit velocity goal
-    void set_exit_vel(units::feet_per_second_t exit_vel) {
-        setpoint = exit_vel;
-    };
+    ///@brief this will set the flywheel to a constant low speed mode
+    void idle();
+    /// @brief this will turn on the feed motor 
+    void feed();
+    /// @brief sets the exit fly volocity goal
+    void set_exit_vel(units::feet_per_second_t);
     units::feet_per_second_t get_exit_vel();
 
-    // this is literally only for sysid so just ignore it i suppose
-    units::foot_t get_pose();
+    /// @brief gets the positions of the feed and fly wheel motor
+    units::foot_t get_fly_position();
+    /// @brief this like the name say resets the sysid.
+    void cancel_sysid();
+    
+    void run_sysid(int);
 
-    void update_nt();
+    bool check_if_ring();
+    
 private:
-    /// @brief the value of the shooter motor power(this is to be changed later)
-    int shoot_power = 1;
-    /// @brief the value of the feed wheel motor power(this is to be changed later)
-    int feed_power = 0;
+    bool fly_has_ring = false;
+    /// @brief set the exit vel for the flywheel
+    units::feet_per_second_t fly_speed = 0_ft; 
+    
+    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
+
+    /// @brief this is the flywheel motor
+    rev::CANSparkFlex flywheel{97,rev::CANSparkLowLevel::MotorType::kBrushless};
 
     units::feet_per_second_t setpoint;
 
+    /// @brief this is the feedwheel motor
+    rev::CANSparkMax feedwheel_motor{99,rev::CANSparkLowLevel::MotorType::kBrushless};
+    /// @brief this is the can spark flex encoder
+    rev::SparkRelativeEncoder flywheel_encoder = flywheel.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
+    /// @brief Creates a PIDController with gains kP, kI, and kD
+     
     frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
+    frc::PIDController Flywheel_PID{constants::FLY_KP, constants::FLY_KI, constants::FLY_KD};
+    /// @brief this is the sensor for the shooter
+    frc::DigitalInput Fly_sense;
 
      frc::PIDController velocity_controller {
         0,
         0,
         0
     };
-
-    /// @brief this is the flywheel motor
-    rev::CANSparkFlex flywheel{97,rev::CANSparkLowLevel::MotorType::kBrushless};
-    /// @brief this is the flywheel encoder!
-    rev::SparkRelativeEncoder flywheel_encoder = flywheel.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
-    /// @brief this is the feedwheel motor
-    rev::CANSparkMax feed_motor{99,rev::CANSparkLowLevel::MotorType::kBrushless};
-
-    frc2::sysid::SysIdRoutine sysid {
-        frc2::sysid::Config { 0.35_V / 1_s, 4_V, std::nullopt, std::nullopt },
-        frc2::sysid::Mechanism {
+    /// this is my attempt at sysid with my very limited knowledge
+    frc2::sysid::SysIdRoutine sysid{
+        frc2::sysid::Config{0.25_V / 1_s, 4_V, std::nullopt, std::nullopt},
+        frc2::sysid::Mechanism{
         [this](units::volt_t volts) {
             flywheel.SetVoltage(volts);
         },
-        [this](auto log) {
-            log->Motor("flywheel")
-                .voltage(flywheel.Get() * frc::RobotController::GetBatteryVoltage())
+        [this](auto log){
+            log->Motor("flywheel-1")
+                .voltage(flywheel.Get()* frc::RobotController::GetBatteryVoltage())
                 .velocity(units::meters_per_second_t{get_exit_vel()})
-                .position(units::meter_t {get_pose()});
+                .position(units::meter_t {get_fly_position()});
+
         },
         this
         }
     };
+    std::optional<frc2::CommandPtr> sysid_command;
 };
 
 }

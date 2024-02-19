@@ -9,11 +9,9 @@
 
 using namespace subsystems::shooter;
 
-int constants::sgn(double x) {
+/*int constants::sgn(double x) {
     return x >= 0 ? 1 : -1;
-}
-
-Shooter::Shooter() {}
+} */
 
 void Shooter::tick(frc::Pose2d pose){
     frc::Translation2d robot_position_rel = pose.Translation() - constants::GOAL_POSITION;
@@ -78,36 +76,36 @@ inline void subsystems::shooter::Shooter::activate()
 };
 
 // turret
-void subsystems::turret::turret::idle_turret() {}
+void subsystems::turret::Turret::idle_turret() {}
 
-void subsystems::turret::turret::set_angle(units::degree_t) {
+void subsystems::turret::Turret::set_angle(units::degree_t) {
 
 }
-units::degree_t subsystems::turret::turret::get_angle() {
+units::degree_t subsystems::turret::Turret::get_angle() {
     //units::degree_t turret_angle = turret_encoder.GetVelocity() 
 }
 
 
 
-void subsystems::turret::turret::update_nt() {
+void subsystems::turret::Turret::update_nt() {
     // Calculate dtheta/dt
-    units::second_t dt = frc::Timer::GetFPGATimestamp() - last_time;
-    units::degree_t dtheta = get_pose() - last_angle;
-    velocity = dtheta / dt;
+    //units::second_t dt = frc::Timer::GetFPGATimestamp() - last_time;
+    //units::degree_t dtheta = get_pose() - last_angle;
+    //velocity = dtheta / dt;
 
     // Do other things
     frc::SmartDashboard::PutNumber("turret_pos", get_pose().value());
     frc::SmartDashboard::PutBoolean("turret_inplace", at_goal_point());
 
     // Set last_position and last_time
-    last_time = frc::Timer::GetFPGATimestamp();
-    last_angle = get_pose();
+    //last_time = frc::Timer::GetFPGATimestamp();
+    //last_angle = get_pose();
 
 }
-bool subsystems::turret::turret::at_goal_point() {}
-bool subsystems::turret::turret::turret_power() {}
+bool subsystems::turret::Turret::at_goal_point() {}
+bool subsystems::turret::Turret::turret_power() {}
 
 // pivot
-void subsystems::pivot::pivot::set_angle(units::degree_t) {};
-void subsystems::pivot::pivot::idle_angle() {}
-bool subsystems::pivot::pivot::at_angle() {}
+void subsystems::pivot::Pivot::set_angle(units::degree_t) {};
+void subsystems::pivot::Pivot::idle_angle() {}
+bool subsystems::pivot::Pivot::at_angle() {}

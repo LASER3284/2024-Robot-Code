@@ -17,8 +17,13 @@ namespace constants {
     static constexpr int k_turret_id = 95;  
 }
 
-class turret : public frc2::SubsystemBase{
+class Turret : public frc2::SubsystemBase{
     public:
+        void tick();
+
+        void run_sysid(int);
+        void cancel_sysid();
+        
         /// @brief idle the turret
         void idle_turret();
         /// @brief set setpoint
@@ -35,12 +40,16 @@ class turret : public frc2::SubsystemBase{
 
         units::degree_t get_pose();
     private:
+        std::optional<frc2::CommandPtr> sysid_command;
+       
+        units::degree_t goal_angle;
+
         /// @brief variable for the point that the turret is going to
         int set_point = 0;
         /// @brief this will be the value of where the turret is 
         int at_point = 0;
         /// @brief this is the motor that spins the turret
-        rev::CANSparkMax pivot{99,rev::CANSparkLowLevel::MotorType::kBrushless};
+        rev::CANSparkMax turret{99,rev::CANSparkLowLevel::MotorType::kBrushless};
         /// @brief absolute encoder for the turret
         frc::DutyCycleEncoder turret_encoder { 0 };
         
@@ -54,11 +63,11 @@ class turret : public frc2::SubsystemBase{
         frc2::sysid::Config { 0.35_V / 1_s, 4_V, std::nullopt, std::nullopt },
         frc2::sysid::Mechanism {
         [this](units::volt_t volts) {
-            pivot.SetVoltage(volts);
+            turret.SetVoltage(volts);
         },
         [this](auto log) {
             log->Motor("turret")
-                .voltage(pivot.Get() * frc::RobotController::GetBatteryVoltage())
+                .voltage(turret.Get() * frc::RobotController::GetBatteryVoltage())
                 .velocity(units::turns_per_second_t{get_vel()})
                 .position(units::turn_t{get_pose()});
         },

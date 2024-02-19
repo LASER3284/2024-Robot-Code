@@ -58,15 +58,19 @@ public:
     // turning everything on i suppose
     }
 
+    void run_sysid();
+    void cancel_sysid();
+
+    units::meters_per_second_t get_vel();
+    units::meter_t get_pose();
+
 private:
+    
     constants::ShooterStates state = constants::ShooterStates::Stopped;
 
-    turret::turret turret;
-    flywheel::flywheel flywheel;
-    pivot::pivot pivot;
-
-    units::second_t last_time = frc::Timer::GetFPGATimestamp();
-    units::degree_t last_angle = get_pose();
+    turret::Turret turret;
+    flywheel::Flywheel flywheel;
+    pivot::Pivot pivot;
 
 };
 
