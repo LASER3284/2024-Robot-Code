@@ -3,6 +3,10 @@
 
 void subsystems::pivot::Pivot::init() {
     motor.SetInverted(constants::DIRECTION);
+
+    while (get_angle() > 180_deg) {
+        initial_offset -= 360_deg;
+    }
 }
 
 void subsystems::pivot::Pivot::update_nt() {
@@ -28,7 +32,7 @@ void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
 }
 
 units::degree_t subsystems::pivot::Pivot::get_angle() {
-    return pivot_encoder.Get() - 0_deg;
+    return pivot_encoder.Get() + 43_deg + initial_offset;
     //                           ^---- CHANGE THIS
 }
 

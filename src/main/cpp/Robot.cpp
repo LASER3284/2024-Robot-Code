@@ -39,6 +39,7 @@ void Robot::RobotInit() {
     }
 
     intake.init();
+    shooter.init();
 }
 
 void Robot::RobotPeriodic() {
@@ -76,6 +77,7 @@ void Robot::TeleopPeriodic() {
 
 void Robot::DisabledInit() {
     drive.cancel_sysid();
+    shooter.cancel_sysid();
 }
 void Robot::DisabledPeriodic() {}
 

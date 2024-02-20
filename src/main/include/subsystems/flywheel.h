@@ -62,7 +62,7 @@ public:
     bool has_piece();
     
 private:    
-    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0_V / 1_fps, 0_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0.215_V, 0.078_V / 1_fps, 0.014728_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
     rev::CANSparkFlex motor {20, rev::CANSparkLowLevel::MotorType::kBrushless};

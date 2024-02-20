@@ -54,7 +54,7 @@ private:
 
     frc::TrapezoidProfile<units::degrees> profile {constraints};
 
-    frc::ArmFeedforward ff {0_V, 0_V, 0_V / 1_deg_per_s, 0_V / 1_deg_per_s_sq};
+    frc::ArmFeedforward ff {0.13947_V, 0.00947_V, 0.01325_V / 1_deg_per_s, 0.00103_V / 1_deg_per_s_sq};
 
     /// @brief variable for the point that the turret is going to
     int set_point = 0;

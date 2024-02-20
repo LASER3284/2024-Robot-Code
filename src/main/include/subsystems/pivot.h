@@ -18,7 +18,7 @@ namespace pivot {
 
 namespace constants {
     /// @brief The value to give to SetInverted
-    constexpr bool DIRECTION = false;
+    constexpr bool DIRECTION = true;
     // CHANGE THIS IF INVERTED ^----
 
     constexpr units::degree_t TOLERANCE = 2_deg;
@@ -43,6 +43,8 @@ public:
     bool at_angle();
 private:
     std::optional<frc2::CommandPtr> sysid_command;
+
+    units::degree_t initial_offset = 0_deg;
     
     /// @brief this is the absolute encoder
     frc::DutyCycleEncoder pivot_encoder {7};
@@ -59,7 +61,7 @@ private:
 
     frc::TrapezoidProfile<units::degrees> profile {constraints};
 
-    frc::ArmFeedforward ff {0_V, 0_V, 0_V / 1_deg_per_s, 0_V / 1_deg_per_s_sq};
+    frc::ArmFeedforward ff {0.69993_V, 0_V, 0.00062_V / 1_deg_per_s, 0.00377_V / 1_deg_per_s_sq};
 
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
