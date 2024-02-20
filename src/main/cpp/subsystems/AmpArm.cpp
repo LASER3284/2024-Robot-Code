@@ -179,6 +179,11 @@ void subsystems::amparm::Extension::init() {
     motor.SetPosition(0_deg);
 }
 
+void subsystems::amparm::Extension::reset() {
+    setpoint = {get_position(), 0_fps};
+    goal = {get_position(), 0_fps};
+}
+
 units::inch_t subsystems::amparm::Extension::get_position() {
     using namespace subsystems::amparm::constants::extension;
     // Multiply by 2 at the end bc of the cascading effect where one pulley rotation is extension of 2 pulley circumference

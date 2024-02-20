@@ -41,6 +41,8 @@ public:
 
     void tick();
 
+    void reset();
+
     void set_goal(units::inch_t);
 
     units::inch_t get_position();
