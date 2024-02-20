@@ -9,10 +9,9 @@
 #include <frc/controller/ArmFeedforward.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/trajectory/TrapezoidProfile.h>
-#include <frc/Timer.h>
 #include <frc/DutyCycleEncoder.h>
 
-// SysID
+// SysId
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
 
@@ -49,6 +48,7 @@ namespace constants {
 
 class Ballast : public frc2::SubsystemBase {
 public: 
+    /// @brief The constructor method for the ballast. 
     Ballast();
 
     /// @brief Calculates the percent output to set the motor to based on the angle of the ballast.
@@ -66,14 +66,6 @@ public:
     /// Rotation should be 0 degrees parallel to the bottom of the frame in CCW+ orientation.
     /// @param rot The rotation goal to rotate the wrist to.
     void set_rotation_goal(units::degree_t rot);
-
-    /// @brief Manually control the rotation of the ballast.
-    void manual_control(double percentage) { manual_percentage = percentage; }
-
-    void reset_rotation() {
-    set_rotation_goal(get_rotation());
-    ballast_timer.Restart();
-    }
 
     /// @brief Cancels the SysId command if it has not been done already.
     void cancel_sysid();
@@ -93,9 +85,7 @@ private:
         0.0,    // KP
         0.0,    // KI
         0.0    // KD
-    };
-
-    double manual_percentage = 0.0;
+    }; 
 
     /// @brief The trapezoidal profile constraints for the shoulder rotation
     /// This specifies the max rotational velocity *and* the max rotational acceleration.
@@ -106,9 +96,6 @@ private:
 
     /// @brief The current setpoint for the ballast.
     frc::TrapezoidProfile<units::radians>::State ballast_setpoint;
-
-    /// @brief A timer used for overriding the manual percentage vs the feedforward calculations.
-    frc::Timer ballast_timer;
             
     /// @brief The last commanded setpoint for the ballast.
     units::degree_t last_setpoint;
