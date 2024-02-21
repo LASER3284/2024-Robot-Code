@@ -21,6 +21,8 @@ namespace constants {
     /// @brief The value to give to SetInverted
     constexpr bool FEED_DIRECTION = false;
 
+    constexpr units::feet_per_second_t TOLERANCE = 4_fps;
+
     /// @brief this is the id of the shooter flywheel motor
     constexpr int FLYWHEEL_ID = 97;
     /// @brief this is the id of the shooter feedwheel motor
@@ -45,9 +47,11 @@ public:
     /// @brief this will set the flywheel to a constant low speed mode
     void stop_feed();
 
+    bool at_speed();
+
     void reverse_feed();
-    /// @brief this will turn on the feed motor 
-    void feed();
+    /// @brief this will turn on the feed motor
+    void feed(bool);
     /// @brief sets the exit fly volocity goal
     void set_exit_vel(units::feet_per_second_t);
     units::feet_per_second_t get_exit_vel();
@@ -61,7 +65,8 @@ public:
 
     bool has_piece();
     
-private:    
+private:
+    units::turn_t goal_feed = units::turn_t{0};
     frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0.215_V, 0.078_V / 1_fps, 0.014728_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
@@ -71,6 +76,7 @@ private:
 
     /// @brief this is the feedwheel motor
     rev::CANSparkMax feedwheel_motor {22, rev::CANSparkLowLevel::MotorType::kBrushless};
+    rev::SparkRelativeEncoder feed_enc = feedwheel_motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
     /// @brief this is the can spark flex encoder
     rev::SparkRelativeEncoder flywheel_encoder = motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
     /// @brief Creates a PIDController with gains kP, kI, and kD

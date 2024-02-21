@@ -7,7 +7,7 @@ void subsystems::flywheel::Flywheel::init() {
 }
 
 void subsystems::flywheel::Flywheel::update_nt() {
-    // Nothing to log yet
+    frc::SmartDashboard::PutNumber("shooter_flywheel_velocity", get_exit_vel().value());
 }
 
 
@@ -32,25 +32,37 @@ void subsystems::flywheel::Flywheel::stop_feed() {
     feedwheel_motor.SetVoltage(0_V);
 }
 
-void subsystems::flywheel::Flywheel::feed() {
-    if (has_piece()) {
+void subsystems::flywheel::Flywheel::feed(bool fire) {
+    if (has_piece() && !fire) {
         feedwheel_motor.SetVoltage(0_V);
     } else {
-        feedwheel_motor.SetVoltage(7.5_V);
+        feedwheel_motor.SetVoltage(7.5_V * (goal_feed - units::turn_t{feed_enc.GetPosition()} >= units::turn_t{0} ? 1 : -1));
     }
 }
 
 void subsystems::flywheel::Flywheel::reverse_feed() {
-    if (!has_piece()) {
+    if (piece_sensor.Get()) {
         feedwheel_motor.SetVoltage(0_V);
     } else {
         feedwheel_motor.SetVoltage(-7.5_V);
     }
 }
 
-bool subsystems::flywheel::Flywheel::has_piece(){
-    return !piece_sensor.Get();
+bool subsystems::flywheel::Flywheel::has_piece() {
+    if (piece_sensor.Get()) {
+        return false;
+    } else {
+        if (units::math::abs(goal_feed - units::turn_t{feed_enc.GetPosition()}) < units::turn_t{0.1}) {
+            return true;
+        }
+        goal_feed = units::turn_t{feed_enc.GetPosition()} + units::turn_t{0.25};
+        return false;
+    }
 };
+
+bool subsystems::flywheel::Flywheel::at_speed() {
+    return units::math::abs(setpoint - get_exit_vel()) < constants::TOLERANCE;
+}
 
 void subsystems::flywheel::Flywheel::run_sysid(int test_num) {
     if (!sysid_command) {

@@ -24,6 +24,8 @@ void Robot::RobotInit() {
     mech_chooser.AddOption("Shooter Pivot", MechanismChooser::ShooterPivot);
     mech_chooser.AddOption("Shooter Flywheel", MechanismChooser::ShooterFlywheel);
     mech_chooser.AddOption("Shooter Turret", MechanismChooser::ShooterTurret);
+    mech_chooser.AddOption("Amp Arm Shoulder", MechanismChooser::AmpArmShoulder);
+    mech_chooser.AddOption("Amp Arm Extension", MechanismChooser::AmpArmExtension);
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
@@ -40,12 +42,15 @@ void Robot::RobotInit() {
 
     intake.init();
     shooter.init();
+    amp_arm.init();
 }
 
 void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
     shooter.update_nt();
+
+    amp_arm.update_nt();
 
     happy_face.tick();
 
@@ -60,17 +65,14 @@ void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {
     drive.reset_odometry();
+    amp_arm.reset();
+
+    aux_controller.A().OnTrue(amp_arm.score());
+    chassis_controller->RightBumper().WhileTrue(intake_cmd());
 }
 
 void Robot::TeleopPeriodic() {
-    // snip
-
-    if (chassis_controller->GetRightBumper()) {
-        intake.activate(subsystems::intake::constants::DeployStates::SPIN);
-    } else {
-        intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
-    }
-
+    amp_arm.tick();
     intake.tick();
     drive.tick(true);
 }
@@ -78,6 +80,7 @@ void Robot::TeleopPeriodic() {
 void Robot::DisabledInit() {
     drive.cancel_sysid();
     shooter.cancel_sysid();
+    amp_arm.cancel_sysid();
 }
 void Robot::DisabledPeriodic() {}
 
@@ -86,20 +89,26 @@ void Robot::TestInit() {
 }
 void Robot::TestPeriodic() {
     switch (selected_mech) {
-    case MechanismChooser::Drivetrain:
-        drive.run_sysid(sysid_chooser.GetSelected());
-        break;
-    case MechanismChooser::ShooterFlywheel:
-        shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Flywheel);
-        break;
-    case MechanismChooser::ShooterPivot:
-        shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Pivot);
-        break;
-    case MechanismChooser::ShooterTurret:
-        shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Turret);
-        break;
-    default:
-        break;
+        case MechanismChooser::Drivetrain:
+            drive.run_sysid(sysid_chooser.GetSelected());
+            break;
+        case MechanismChooser::ShooterFlywheel:
+            shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Flywheel);
+            break;
+        case MechanismChooser::ShooterPivot:
+            shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Pivot);
+            break;
+        case MechanismChooser::ShooterTurret:
+            shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Turret);
+            break;
+        case MechanismChooser::AmpArmShoulder:
+            amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ShoulderMech);
+            break;
+        case MechanismChooser::AmpArmExtension:
+            amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ExtensionMech);
+            break;
+        default:
+            break;
     }
 }
 

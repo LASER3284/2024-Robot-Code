@@ -5,11 +5,13 @@
 #pragma once
 
 #include <frc/TimedRobot.h>
-#include <frc/SmartDashboard/SendableChooser.h>
+#include <frc/smartdashboard/SendableChooser.h>
 #include "subsystems/drive.h"
 #include "subsystems/uselessthing.h"
 #include "subsystems/shooter.h"
 #include "subsystems/intake.h"
+#include "subsystems/AmpArm.h"
+#include <frc2/command/button/CommandXboxController.h>
 
 class Robot : public frc::TimedRobot {
 public:
@@ -31,6 +33,13 @@ public:
     void SimulationInit() override;
     void SimulationPeriodic() override;
 
+    frc2::CommandPtr intake_cmd() {
+        return frc2::cmd::Parallel(
+            intake.intake(),
+            amp_arm.intake()
+        );
+    }
+
     enum SysIdChooser {
         QsFwd = 0,
         QsRev,
@@ -45,12 +54,16 @@ public:
         ShooterPivot,
         ShooterFlywheel,
         ShooterTurret,
+        AmpArmShoulder,
+        AmpArmExtension
     };
 
 private:
-    std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
-    frc::XboxController aux_controller {1};
+    std::shared_ptr<frc2::CommandXboxController> chassis_controller = std::make_shared<frc2::CommandXboxController>(0);
+    frc2::CommandXboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};
+    subsystems::amparm::AmpArm amp_arm{};
+
     subsystems::useless::Useless happy_face{};
     subsystems::shooter::Shooter shooter{};
     subsystems::intake::Intake intake{};
