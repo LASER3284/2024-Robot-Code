@@ -33,9 +33,15 @@ void subsystems::amparm::AmpArm::activate(constants::States state) {
             if (extension.in_place())
                 shoulder.set_goal(constants::DOWN_ANGLE);
             break;
+        case constants::States::Intake:
+            shoulder.set_goal(constants::DOWN_ANGLE);
+            if (!has_piece() && in_place())
+                roller.spin();
+            extension.set_goal(constants::DOWN_EXTENSION);
+            break;
         case constants::States::Feed:
             shoulder.set_goal(constants::DOWN_ANGLE);
-            if (!has_piece())
+            if (in_place())
                 roller.spin();
             extension.set_goal(constants::DOWN_EXTENSION);
             break;
@@ -177,6 +183,7 @@ void subsystems::amparm::Extension::init() {
     using namespace subsystems::amparm::constants::extension;
     motor.SetInverted(DIRECTION);
     motor.SetPosition(0_deg);
+    motor.SetNeutralMode(ctre::phoenix6::signals::NeutralModeValue::Brake);
 }
 
 void subsystems::amparm::Extension::reset() {
@@ -203,10 +210,10 @@ void subsystems::amparm::Extension::set_goal(units::inch_t goal) {
 void subsystems::amparm::Extension::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    motor.SetVoltage(
-        units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
-        + ff.Calculate(setpoint.velocity)
-    );
+    motor.SetVoltage(0_V);
+    //    units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
+    //    + ff.Calculate(setpoint.velocity)
+    //);
 }
 
 bool subsystems::amparm::Extension::in_place() {

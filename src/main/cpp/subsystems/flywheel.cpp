@@ -8,6 +8,7 @@ void subsystems::flywheel::Flywheel::init() {
 
 void subsystems::flywheel::Flywheel::update_nt() {
     frc::SmartDashboard::PutNumber("shooter_flywheel_velocity", get_exit_vel().value());
+    frc::SmartDashboard::PutNumber("flywheel_goal_feed", goal_feed.value());
 }
 
 
@@ -35,8 +36,10 @@ void subsystems::flywheel::Flywheel::stop_feed() {
 void subsystems::flywheel::Flywheel::feed(bool fire) {
     if (has_piece() && !fire) {
         feedwheel_motor.SetVoltage(0_V);
-    } else {
-        feedwheel_motor.SetVoltage(7.5_V * (goal_feed - units::turn_t{feed_enc.GetPosition()} >= units::turn_t{0} ? 1 : -1));
+    } else if (!fire) {
+        feedwheel_motor.SetVoltage(1_V);
+    } else if (fire) {
+        feedwheel_motor.SetVoltage(12_V);
     }
 }
 
@@ -49,6 +52,7 @@ void subsystems::flywheel::Flywheel::reverse_feed() {
 }
 
 bool subsystems::flywheel::Flywheel::has_piece() {
+    /*
     if (piece_sensor.Get()) {
         return false;
     } else {
@@ -58,6 +62,8 @@ bool subsystems::flywheel::Flywheel::has_piece() {
         goal_feed = units::turn_t{feed_enc.GetPosition()} + units::turn_t{0.25};
         return false;
     }
+    */
+   return !piece_sensor.Get();
 };
 
 bool subsystems::flywheel::Flywheel::at_speed() {

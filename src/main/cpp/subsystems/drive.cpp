@@ -108,7 +108,8 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
 void subsystems::drive::Drivetrain::reset_odometry() {
     gyro->Reset();
 
-    set_pose(frc::Pose2d {});
+    // TEMPORARY
+    set_pose(frc::Pose2d {frc::Translation2d {8.5_ft, 218.42_in - 7.25_ft}, frc::Rotation2d {-78_deg}});
 }
 
 void subsystems::drive::Drivetrain::update_odometry() {

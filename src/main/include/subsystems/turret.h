@@ -17,7 +17,7 @@ namespace turret {
 
 namespace constants {
     /// @brief The value to give to SetInverted
-    constexpr bool DIRECTION = false;
+    constexpr bool DIRECTION = true;
     // CHANGE IF INVERTED      ^----
 
     constexpr units::degree_t TOLERANCE = 2.5_deg;
@@ -66,8 +66,8 @@ private:
     frc::DutyCycleEncoder turret_encoder {8};
     
     frc::PIDController pid {
-        0,
-        0,
+        0.1,
+        0.00375,
         0
     };
 

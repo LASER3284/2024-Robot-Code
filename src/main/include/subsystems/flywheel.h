@@ -16,10 +16,10 @@ namespace flywheel{
 
 namespace constants {
     /// @brief The value to give to SetInverted
-    constexpr bool FLYWHEEL_DIRECTION = true;
+    constexpr bool FLYWHEEL_DIRECTION = false;
 
     /// @brief The value to give to SetInverted
-    constexpr bool FEED_DIRECTION = false;
+    constexpr bool FEED_DIRECTION = true;
 
     constexpr units::feet_per_second_t TOLERANCE = 4_fps;
 
@@ -85,8 +85,8 @@ private:
     frc::DigitalInput piece_sensor {9};
 
      frc::PIDController pid {
-        0,
-        0,
+        0.18,
+        0.005,
         0
     };
     /// this is my attempt at sysid with my very limited knowledge

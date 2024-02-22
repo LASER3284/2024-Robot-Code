@@ -4,6 +4,7 @@
 
 void subsystems::turret::Turret::init() {
     motor.SetInverted(constants::DIRECTION);
+    pid.SetIZone(360);
 }
 
 void subsystems::turret::Turret::tick() {
@@ -17,8 +18,13 @@ void subsystems::turret::Turret::set_angle(units::degree_t goal) {
 }
 
 units::degree_t subsystems::turret::Turret::get_angle() {
-    return turret_encoder.Get() + 0_deg;
-    //                            ^---- CHANGE THIS
+    // negative bc thrubore is wrong direction on physical bot
+    units::degree_t initial_offset = 0_deg;
+    while (units::math::abs(turret_encoder.Get() + 38_deg + initial_offset) > 360_deg) {
+        initial_offset -= 360_deg * (turret_encoder.Get() + 38_deg < 0_deg ? -1 : 1);
+    }
+    return -(turret_encoder.Get() + 38_deg + initial_offset);
+    //                              ^---- CHANGE THIS
 }
 
 bool subsystems::turret::Turret::at_goal_point() {
@@ -31,7 +37,7 @@ void subsystems::turret::Turret::update_nt() {
     velocity = dtheta / dt;
 
     // update nt
-    frc::SmartDashboard::PutNumber("shooter_pivot_angle", get_angle().value());
+    frc::SmartDashboard::PutNumber("shooter_turret_current_angle", get_angle().value());
 
     last_angle = get_angle();
     last_time = frc::Timer::GetFPGATimestamp();

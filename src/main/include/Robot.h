@@ -40,6 +40,22 @@ public:
         );
     }
 
+    frc2::CommandPtr shoot() {
+        return frc2::cmd::Sequence(
+            frc2::cmd::Race(
+                frc2::cmd::Sequence(
+                    frc2::cmd::Parallel(
+                        amp_arm.feed(),
+                        shooter.feed()
+                    ),
+                    shooter.score()
+                ),
+                frc2::cmd::Wait(5_s)
+            ),
+            shooter.stable()
+        );
+    }
+
     enum SysIdChooser {
         QsFwd = 0,
         QsRev,

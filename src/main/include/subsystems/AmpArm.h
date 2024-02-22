@@ -30,6 +30,7 @@ namespace constants {
     enum States {
         Stopped = 0,
         Feed,
+        Intake,
         ReverseFeed,
         AmpScore,
         TrapScore,
@@ -118,9 +119,9 @@ public:
 
     /// @brief Spins the roller for intake on startup, stops when interrupted.
     frc2::CommandPtr intake() {
-        return frc2::cmd::StartEnd(
+        return this->StartEnd(
             [this]() {
-                activate(constants::States::Feed);
+                activate(constants::States::Intake);
             },
             [this]() {
                 activate(constants::States::Stopped);
@@ -128,10 +129,30 @@ public:
         );
     }
 
+    /// @brief Spins the roller for intake on startup, stops when interrupted.
+    frc2::CommandPtr feed() {
+        return frc2::cmd::Sequence(
+            frc2::cmd::Wait(1_s),
+            this->Run(
+                [this]() {
+                    activate(constants::States::Feed);
+                }
+            ).Until([this]() {
+                return !has_piece();
+            }).BeforeStarting([this]() {
+                activate(constants::States::Feed);
+            }),
+            frc2::cmd::Wait(0.5_s),
+            this->RunOnce([this]() {
+                activate(constants::States::Stopped);
+            })
+        );
+    }
+
     /// @brief Spins the roller for reverse feed on startup, stops when
     /// interrupted.
     frc2::CommandPtr reverse_feed() {
-        return frc2::cmd::StartEnd(
+        return this->StartEnd(
             [this]() {
                 activate(constants::States::ReverseFeed);
             },

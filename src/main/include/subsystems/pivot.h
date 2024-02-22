@@ -18,10 +18,10 @@ namespace pivot {
 
 namespace constants {
     /// @brief The value to give to SetInverted
-    constexpr bool DIRECTION = true;
+    constexpr bool DIRECTION = false;
     // CHANGE THIS IF INVERTED ^----
 
-    constexpr units::degree_t TOLERANCE = 2_deg;
+    constexpr units::degree_t TOLERANCE = 0.5_deg;
 }
 
 class Pivot : public frc2::SubsystemBase {
@@ -43,8 +43,6 @@ public:
     bool at_angle();
 private:
     std::optional<frc2::CommandPtr> sysid_command;
-
-    units::degree_t initial_offset = 0_deg;
     
     /// @brief this is the absolute encoder
     frc::DutyCycleEncoder pivot_encoder {7};
@@ -66,8 +64,8 @@ private:
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     frc::PIDController pid {
-        0,
-        0,
+        0.135,
+        0.025,
         0
     };
 

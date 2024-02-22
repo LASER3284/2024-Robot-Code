@@ -35,10 +35,12 @@ void Robot::RobotInit() {
     auto_chooser.SetDefaultOption("None", "None");
 
     for (const auto &file : std::filesystem::directory_iterator(path)) {
-        std::string filename = file.path().string();
+        std::string filename = file.path().filename().string();
         filename = filename.substr(0, filename.size() - 6);
         auto_chooser.AddOption(filename, filename);
     }
+
+    frc::SmartDashboard::PutData("AutoChooser", &auto_chooser);
 
     intake.init();
     shooter.init();
@@ -48,7 +50,8 @@ void Robot::RobotInit() {
 void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
-    shooter.update_nt();
+
+    shooter.update_nt(drive.get_pose());
 
     amp_arm.update_nt();
 
@@ -68,12 +71,14 @@ void Robot::TeleopInit() {
     amp_arm.reset();
 
     aux_controller.A().OnTrue(amp_arm.score());
+    aux_controller.RightBumper().OnTrue(shoot());
     chassis_controller->RightBumper().WhileTrue(intake_cmd());
 }
 
 void Robot::TeleopPeriodic() {
     amp_arm.tick();
     intake.tick();
+    shooter.tick();
     drive.tick(true);
 }
 
