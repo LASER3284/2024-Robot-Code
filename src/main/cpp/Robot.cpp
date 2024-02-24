@@ -29,6 +29,10 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
+    pathplanner::NamedCommands::registerCommand("shoot", std::move(shoot()));
+    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_cmd()));
+    // pathplanner::NamedCommands::registerCommand("amp", amp_score());
+
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
 
@@ -62,10 +66,15 @@ void Robot::RobotPeriodic() {
 }
 
 void Robot::AutonomousInit() {
+    amp_arm.reset();
     auto_cmd = drive.get_auto_path(auto_chooser.GetSelected());
     auto_cmd.Schedule();
 }
-void Robot::AutonomousPeriodic() {}
+void Robot::AutonomousPeriodic() {
+    // amp arm and intake later
+    shooter.tick();
+    amp_arm.tick();
+}
 
 void Robot::TeleopInit() {
     amp_arm.reset();

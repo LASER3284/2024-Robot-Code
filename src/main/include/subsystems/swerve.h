@@ -100,13 +100,13 @@ private:
     void _set_turn_power(const units::volt_t);
 
     frc::PIDController heading_controller {
-        1.75,
+        1.85,
         0.6,
         0.0
     };
 
     frc::PIDController drive_controller {
-        0.0,
+        0.1,
         0.0,
         0.0
     };

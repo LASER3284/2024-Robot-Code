@@ -22,8 +22,8 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(0.0, 0.0, 0.0),
-            PIDConstants(0.5, 0.0, 0.0),
+            PIDConstants(0.7, 0.0, 0.0),
+            PIDConstants(1.68, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
             ReplanningConfig(false, false)
@@ -38,7 +38,7 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         this
     );
 
-    pose_estimator.SetVisionMeasurementStdDevs({0.9, 0.9, 0.9});
+    pose_estimator.SetVisionMeasurementStdDevs({1.3, 1.3, 1.3});
 }
 
 void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {

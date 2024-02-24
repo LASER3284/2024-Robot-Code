@@ -42,16 +42,22 @@ public:
 
     frc2::CommandPtr shoot() {
         return frc2::cmd::Sequence(
-            frc2::cmd::Race(
-                frc2::cmd::Sequence(
-                    frc2::cmd::Parallel(
-                        amp_arm.feed(),
-                        shooter.feed()
-                    ),
-                    shooter.score()
+            frc2::cmd::RunOnce([this]() {
+                FRC_ReportError(1, "goofy auto thingy!!!!!!!!!!!!!!!!\n");
+            }),
+            frc2::cmd::Sequence(
+                frc2::cmd::RunOnce([this]() {
+                    FRC_ReportError(1, "goofy auto thingy pt 3!!!!!!!!!!!!!!!!\n");
+                }),
+                frc2::cmd::Parallel(
+                    amp_arm.feed(),
+                    shooter.feed()
                 ),
-                frc2::cmd::Wait(5_s)
-            ),
+                shooter.score()
+            ).WithTimeout(5_s),
+            frc2::cmd::RunOnce([this]() {
+                FRC_ReportError(1, "goofy auto thingy pt 2!!!!!!!!!!!!!!!!\n");
+            }),
             shooter.stable()
         );
     }
