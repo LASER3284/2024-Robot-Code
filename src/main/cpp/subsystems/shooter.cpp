@@ -55,12 +55,14 @@ void subsystems::shooter::Shooter::tick() {
         case constants::ShooterStates::Stopped: {
             flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_IDLE);
-            turret.set_angle(constants::TURRET_IDLE);
+            if (pivot.at_angle())
+                turret.set_angle(constants::TURRET_IDLE);
         }
         break;
         case constants::ShooterStates::PrepFeeding: {
             pivot.set_angle(constants::PIVOT_FEED);
-            turret.set_angle(constants::TURRET_FEED);
+            if (pivot.at_angle())
+                turret.set_angle(constants::TURRET_FEED);
             flywheel.feed(false);
         }
         break;
@@ -68,7 +70,8 @@ void subsystems::shooter::Shooter::tick() {
             flywheel.set_exit_vel(constants::IDLE_VELOCITY);
             flywheel.stop_feed();
             pivot.set_angle(constants::PIVOT_IDLE);
-            turret.set_angle(constants::TURRET_IDLE);
+            if (pivot.at_angle())
+                turret.set_angle(constants::TURRET_IDLE);
         }
         break;
         case constants::ShooterStates::TrackShot: {

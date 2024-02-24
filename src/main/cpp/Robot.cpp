@@ -36,11 +36,12 @@ void Robot::RobotInit() {
 
     for (const auto &file : std::filesystem::directory_iterator(path)) {
         std::string filename = file.path().filename().string();
-        filename = filename.substr(0, filename.size() - 6);
+        filename = filename.substr(0, filename.size() - 5);
         auto_chooser.AddOption(filename, filename);
     }
 
     frc::SmartDashboard::PutData("AutoChooser", &auto_chooser);
+    frc::SmartDashboard::PutBoolean("reset_to_vision", false);
 
     intake.init();
     shooter.init();
@@ -67,12 +68,11 @@ void Robot::AutonomousInit() {
 void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {
-    drive.reset_odometry();
     amp_arm.reset();
 
     aux_controller.A().OnTrue(amp_arm.score());
     aux_controller.RightBumper().OnTrue(shoot());
-    chassis_controller->RightBumper().WhileTrue(intake_cmd());
+    aux_controller.LeftBumper().WhileTrue(intake_cmd());
 }
 
 void Robot::TeleopPeriodic() {

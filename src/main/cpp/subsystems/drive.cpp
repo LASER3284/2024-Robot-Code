@@ -37,6 +37,8 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         },
         this
     );
+
+    pose_estimator.SetVisionMeasurementStdDevs({0.9, 0.9, 0.9});
 }
 
 void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
@@ -106,10 +108,7 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
 }
 
 void subsystems::drive::Drivetrain::reset_odometry() {
-    gyro->Reset();
-
-    // TEMPORARY
-    set_pose(frc::Pose2d {frc::Translation2d {8.5_ft, 218.42_in - 7.25_ft}, frc::Rotation2d {-78_deg}});
+    set_pose(frc::Pose2d {});
 }
 
 void subsystems::drive::Drivetrain::update_odometry() {
@@ -120,18 +119,22 @@ void subsystems::drive::Drivetrain::update_odometry() {
             back_left.get_position(), back_right.get_position()
         }
     );
-    /*
-    photon_estimator.SetReferencePose(frc::Pose3d {pose_estimator.GetEstimatedPosition()});
-
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
-            vision_est.value().timestamp
+            frc::Timer::GetFPGATimestamp()
         );
     }
-    */
+}
+
+void subsystems::drive::Drivetrain::reset_pose_to_vision() {
+    auto vision_est = photon_estimator.Update();
+
+    if (vision_est) {
+        set_pose(vision_est.value().estimatedPose.ToPose2d());
+    }
 }
 
 void subsystems::drive::Drivetrain::run_sysid(int test_num) {

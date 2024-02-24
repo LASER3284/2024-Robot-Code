@@ -47,7 +47,7 @@ private:
     
     units::degree_t goal_angle;
 
-    frc::TrapezoidProfile<units::degrees>::Constraints constraints {0_deg_per_s, 0_deg_per_s_sq};
+    frc::TrapezoidProfile<units::degrees>::Constraints constraints {90_deg_per_s, 135_deg_per_s_sq};
 
     frc::TrapezoidProfile<units::degrees>::State goal;
     frc::TrapezoidProfile<units::degrees>::State setpoint;
@@ -66,7 +66,7 @@ private:
     frc::DutyCycleEncoder turret_encoder {8};
     
     frc::PIDController pid {
-        0.1,
+        0.125,
         0.00375,
         0
     };

@@ -21,7 +21,7 @@ namespace constants {
     constexpr bool DIRECTION = false;
     // CHANGE THIS IF INVERTED ^----
 
-    constexpr units::degree_t TOLERANCE = 0.5_deg;
+    constexpr units::degree_t TOLERANCE = 1_deg;
 }
 
 class Pivot : public frc2::SubsystemBase {
@@ -52,7 +52,7 @@ private:
 
     units::degrees_per_second_t velocity;
 
-    frc::TrapezoidProfile<units::degrees>::Constraints constraints {0_deg_per_s, 0_deg_per_s_sq};
+    frc::TrapezoidProfile<units::degrees>::Constraints constraints {90_deg_per_s, 135_deg_per_s_sq};
 
     frc::TrapezoidProfile<units::degrees>::State goal;
     frc::TrapezoidProfile<units::degrees>::State setpoint;
@@ -64,8 +64,8 @@ private:
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     frc::PIDController pid {
-        0.135,
-        0.025,
+        0.225,
+        0.25,
         0
     };
 

@@ -37,7 +37,7 @@ void subsystems::flywheel::Flywheel::feed(bool fire) {
     if (has_piece() && !fire) {
         feedwheel_motor.SetVoltage(0_V);
     } else if (!fire) {
-        feedwheel_motor.SetVoltage(1_V);
+        feedwheel_motor.SetVoltage(1.5_V);
     } else if (fire) {
         feedwheel_motor.SetVoltage(12_V);
     }
