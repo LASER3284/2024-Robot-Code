@@ -1,4 +1,5 @@
 #include "subsystems/AmpArm.h"
+#include "subsystems/amparm/extension.h"
 #include <units/angle.h>
 #include <numbers>
 #include <frc/smartdashboard/SmartDashboard.h>
@@ -210,10 +211,10 @@ void subsystems::amparm::Extension::set_goal(units::inch_t goal) {
 void subsystems::amparm::Extension::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    motor.SetVoltage(0_V);
-    //    units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
-    //    + ff.Calculate(setpoint.velocity)
-    //);
+    motor.SetVoltage(
+        units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
+        + ff.Calculate(setpoint.velocity)
+    );
 }
 
 bool subsystems::amparm::Extension::in_place() {
@@ -224,6 +225,13 @@ bool subsystems::amparm::Extension::in_place() {
 void subsystems::amparm::Extension::update_nt() {
     frc::SmartDashboard::PutNumber("amparm_extension", get_position().value());
     frc::SmartDashboard::PutBoolean("amp_extension_inplace", in_place());
+
+    if (!limit.Get())
+        _set_position(0.25_in);
+}
+
+void subsystems::amparm::Extension::_set_position(units::inch_t pos) {
+    motor.SetPosition(pos / 2 / std::numbers::pi / constants::extension::PULLEY_DIAMETER * constants::extension::GEAR_RATIO * units::turn_t{1});
 }
 
 void subsystems::amparm::Extension::run_sysid(int test_num) {

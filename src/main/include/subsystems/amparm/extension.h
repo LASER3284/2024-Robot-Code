@@ -9,6 +9,7 @@
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <frc/trajectory/TrapezoidProfile.h>
 #include <frc/RobotController.h>
+#include <frc/DigitalInput.h>
 
 // SysID stuff
 #include <frc2/command/SubsystemBase.h>
@@ -56,6 +57,8 @@ public:
     void cancel_sysid();
 
 private:
+    void _set_position(units::inch_t);
+
     ctre::phoenix6::hardware::TalonFX motor {18};
 
     frc::TrapezoidProfile<units::inches>::Constraints constraints {24_in / 1_s, 24_in / 1_s / 1_s};
@@ -65,10 +68,13 @@ private:
 
     frc::TrapezoidProfile<units::inches> profile {constraints};
 
+    frc::DigitalInput limit {6};
+
     /// @brief Ks, Kg, Kv, Ka
     /// Units in feet b/c no inches per second unit literal
     frc::ElevatorFeedforward ff {0.47055_V, 0.37605_V, 1.5945_V / 1_fps, 0.10519_V / 1_fps_sq};
 
+    // Integral gain must be 0 or a deadband must be set
     frc::PIDController pid {0.5, 0, 0};
 
     frc2::sysid::SysIdRoutine sysid {
