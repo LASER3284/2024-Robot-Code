@@ -127,6 +127,15 @@ void subsystems::drive::Drivetrain::update_odometry() {
             frc::Timer::GetFPGATimestamp()
         );
     }
+
+    vision_est = photon_estimator_front.Update();
+
+    if (vision_est) {
+        pose_estimator.AddVisionMeasurement(
+            vision_est.value().estimatedPose.ToPose2d(),
+            frc::Timer::GetFPGATimestamp()
+        );
+    }
 }
 
 void subsystems::drive::Drivetrain::reset_pose_to_vision() {

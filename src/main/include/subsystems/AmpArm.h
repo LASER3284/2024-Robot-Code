@@ -39,8 +39,8 @@ namespace constants {
 
     constexpr units::degree_t DOWN_ANGLE = 0_deg;
     constexpr units::inch_t DOWN_EXTENSION = 0_in;
-    constexpr units::degree_t AMPSCORE_ANGLE = 90_deg;
-    constexpr units::inch_t AMPSCORE_EXTENSION = 6_in;
+    constexpr units::degree_t AMPSCORE_ANGLE = 91_deg;
+    constexpr units::inch_t AMPSCORE_EXTENSION = 14.8_in;
     constexpr units::degree_t TRAPSCORE_ANGLE = 90_deg;
     constexpr units::inch_t TRAPSCORE_EXTESNION = 20_in;
 }
@@ -117,6 +117,12 @@ public:
         );
     }
 
+    frc2::CommandPtr stop() {
+        return this->RunOnce([this]() {
+            activate(constants::States::Stopped);
+        });
+    }
+
     /// @brief Spins the roller for intake on startup, stops when interrupted.
     frc2::CommandPtr intake() {
         return this->StartEnd(
@@ -127,6 +133,12 @@ public:
                 activate(constants::States::Stopped);
             }
         );
+    }
+
+    frc2::CommandPtr intake_continuous() {
+        return this->RunOnce([this]() {
+            activate(constants::States::Intake);
+        });
     }
 
     /// @brief Spins the roller for intake on startup, stops when interrupted.

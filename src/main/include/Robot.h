@@ -40,8 +40,19 @@ public:
         );
     }
 
+    frc2::CommandPtr intake_continuous() {
+        return frc2::cmd::Parallel(
+            intake.intake_continuous(),
+            amp_arm.intake_continuous()
+        );
+    }
+
     frc2::CommandPtr shoot() {
         return frc2::cmd::Sequence(
+            intake.RunOnce([this]() {
+                intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+            }),
+            amp_arm.stop(),
             frc2::cmd::RunOnce([this]() {
                 FRC_ReportError(1, "goofy auto thingy!!!!!!!!!!!!!!!!\n");
             }),

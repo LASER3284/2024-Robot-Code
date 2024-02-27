@@ -30,7 +30,7 @@ void Robot::RobotInit() {
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
     pathplanner::NamedCommands::registerCommand("shoot", std::move(shoot()));
-    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_cmd()));
+    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous()));
     // pathplanner::NamedCommands::registerCommand("amp", amp_score());
 
 
@@ -45,7 +45,6 @@ void Robot::RobotInit() {
     }
 
     frc::SmartDashboard::PutData("AutoChooser", &auto_chooser);
-    frc::SmartDashboard::PutBoolean("reset_to_vision", false);
 
     intake.init();
     shooter.init();
@@ -71,9 +70,9 @@ void Robot::AutonomousInit() {
     auto_cmd.Schedule();
 }
 void Robot::AutonomousPeriodic() {
-    // amp arm and intake later
     shooter.tick();
     amp_arm.tick();
+    intake.tick();
 }
 
 void Robot::TeleopInit() {
@@ -81,7 +80,7 @@ void Robot::TeleopInit() {
 
     aux_controller.A().OnTrue(amp_arm.score());
     aux_controller.RightBumper().OnTrue(shoot());
-    aux_controller.LeftBumper().WhileTrue(intake_cmd());
+    chassis_controller->LeftBumper().WhileTrue(intake_cmd());
 }
 
 void Robot::TeleopPeriodic() {

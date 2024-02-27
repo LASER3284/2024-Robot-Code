@@ -48,8 +48,7 @@ void subsystems::swerve::Module::set_desired_goal(const frc::SwerveModuleState& 
 
     if (!force && units::math::abs(state.speed) < constants::kMAX_WHEEL_SPEED * 0.01) {
         state.angle = last_angle;
-    }
-    else {
+    } else {
         last_angle = state.angle;
     }
 
