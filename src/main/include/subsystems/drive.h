@@ -75,6 +75,8 @@ public:
     /// @param is_field_oriented Whether or not to use field-oriented drive.
     void tick(bool);
 
+    void swerve_tick();
+
     /// @brief Updates the Network Tables data.
     void update_nt();
 

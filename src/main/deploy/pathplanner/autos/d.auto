@@ -12,12 +12,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "d1"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "shoot"
@@ -36,10 +30,16 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "d2"
+                  "pathName": "d1"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {

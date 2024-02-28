@@ -22,7 +22,7 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(0.7, 0.0, 0.0),
+            PIDConstants(0.9, 0.0, 0.0),
             PIDConstants(1.68, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
@@ -105,6 +105,15 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     }
 
     frc::SmartDashboard::PutNumber("Drivetrain_max_speed", max_detected_velocity.value());
+
+    swerve_tick();
+}
+
+void subsystems::drive::Drivetrain::swerve_tick() {
+    front_left.tick();
+    front_right.tick();
+    back_left.tick();
+    back_right.tick();
 }
 
 void subsystems::drive::Drivetrain::reset_odometry() {
@@ -176,15 +185,7 @@ void subsystems::drive::Drivetrain::run_sysid(int test_num) {
 frc2::CommandPtr subsystems::drive::Drivetrain::get_auto_path(std::string path_name) {
     current_traj = path_name;
 
-    return frc2::cmd::Sequence(
-        AutoBuilder::buildAuto(path_name),
-        frc2::cmd::Run([this]() {
-            front_left.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d()}, true);
-            front_right.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
-            back_left.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
-            back_right.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
-        })
-    );
+    return AutoBuilder::buildAuto(path_name);
 }
 
 void subsystems::drive::Drivetrain::cancel_sysid() {

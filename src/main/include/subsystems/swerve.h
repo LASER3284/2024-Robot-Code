@@ -49,12 +49,14 @@ public:
     /// @return The heading in degrees
     units::radian_t get_heading() const;
 
+    void tick();
+
     units::feet_per_second_t get_velocity() const;
 
     /// @brief Sets the desired state of the module (velocity of the drive and
     /// position of the turn)
     /// @param ref_state The reference state to base on
-    /// @param force_angle Whether or not to force the angle position
+    /// @param force Whether or not to force the angle position
     void set_desired_goal(const frc::SwerveModuleState&, bool = false);
 
     /// @brief Resets the position of the drive motor to 0 encoder counts.
@@ -98,6 +100,10 @@ private:
     /// @param volts The voltage from -12V to 12V
     /// @see apply_heading_goal
     void _set_turn_power(const units::volt_t);
+
+    frc::SwerveModuleState goal;
+
+    bool force_angle = false;
 
     frc::PIDController heading_controller {
         1.85,

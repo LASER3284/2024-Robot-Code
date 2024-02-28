@@ -65,7 +65,7 @@ public:
                     shooter.feed()
                 ),
                 shooter.score()
-            ).WithTimeout(5_s),
+            ).WithTimeout(10_s),
             frc2::cmd::RunOnce([this]() {
                 FRC_ReportError(1, "goofy auto thingy pt 2!!!!!!!!!!!!!!!!\n");
             }),

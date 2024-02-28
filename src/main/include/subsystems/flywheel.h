@@ -21,6 +21,8 @@ namespace constants {
     /// @brief The value to give to SetInverted
     constexpr bool FEED_DIRECTION = true;
 
+    constexpr int FEED_ID = 22;
+
     constexpr units::feet_per_second_t TOLERANCE = 4_fps;
 
     /// @brief this is the id of the shooter flywheel motor
@@ -75,8 +77,13 @@ private:
     units::feet_per_second_t setpoint;
 
     /// @brief this is the feedwheel motor
-    rev::CANSparkMax feedwheel_motor {22, rev::CANSparkLowLevel::MotorType::kBrushless};
-    rev::SparkRelativeEncoder feed_enc = feedwheel_motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
+    ctre::phoenix6::hardware::TalonFX feedwheel_motor {
+        constants::FEED_ID,
+    };
+
+    /// @brief this is the feedwheel encoder
+    std::unique_ptr<ctre::phoenix6::hardware::CANcoder> feed_enc;
+
     /// @brief this is the can spark flex encoder
     rev::SparkRelativeEncoder flywheel_encoder = motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
     /// @brief Creates a PIDController with gains kP, kI, and kD

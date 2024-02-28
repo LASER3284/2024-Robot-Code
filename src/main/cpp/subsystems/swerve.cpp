@@ -42,11 +42,16 @@ frc::SwerveModulePosition subsystems::swerve::Module::get_position() const {
 }
 
 void subsystems::swerve::Module::set_desired_goal(const frc::SwerveModuleState& ref_state, bool force) {
+    goal = ref_state;
+    force_angle = force;
+}
+
+void subsystems::swerve::Module::tick() {
     const frc::Rotation2d encoder_rotation {get_heading()};
 
-    auto state = frc::SwerveModuleState::Optimize(ref_state, encoder_rotation);
+    auto state = frc::SwerveModuleState::Optimize(goal, encoder_rotation);
 
-    if (!force && units::math::abs(state.speed) < constants::kMAX_WHEEL_SPEED * 0.01) {
+    if (!force_angle && units::math::abs(state.speed) < constants::kMAX_WHEEL_SPEED * 0.01) {
         state.angle = last_angle;
     } else {
         last_angle = state.angle;

@@ -29,7 +29,7 @@ namespace extension {
     /// SetInverted)
     constexpr bool DIRECTION = false;
 
-    constexpr units::inch_t TOLERANCE = 1_in;
+    constexpr units::inch_t TOLERANCE = 0.5_in;
 }
 
 }
@@ -72,7 +72,7 @@ private:
 
     /// @brief Ks, Kg, Kv, Ka
     /// Units in feet b/c no inches per second unit literal
-    frc::ElevatorFeedforward ff {0.47055_V, 0.37605_V, 1.5945_V / 1_fps, 0.10519_V / 1_fps_sq};
+    frc::ElevatorFeedforward ff {0.44055_V, 0.37605_V, 1.5945_V / 1_fps, 0.10519_V / 1_fps_sq};
 
     // Integral gain must be 0 or a deadband must be set
     frc::PIDController pid {0.5, 0, 0};

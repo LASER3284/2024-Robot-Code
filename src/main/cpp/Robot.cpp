@@ -73,6 +73,7 @@ void Robot::AutonomousPeriodic() {
     shooter.tick();
     amp_arm.tick();
     intake.tick();
+    drive.swerve_tick();
 }
 
 void Robot::TeleopInit() {

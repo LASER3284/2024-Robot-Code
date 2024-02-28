@@ -136,8 +136,10 @@ public:
     }
 
     frc2::CommandPtr intake_continuous() {
-        return this->RunOnce([this]() {
+        return this->Run([this]() {
             activate(constants::States::Intake);
+        }).Until([this]() {
+            return has_piece();
         });
     }
 

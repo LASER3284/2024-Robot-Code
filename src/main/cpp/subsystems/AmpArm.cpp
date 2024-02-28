@@ -83,6 +83,7 @@ void subsystems::amparm::AmpArm::cancel_sysid() {
 
 void subsystems::amparm::AmpArm::reset() {
     shoulder.reset();
+    extension.reset();
 }
 
 // ROLLER SECTION //
@@ -189,7 +190,7 @@ void subsystems::amparm::Extension::init() {
 
 void subsystems::amparm::Extension::reset() {
     setpoint = {get_position(), 0_fps};
-    goal = {get_position(), 0_fps};
+    goal = {0_in, 0_fps};
 }
 
 units::inch_t subsystems::amparm::Extension::get_position() {
@@ -209,12 +210,16 @@ void subsystems::amparm::Extension::set_goal(units::inch_t goal) {
 }
 
 void subsystems::amparm::Extension::tick() {
-    setpoint = profile.Calculate(20_ms, setpoint, goal);
+    if (goal.position == 0_in && !limit.Get()) {
+        motor.SetVoltage(-0.45_V);
+    } else {
+        setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    motor.SetVoltage(
-        units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
-        + ff.Calculate(setpoint.velocity)
-    );
+        motor.SetVoltage(
+            units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
+            + ff.Calculate(setpoint.velocity)
+        );
+    }
 }
 
 bool subsystems::amparm::Extension::in_place() {
@@ -226,8 +231,9 @@ void subsystems::amparm::Extension::update_nt() {
     frc::SmartDashboard::PutNumber("amparm_extension", get_position().value());
     frc::SmartDashboard::PutBoolean("amp_extension_inplace", in_place());
 
-    if (!limit.Get())
-        _set_position(0.25_in);
+    if (!limit.Get()) {
+        _set_position(0_in);
+    }
 }
 
 void subsystems::amparm::Extension::_set_position(units::inch_t pos) {

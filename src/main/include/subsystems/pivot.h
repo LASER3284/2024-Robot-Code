@@ -52,20 +52,20 @@ private:
 
     units::degrees_per_second_t velocity;
 
-    frc::TrapezoidProfile<units::degrees>::Constraints constraints {90_deg_per_s, 135_deg_per_s_sq};
+    frc::TrapezoidProfile<units::degrees>::Constraints constraints {180_deg_per_s, 180_deg_per_s_sq};
 
     frc::TrapezoidProfile<units::degrees>::State goal;
     frc::TrapezoidProfile<units::degrees>::State setpoint;
 
     frc::TrapezoidProfile<units::degrees> profile {constraints};
 
-    frc::ArmFeedforward ff {0.69993_V, 0_V, 0.00062_V / 1_deg_per_s, 0.00377_V / 1_deg_per_s_sq};
+    frc::ArmFeedforward ff {0.25371_V, 0.48077_V, 0.011697_V / 1_deg_per_s, 0.00152_V / 1_deg_per_s_sq};
 
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     frc::PIDController pid {
-        0.22,
-        0.25,
+        0.255,
+        0.01,
         0
     };
 
