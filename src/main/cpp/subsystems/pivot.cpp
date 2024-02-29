@@ -31,11 +31,11 @@ void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
 
 units::degree_t subsystems::pivot::Pivot::get_angle() {
     units::degree_t initial_offset = 0_deg;
-    while (units::math::abs(pivot_encoder.Get() + 43.5_deg + initial_offset) > 180_deg) {
-        initial_offset -= 360_deg * (pivot_encoder.Get() + 43.5_deg < 0_deg ? -1 : 1);
+    const units::degree_t constant_offset = 59_deg;
+    while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
+        initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }
-    return pivot_encoder.Get() + 43.5_deg + initial_offset;
-    //                           ^---- CHANGE THIS
+    return pivot_encoder.Get() + constant_offset + initial_offset;
 }
 
 bool subsystems::pivot::Pivot::at_angle() {

@@ -98,7 +98,14 @@ void subsystems::amparm::Shoulder::init() {
 }
 
 units::degree_t subsystems::amparm::Shoulder::get_position() const {
-    return (encoder.Get() - 155_deg);
+    units::degree_t initial_offset = 0_deg;
+    const units::degree_t constant_offset = -252_deg;
+
+    while (units::math::abs(encoder.Get() + constant_offset + initial_offset) > 180_deg) {
+        initial_offset -= 360_deg * (encoder.Get() + constant_offset < 0_deg ? -1 : 1);
+    }
+
+    return (encoder.Get() + constant_offset + initial_offset);
 }
 
 void subsystems::amparm::Shoulder::reset() {

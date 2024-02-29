@@ -72,7 +72,7 @@ private:
 
     /// @brief Ks, Kg, Kv, Ka
     /// Units in feet b/c no inches per second unit literal
-    frc::ElevatorFeedforward ff {0.44055_V, 0.37605_V, 1.5945_V / 1_fps, 0.10519_V / 1_fps_sq};
+    frc::ElevatorFeedforward ff {0.54078_V, 0.50262_V, 1.21088_V / 1_fps, 0.08067_V / 1_fps_sq};
 
     // Integral gain must be 0 or a deadband must be set
     frc::PIDController pid {0.5, 0, 0};

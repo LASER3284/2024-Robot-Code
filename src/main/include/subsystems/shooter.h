@@ -42,8 +42,8 @@ namespace constants {
     constexpr frc::Translation2d GOAL_RED_POSITION { 652.75_in, 218.42_in};
     constexpr units::foot_t DELTA_Y = 7.5_ft;
 
-    constexpr units::degree_t PIVOT_IDLE = 12_deg;
-    constexpr units::degree_t TURRET_IDLE = 0_deg;
+    constexpr units::degree_t PIVOT_IDLE = 44_deg;
+    constexpr units::degree_t TURRET_IDLE = 14_deg;
 
     constexpr units::degree_t PIVOT_FEED = 44_deg;
     constexpr units::degree_t TURRET_FEED = 14_deg;

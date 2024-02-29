@@ -80,7 +80,8 @@ void Robot::TeleopInit() {
     amp_arm.reset();
 
     aux_controller.A().OnTrue(amp_arm.score());
-    aux_controller.RightBumper().OnTrue(shoot());
+    aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop());
+    aux_controller.LeftBumper().OnTrue(shoot());
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
 }
 

@@ -10,6 +10,7 @@
 #include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc2/command/SubsystemBase.h>
 #include <frc/DigitalInput.h>
+#include <ctre/phoenix6/CANcoder.hpp>
 namespace subsystems{
 
 namespace flywheel{
@@ -21,20 +22,14 @@ namespace constants {
     /// @brief The value to give to SetInverted
     constexpr bool FEED_DIRECTION = true;
 
-    constexpr int FEED_ID = 22;
-
     constexpr units::feet_per_second_t TOLERANCE = 4_fps;
 
-    /// @brief this is the id of the shooter flywheel motor
-    constexpr int FLYWHEEL_ID = 97;
-    /// @brief this is the id of the shooter feedwheel motor
-    constexpr int FEED_ID = 96;
     /// @brief this is the pid values for proportional gain(kp)
      constexpr double FLY_KP = 0.0;
     /// @brief intergral gain(ki)
     constexpr double FLY_KI = 0.0; 
     /// @brief derivative gain (kd)
-    constexpr double FLY_KD= 0.0;
+    constexpr double FLY_KD = 0.0;
     /// @brief this is the gear ratio of the flywheel
     constexpr double fly_ratio = 1.66;
     
@@ -69,7 +64,7 @@ public:
     
 private:
     units::turn_t goal_feed = units::turn_t{0};
-    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0.215_V, 0.078_V / 1_fps, 0.014728_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0.26286_V, 0.08371_V / 1_fps, 0.01204_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
     rev::CANSparkFlex motor {20, rev::CANSparkLowLevel::MotorType::kBrushless};
@@ -77,9 +72,7 @@ private:
     units::feet_per_second_t setpoint;
 
     /// @brief this is the feedwheel motor
-    ctre::phoenix6::hardware::TalonFX feedwheel_motor {
-        constants::FEED_ID,
-    };
+    ctre::phoenix6::hardware::TalonFX feedwheel_motor {22};
 
     /// @brief this is the feedwheel encoder
     std::unique_ptr<ctre::phoenix6::hardware::CANcoder> feed_enc;

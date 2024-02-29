@@ -117,7 +117,7 @@ private:
         0.0
     };
 
-    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.24991_V, 0.6175_V / 1_fps, 0.02664_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.01965_V, 0.75773_V / 1_fps, 0.09844_V / 1_fps_sq};
 
     std::unique_ptr<rev::CANSparkFlex> drive_motor;
     std::unique_ptr<rev::SparkRelativeEncoder> drive_enc;

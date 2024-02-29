@@ -75,7 +75,7 @@ private:
     frc::TrapezoidProfile<units::degrees> profile {constraints};
 
     /// @brief Ks, Kg, Kv, Ka
-    frc::ArmFeedforward ff {0.43219_V, 0.31952_V, 0.065_V / 1_deg_per_s, 0.017_V / 1_deg_per_s_sq};
+    frc::ArmFeedforward ff {0.66118_V, 0.50262_V, 0.01506_V / 1_deg_per_s, 0.00333_V / 1_deg_per_s_sq};
 
     frc::PIDController pid {0.7, 0, 0};
 
