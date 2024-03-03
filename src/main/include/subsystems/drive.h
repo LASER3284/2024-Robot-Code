@@ -15,8 +15,8 @@
 #include "swerve.h"
 
 // Vision stuff
-#include <photonlib/PhotonCamera.h>
-#include <photonlib/PhotonPoseEstimator.h>
+#include <photon/PhotonCamera.h>
+#include <photon/PhotonPoseEstimator.h>
 #include <frc/apriltag/AprilTagFieldLayout.h>
 #include <frc/apriltag/AprilTagFields.h>
 
@@ -75,6 +75,8 @@ public:
     /// @param is_field_oriented Whether or not to use field-oriented drive.
     void tick(bool);
 
+    void swerve_tick();
+
     /// @brief Updates the Network Tables data.
     void update_nt();
 
@@ -87,6 +89,8 @@ public:
 
     /// @brief Runs in the tick in order to estimate the pose of the robot.
     void update_odometry();
+
+    void reset_pose_to_vision();
 
     /// @brief Returns the translational and rotational components of the robot
     /// based on known odometry. Used by PathPlanner.
@@ -158,17 +162,25 @@ private:
         frc::Pose2d {}
     };
 
-    /*
-    photonlib::PhotonPoseEstimator photon_estimator {
+    photon::PhotonPoseEstimator photon_estimator {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
-        photonlib::LOWEST_AMBIGUITY,
-        std::move(photonlib::PhotonCamera{"mainCam"}),
+        photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
+        std::move(photon::PhotonCamera{"mainCam"}),
         frc::Transform3d {
-            frc::Translation3d{14.75_in, 14.75_in, 5.875_in},
-            frc::Rotation3d{0_deg, 67.5_deg, 0_deg}
+            frc::Translation3d{-14.75_in, 0.75_in, 8_in},
+            frc::Rotation3d{0_deg, 30_deg, 180_deg}
         }
     };
-    */
+
+    photon::PhotonPoseEstimator photon_estimator_front {
+        frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
+        photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
+        std::move(photon::PhotonCamera{"frontCam"}),
+        frc::Transform3d {
+            frc::Translation3d{13.5_in, -2.75_in, 9_in},
+            frc::Rotation3d{0_deg, 30_deg, 0_deg}
+        }
+    };
 
     frc2::sysid::SysIdRoutine sysid {
         frc2::sysid::Config {std::nullopt, std::nullopt, std::nullopt, std::nullopt},

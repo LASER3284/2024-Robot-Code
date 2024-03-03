@@ -22,8 +22,8 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(0.0, 0.0, 0.0),
-            PIDConstants(0.5, 0.0, 0.0),
+            PIDConstants(0.9, 0.0, 0.0),
+            PIDConstants(1.68, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
             ReplanningConfig(false, false)
@@ -37,6 +37,8 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         },
         this
     );
+
+    pose_estimator.SetVisionMeasurementStdDevs({1.3, 1.3, 1.3});
 }
 
 void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
@@ -103,11 +105,18 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     }
 
     frc::SmartDashboard::PutNumber("Drivetrain_max_speed", max_detected_velocity.value());
+
+    swerve_tick();
+}
+
+void subsystems::drive::Drivetrain::swerve_tick() {
+    front_left.tick();
+    front_right.tick();
+    back_left.tick();
+    back_right.tick();
 }
 
 void subsystems::drive::Drivetrain::reset_odometry() {
-    gyro->Reset();
-
     set_pose(frc::Pose2d {});
 }
 
@@ -119,18 +128,31 @@ void subsystems::drive::Drivetrain::update_odometry() {
             back_left.get_position(), back_right.get_position()
         }
     );
-    /*
-    photon_estimator.SetReferencePose(frc::Pose3d {pose_estimator.GetEstimatedPosition()});
-
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
-            vision_est.value().timestamp
+            frc::Timer::GetFPGATimestamp()
         );
     }
-    */
+
+    vision_est = photon_estimator_front.Update();
+
+    if (vision_est) {
+        pose_estimator.AddVisionMeasurement(
+            vision_est.value().estimatedPose.ToPose2d(),
+            frc::Timer::GetFPGATimestamp()
+        );
+    }
+}
+
+void subsystems::drive::Drivetrain::reset_pose_to_vision() {
+    auto vision_est = photon_estimator.Update();
+
+    if (vision_est) {
+        set_pose(vision_est.value().estimatedPose.ToPose2d());
+    }
 }
 
 void subsystems::drive::Drivetrain::run_sysid(int test_num) {
@@ -163,15 +185,7 @@ void subsystems::drive::Drivetrain::run_sysid(int test_num) {
 frc2::CommandPtr subsystems::drive::Drivetrain::get_auto_path(std::string path_name) {
     current_traj = path_name;
 
-    return frc2::cmd::Sequence(
-        AutoBuilder::buildAuto(path_name),
-        frc2::cmd::Run([this]() {
-            front_left.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d()}, true);
-            front_right.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
-            back_left.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
-            back_right.set_desired_goal(frc::SwerveModuleState { 0_mps, frc::Rotation2d() }, true);
-        })
-    );
+    return AutoBuilder::buildAuto(path_name);
 }
 
 void subsystems::drive::Drivetrain::cancel_sysid() {

@@ -5,10 +5,13 @@
 #pragma once
 
 #include <frc/TimedRobot.h>
-#include <frc/SmartDashboard/SendableChooser.h>
+#include <frc/smartdashboard/SendableChooser.h>
 #include "subsystems/drive.h"
 #include "subsystems/uselessthing.h"
+#include "subsystems/shooter.h"
 #include "subsystems/intake.h"
+#include "subsystems/AmpArm.h"
+#include <frc2/command/button/CommandXboxController.h>
 
 class Robot : public frc::TimedRobot {
 public:
@@ -30,6 +33,46 @@ public:
     void SimulationInit() override;
     void SimulationPeriodic() override;
 
+    frc2::CommandPtr intake_cmd() {
+        return frc2::cmd::Parallel(
+            intake.intake(),
+            amp_arm.intake()
+        );
+    }
+
+    frc2::CommandPtr intake_continuous() {
+        return frc2::cmd::Parallel(
+            intake.intake_continuous(),
+            amp_arm.intake_continuous()
+        );
+    }
+
+    frc2::CommandPtr shoot() {
+        return frc2::cmd::Sequence(
+            intake.RunOnce([this]() {
+                intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+            }),
+            amp_arm.stop(),
+            frc2::cmd::RunOnce([this]() {
+                FRC_ReportError(1, "goofy auto thingy!!!!!!!!!!!!!!!!\n");
+            }),
+            frc2::cmd::Sequence(
+                frc2::cmd::RunOnce([this]() {
+                    FRC_ReportError(1, "goofy auto thingy pt 3!!!!!!!!!!!!!!!!\n");
+                }),
+                frc2::cmd::Parallel(
+                    amp_arm.feed(),
+                    shooter.feed()
+                ),
+                shooter.score()
+            ).WithTimeout(10_s),
+            frc2::cmd::RunOnce([this]() {
+                FRC_ReportError(1, "goofy auto thingy pt 2!!!!!!!!!!!!!!!!\n");
+            }),
+            shooter.stable()
+        );
+    }
+
     enum SysIdChooser {
         QsFwd = 0,
         QsRev,
@@ -41,14 +84,21 @@ public:
     enum MechanismChooser {
         MechNone = 0,
         Drivetrain,
-        Intake,
+        ShooterPivot,
+        ShooterFlywheel,
+        ShooterTurret,
+        AmpArmShoulder,
+        AmpArmExtension
     };
 
 private:
-    std::shared_ptr<frc::XboxController> chassis_controller = std::make_shared<frc::XboxController>(0);
-    frc::XboxController aux_controller {1};
+    std::shared_ptr<frc2::CommandXboxController> chassis_controller = std::make_shared<frc2::CommandXboxController>(0);
+    frc2::CommandXboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};
+    subsystems::amparm::AmpArm amp_arm{};
+
     subsystems::useless::Useless happy_face{};
+    subsystems::shooter::Shooter shooter{};
     subsystems::intake::Intake intake{};
 
     frc2::CommandPtr auto_cmd = frc2::cmd::None();

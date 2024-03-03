@@ -21,26 +21,43 @@ void Robot::RobotInit() {
 
     mech_chooser.SetDefaultOption("No Mechanism", MechanismChooser::MechNone);
     mech_chooser.AddOption("Drive Train", MechanismChooser::Drivetrain);
+    mech_chooser.AddOption("Shooter Pivot", MechanismChooser::ShooterPivot);
+    mech_chooser.AddOption("Shooter Flywheel", MechanismChooser::ShooterFlywheel);
+    mech_chooser.AddOption("Shooter Turret", MechanismChooser::ShooterTurret);
+    mech_chooser.AddOption("Amp Arm Shoulder", MechanismChooser::AmpArmShoulder);
+    mech_chooser.AddOption("Amp Arm Extension", MechanismChooser::AmpArmExtension);
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
+    pathplanner::NamedCommands::registerCommand("shoot", std::move(shoot()));
+    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous()));
+    // pathplanner::NamedCommands::registerCommand("amp", amp_score());
+
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
 
     auto_chooser.SetDefaultOption("None", "None");
 
     for (const auto &file : std::filesystem::directory_iterator(path)) {
-        std::string filename = file.path().string();
-        filename = filename.substr(0, filename.size() - 6);
+        std::string filename = file.path().filename().string();
+        filename = filename.substr(0, filename.size() - 5);
         auto_chooser.AddOption(filename, filename);
     }
 
+    frc::SmartDashboard::PutData("AutoChooser", &auto_chooser);
+
     intake.init();
+    shooter.init();
+    amp_arm.init();
 }
 
 void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
+
+    shooter.update_nt(drive.get_pose());
+
+    amp_arm.update_nt();
 
     happy_face.tick();
 
@@ -48,30 +65,36 @@ void Robot::RobotPeriodic() {
 }
 
 void Robot::AutonomousInit() {
+    amp_arm.reset();
     auto_cmd = drive.get_auto_path(auto_chooser.GetSelected());
     auto_cmd.Schedule();
 }
-void Robot::AutonomousPeriodic() {}
+void Robot::AutonomousPeriodic() {
+    shooter.tick();
+    amp_arm.tick();
+    intake.tick();
+    drive.swerve_tick();
+}
 
 void Robot::TeleopInit() {
-    drive.reset_odometry();
+    amp_arm.reset();
+
+    aux_controller.A().OnTrue(amp_arm.score());
+    aux_controller.RightBumper().OnTrue(shoot());
+    chassis_controller->LeftBumper().WhileTrue(intake_cmd());
 }
 
 void Robot::TeleopPeriodic() {
-    // snip
-
-    if (chassis_controller->GetRightBumper()) {
-        intake.activate(subsystems::intake::constants::DeployStates::SPIN);
-    } else {
-        intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
-    }
-
+    amp_arm.tick();
     intake.tick();
+    shooter.tick();
     drive.tick(true);
 }
 
 void Robot::DisabledInit() {
     drive.cancel_sysid();
+    shooter.cancel_sysid();
+    amp_arm.cancel_sysid();
 }
 void Robot::DisabledPeriodic() {}
 
@@ -80,11 +103,26 @@ void Robot::TestInit() {
 }
 void Robot::TestPeriodic() {
     switch (selected_mech) {
-    case MechanismChooser::Drivetrain:
-        drive.run_sysid(sysid_chooser.GetSelected());
-        break;
-    default:
-        break;
+        case MechanismChooser::Drivetrain:
+            drive.run_sysid(sysid_chooser.GetSelected());
+            break;
+        case MechanismChooser::ShooterFlywheel:
+            shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Flywheel);
+            break;
+        case MechanismChooser::ShooterPivot:
+            shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Pivot);
+            break;
+        case MechanismChooser::ShooterTurret:
+            shooter.run_sysid(sysid_chooser.GetSelected(), subsystems::shooter::constants::SubMech::Turret);
+            break;
+        case MechanismChooser::AmpArmShoulder:
+            amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ShoulderMech);
+            break;
+        case MechanismChooser::AmpArmExtension:
+            amp_arm.run_sysid(sysid_chooser.GetSelected(), subsystems::amparm::constants::AmpArmSubmechs::ExtensionMech);
+            break;
+        default:
+            break;
     }
 }
 

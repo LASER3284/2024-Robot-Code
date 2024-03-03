@@ -1,25 +1,16 @@
 #pragma once
 
-#include <frc/trajectory/TrapezoidProfile.h>
 #include <units/velocity.h>
-#include <memory>
 #include <units/angular_velocity.h>
 #include <units/angular_acceleration.h>
-#include <map>
 #include <units/angle.h>
 #include <units/time.h>
 #include <units/voltage.h>
-#include <rev/CANSparkMax.h>
-#include <frc/DutyCycleEncoder.h>
-#include <frc/controller/PIDController.h>
-#include <frc/controller/ArmFeedforward.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/Timer.h>
 #include <ctre/phoenix6/TalonFX.hpp>
-#include <frc2/command/sysid/SysIdRoutine.h>
+
+#include <frc2/command/CommandPtr.h>
+#include <frc2/command/Commands.h>
 #include <frc2/command/SubsystemBase.h>
-#include <frc/Timer.h>
-#include <optional>
 
 namespace subsystems {
 
@@ -35,7 +26,7 @@ namespace constants {
     constexpr int ROLLER_ID = 15;
 
     /// @brief The roller intake speed in RPM.
-    constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 5_V;
+    constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 10_V;
 } // namespace constants
 
 class Intake : public frc2::SubsystemBase {
@@ -53,6 +44,25 @@ public:
     /// @param state The desired state of the intake. This can only be applied
     /// through periodic calls to tick().
     void activate(constants::DeployStates);
+
+    frc2::CommandPtr intake() {
+        return this->StartEnd(
+            [this]() {
+                activate(constants::DeployStates::SPIN);
+            },
+            [this]() {
+                activate(constants::DeployStates::NOSPIN);
+            }
+        );
+    }
+
+    frc2::CommandPtr intake_continuous() {
+        return this->RunOnce(
+            [this]() {
+                activate(constants::DeployStates::SPIN);
+            }
+        );
+    }
 private:
     /// @brief The roller motor. 
     ctre::phoenix6::hardware::TalonFX roller_motor {
