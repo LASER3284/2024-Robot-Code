@@ -34,12 +34,13 @@ void subsystems::flywheel::Flywheel::stop_feed() {
 }
 
 void subsystems::flywheel::Flywheel::feed(bool fire) {
-    if (has_piece() && !fire) {
-        feedwheel_motor.SetVoltage(0_V);
-    } else if (!fire) {
-        feedwheel_motor.SetVoltage(1.5_V);
-    } else if (fire) {
+    if (fire) {
         feedwheel_motor.SetVoltage(12_V);
+    } else {
+        if (!has_piece())
+            feedwheel_motor.SetVoltage(1.5_V);
+        else
+            feedwheel_motor.SetVoltage(0_V);
     }
 }
 

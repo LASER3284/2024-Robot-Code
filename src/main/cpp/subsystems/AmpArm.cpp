@@ -36,14 +36,15 @@ void subsystems::amparm::AmpArm::activate(constants::States state) {
             break;
         case constants::States::Intake:
             shoulder.set_goal(constants::DOWN_ANGLE);
-            if (!has_piece() && in_place())
+            if (!has_piece())
                 roller.spin();
+            else
+                roller.stop();
             extension.set_goal(constants::DOWN_EXTENSION);
             break;
         case constants::States::Feed:
             shoulder.set_goal(constants::DOWN_ANGLE);
-            if (in_place())
-                roller.spin();
+            roller.spin();
             extension.set_goal(constants::DOWN_EXTENSION);
             break;
         case constants::States::ReverseFeed:
@@ -137,10 +138,13 @@ void subsystems::amparm::Shoulder::tick() {
     frc::SmartDashboard::PutNumber("amp_shoulder_volts", ff.Calculate(setpoint.position, setpoint.velocity).value());
 
 
-
-    motor.SetVoltage(units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
-        + ff.Calculate(setpoint.position, setpoint.velocity)
-    );
+    if (get_position() > -0.5_deg || setpoint.position > -0.5_deg) {
+        motor.SetVoltage(units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
+            + ff.Calculate(setpoint.position, setpoint.velocity)
+        );
+    } else {
+        motor.SetVoltage(0_V);
+    }
 }
 
 void subsystems::amparm::Shoulder::set_goal(units::degree_t goal) {
@@ -217,11 +221,12 @@ void subsystems::amparm::Extension::set_goal(units::inch_t goal) {
 }
 
 void subsystems::amparm::Extension::tick() {
-    if (goal.position == 0_in && !limit.Get()) {
-        motor.SetVoltage(-0.45_V);
-    } else {
-        setpoint = profile.Calculate(20_ms, setpoint, goal);
+    if (setpoint.position <= 0_in) {
+        motor.SetVoltage(-0.575_V);
+    }
+    setpoint = profile.Calculate(20_ms, setpoint, goal);
 
+    if (setpoint.position > 0_in) {
         motor.SetVoltage(
             units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
             + ff.Calculate(setpoint.velocity)
@@ -237,6 +242,7 @@ bool subsystems::amparm::Extension::in_place() {
 void subsystems::amparm::Extension::update_nt() {
     frc::SmartDashboard::PutNumber("amparm_extension", get_position().value());
     frc::SmartDashboard::PutBoolean("amp_extension_inplace", in_place());
+    frc::SmartDashboard::PutBoolean("amp_ext_limit", !limit.Get());
 
     if (!limit.Get()) {
         _set_position(0_in);

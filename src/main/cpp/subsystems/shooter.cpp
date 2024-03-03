@@ -22,8 +22,8 @@ void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
 
     pivot_angle = units::math::atan2(constants::DELTA_Y, hypotenuse);
 
-    frc::SmartDashboard::PutNumber("shooter_pivotangle_goal", pivot_angle.value());
-    frc::SmartDashboard::PutNumber("shooter_turretangle_goal", turret_angle.value());
+    frc::SmartDashboard::PutNumber("shooter_pivotangle_goal", pivot_angle.value() - 2);
+    frc::SmartDashboard::PutNumber("shooter_turretangle_goal", turret_angle.value() - 12);
     frc::SmartDashboard::PutBoolean("shooter_haspiece", has_piece());
     frc::SmartDashboard::PutBoolean("shooter_pivot_inplace", pivot.at_angle());
     frc::SmartDashboard::PutBoolean("shooter_turret_inplace", turret.at_goal_point());
@@ -55,47 +55,60 @@ void subsystems::shooter::Shooter::tick() {
         case constants::ShooterStates::Stopped: {
             flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_IDLE);
-            if (pivot.at_angle())
+            flywheel.stop_feed();
+            if (pivot_ok())
                 turret.set_angle(constants::TURRET_IDLE);
         }
         break;
+        case constants::ShooterStates::Down: {
+            flywheel.set_exit_vel(0_fps);
+            pivot.set_angle(constants::PIVOT_DOWN);
+            flywheel.stop_feed();
+            turret.set_angle(constants::TURRET_DOWN);
+        }
+        break;
         case constants::ShooterStates::PrepFeeding: {
+            flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_FEED);
-            if (pivot.at_angle())
+            if (pivot_ok())
                 turret.set_angle(constants::TURRET_FEED);
-            flywheel.feed(false);
+            if (!has_piece()) {
+                flywheel.feed(false);
+            } else {
+                flywheel.stop_feed();
+            }
         }
         break;
         case constants::ShooterStates::StableIdle: {
             flywheel.set_exit_vel(constants::IDLE_VELOCITY);
             flywheel.stop_feed();
             pivot.set_angle(constants::PIVOT_IDLE);
-            if (pivot.at_angle())
+            if (pivot_ok())
                 turret.set_angle(constants::TURRET_IDLE);
         }
         break;
         case constants::ShooterStates::TrackShot: {
-            pivot.set_angle(pivot_angle);
-            if (pivot.at_angle())
-                turret.set_angle(turret_angle);
+            pivot.set_angle(pivot_angle - 2_deg);
+            if (pivot_ok())
+                turret.set_angle(turret_angle - 12_deg);
 
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
 
-            if (flywheel.at_speed() && has_piece()) {
+            if (in_place() && has_piece()) {
                 flywheel.feed(true);
             }
         }
         break;
         case constants::ShooterStates::TrackingIdle: {
-            pivot.set_angle(pivot_angle);
-            if (pivot.at_angle())
-                turret.set_angle(turret_angle);
+            pivot.set_angle(pivot_angle - 2_deg);
+            if (pivot_ok())
+                turret.set_angle(turret_angle - 12_deg);
 
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
         break;
         default: {
-            state = constants::StableIdle;
+            state = constants::ShooterStates::Stopped;
         }
         break;
     }

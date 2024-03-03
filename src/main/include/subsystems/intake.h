@@ -26,7 +26,7 @@ namespace constants {
     constexpr int ROLLER_ID = 15;
 
     /// @brief The roller intake speed in RPM.
-    constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 10_V;
+    constexpr units::volt_t ROLLER_INTAKE_SETPOINT = 7_V;
 } // namespace constants
 
 class Intake : public frc2::SubsystemBase {

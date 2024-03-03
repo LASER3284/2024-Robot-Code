@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4135621611975744,
-      "y": 5.5
+      "x": 0.9978270455827631,
+      "y": 2.2250589436984876
     },
     "rotation": 0
   },
@@ -22,43 +22,37 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "intake"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.7
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "intake"
+                      }
+                    }
+                  ]
                 }
               },
               {
                 "type": "path",
                 "data": {
-                  "pathName": "4a"
+                  "pathName": "17a"
                 }
               }
             ]
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "shoot"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "4b"
-                }
-              }
-            ]
+            "pathName": "17b"
           }
         },
         {
@@ -93,7 +87,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "4c"
+                  "pathName": "17c"
                 }
               }
             ]
@@ -102,7 +96,51 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4d"
+            "pathName": "17d"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.3
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "intake"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "17e"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
           }
         }
       ]

@@ -15,11 +15,11 @@ public:
     /// @return Whether the sensor is detecting a piece in range.
     bool has_piece() const { return !piece_sensor.Get(); }
 
-    void spin() { motor.Set(0.8); }
+    void spin() { motor.Set(0.40); }
 
     void stop() { motor.Set(0.0); }
 
-    void reverse() { motor.Set(-0.8); }
+    void reverse() { motor.Set(-0.325); }
 
 private:
     frc::DigitalInput piece_sensor {0};

@@ -29,8 +29,9 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
-    pathplanner::NamedCommands::registerCommand("shoot", std::move(shoot()));
-    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous()));
+    pathplanner::NamedCommands::registerCommand("shoot", std::move(auto_shoot));
+    pathplanner::NamedCommands::registerCommand("shoot start", std::move(auto_shoot2));
+    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous));
     // pathplanner::NamedCommands::registerCommand("amp", amp_score());
 
 
@@ -45,6 +46,25 @@ void Robot::RobotInit() {
     }
 
     frc::SmartDashboard::PutData("AutoChooser", &auto_chooser);
+
+    aux_controller.B()
+        .WhileTrue(std::move(reverse_feed));
+    aux_controller.A()
+        .OnTrue(std::move(tele_track))
+        .OnFalse(std::move(shooter_stable));
+    aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
+        if (!amp_prepscore.IsScheduled()) {
+            amp_prepscore.Schedule();
+        }
+    });
+    aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Falling().IfHigh([this]() {
+        if (!amp_stop.IsScheduled()) {
+            amp_stop.Schedule();
+        }
+    });
+    aux_controller.RightBumper().OnTrue(std::move(amp_score));
+    aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
+    chassis_controller->LeftBumper().WhileTrue(std::move(intake_cmd));
 
     intake.init();
     shooter.init();
@@ -78,11 +98,6 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {
     amp_arm.reset();
-
-    aux_controller.A().OnTrue(amp_arm.score());
-    aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop());
-    aux_controller.LeftBumper().OnTrue(shoot());
-    chassis_controller->LeftBumper().WhileTrue(intake_cmd());
 }
 
 void Robot::TeleopPeriodic() {
@@ -93,6 +108,8 @@ void Robot::TeleopPeriodic() {
 }
 
 void Robot::DisabledInit() {
+    frc2::CommandScheduler::GetInstance().CancelAll();
+
     drive.cancel_sysid();
     shooter.cancel_sysid();
     amp_arm.cancel_sysid();

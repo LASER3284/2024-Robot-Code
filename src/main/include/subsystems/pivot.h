@@ -21,7 +21,7 @@ namespace constants {
     constexpr bool DIRECTION = false;
     // CHANGE THIS IF INVERTED ^----
 
-    constexpr units::degree_t TOLERANCE = 1_deg;
+    constexpr units::degree_t TOLERANCE = 2_deg;
 }
 
 class Pivot : public frc2::SubsystemBase {
@@ -64,8 +64,8 @@ private:
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     frc::PIDController pid {
-        0.255,
-        0.01,
+        0.125,
+        0.05,
         0
     };
 

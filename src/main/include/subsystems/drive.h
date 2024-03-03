@@ -167,7 +167,7 @@ private:
         photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
         std::move(photon::PhotonCamera{"mainCam"}),
         frc::Transform3d {
-            frc::Translation3d{-14.75_in, 0.75_in, 8_in},
+            frc::Translation3d{-14.75_in, -6_in, 8_in},
             frc::Rotation3d{0_deg, 30_deg, 180_deg}
         }
     };

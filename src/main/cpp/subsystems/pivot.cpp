@@ -26,6 +26,7 @@ void subsystems::pivot::Pivot::tick() {
 }
 
 void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
+    goal = goal > 48.5_deg ? 48.5_deg : goal;
     this->goal = {goal, 0_deg_per_s};
 }
 

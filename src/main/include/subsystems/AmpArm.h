@@ -37,7 +37,7 @@ namespace constants {
         Spit
     };
 
-    constexpr units::degree_t DOWN_ANGLE = 0_deg;
+    constexpr units::degree_t DOWN_ANGLE = -20_deg;
     constexpr units::inch_t DOWN_EXTENSION = 0_in;
     constexpr units::degree_t AMPSCORE_ANGLE = 91_deg;
     constexpr units::inch_t AMPSCORE_EXTENSION = 14.8_in;
@@ -118,14 +118,14 @@ public:
     }
 
     frc2::CommandPtr stop() {
-        return this->RunOnce([this]() {
+        return this->Run([this]() {
             activate(constants::States::Stopped);
-        });
+        }).WithTimeout(1.75_s);
     }
 
     /// @brief Spins the roller for intake on startup, stops when interrupted.
     frc2::CommandPtr intake() {
-        return this->StartEnd(
+        return this->RunEnd(
             [this]() {
                 activate(constants::States::Intake);
             },
@@ -146,7 +146,6 @@ public:
     /// @brief Spins the roller for intake on startup, stops when interrupted.
     frc2::CommandPtr feed() {
         return frc2::cmd::Sequence(
-            frc2::cmd::Wait(1_s),
             this->Run(
                 [this]() {
                     activate(constants::States::Feed);

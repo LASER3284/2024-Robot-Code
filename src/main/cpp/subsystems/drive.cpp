@@ -22,8 +22,8 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(0.9, 0.0, 0.0),
-            PIDConstants(1.68, 0.0, 0.0),
+            PIDConstants(4.15, 0.0, 0.0),
+            PIDConstants(2.0, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
             ReplanningConfig(false, false)
@@ -38,7 +38,7 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         this
     );
 
-    pose_estimator.SetVisionMeasurementStdDevs({1.3, 1.3, 1.3});
+    pose_estimator.SetVisionMeasurementStdDevs({2.7, 2.7, 2.7});
 }
 
 void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
@@ -131,18 +131,31 @@ void subsystems::drive::Drivetrain::update_odometry() {
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
+        double uncertainty = 1.0;
+        int num_targets = 0;
+        for (const auto &v : vision_est->targetsUsed) {
+            uncertainty *= 1 / v.GetArea();
+            num_targets++;
+        }
+        uncertainty = uncertainty / num_targets;
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
-            frc::Timer::GetFPGATimestamp()
+            frc::Timer::GetFPGATimestamp(),
+            {uncertainty, uncertainty, uncertainty}
         );
     }
 
     vision_est = photon_estimator_front.Update();
 
     if (vision_est) {
+        double uncertainty = 1.0;
+        for (const auto &v : vision_est->targetsUsed) {
+            uncertainty *= 100 / v.GetArea();
+        }
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
-            frc::Timer::GetFPGATimestamp()
+            frc::Timer::GetFPGATimestamp(),
+            {2 * uncertainty, 2 * uncertainty, 2 * uncertainty}
         );
     }
 }

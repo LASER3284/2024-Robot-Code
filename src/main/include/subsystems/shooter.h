@@ -28,7 +28,8 @@ namespace constants {
         StableShot,
         LowStableShot,
         PrepFeeding,
-        Stopped
+        Stopped,
+        Down
     };
 
     enum SubMech {
@@ -40,12 +41,15 @@ namespace constants {
     constexpr units::feet_per_second_squared_t GRAVITY = 32.175_fps_sq;
     constexpr frc::Translation2d GOAL_BLUE_POSITION { -1.5_in, 218.42_in};
     constexpr frc::Translation2d GOAL_RED_POSITION { 652.75_in, 218.42_in};
-    constexpr units::foot_t DELTA_Y = 7.5_ft;
+    constexpr units::foot_t DELTA_Y = 6_ft + 6_in;
 
-    constexpr units::degree_t PIVOT_IDLE = 44_deg;
+    constexpr units::degree_t PIVOT_IDLE = 40_deg;
     constexpr units::degree_t TURRET_IDLE = 14_deg;
 
-    constexpr units::degree_t PIVOT_FEED = 44_deg;
+    constexpr units::degree_t PIVOT_DOWN = 10_deg;
+    constexpr units::degree_t TURRET_DOWN = 0_deg;
+
+    constexpr units::degree_t PIVOT_FEED = 40_deg;
     constexpr units::degree_t TURRET_FEED = 14_deg;
 
     constexpr units::feet_per_second_t SHOT_VELOCITY = 88_fps;
@@ -68,7 +72,11 @@ public:
 
     bool has_piece() { return flywheel.has_piece(); }
 
-    bool in_place() { return turret.at_goal_point() && flywheel.at_speed() && pivot.at_angle(); }
+    bool pivot_ok() { return pivot.get_angle() < 48.5_deg && pivot.get_angle() > 12_deg; };
+
+    bool in_place() {
+        return turret.at_goal_point() && flywheel.at_speed() && pivot.at_angle();
+    }
 
     void cancel_sysid() {
         turret.cancel_sysid();
@@ -79,35 +87,22 @@ public:
     frc2::CommandPtr score() {
         return frc2::cmd::Sequence(
             this->Run([this]() {
-                activate(constants::ShooterStates::TrackingIdle);
-            }).Until([this]() {
-                return in_place();
-            }).BeforeStarting([this]() {
-                activate(constants::ShooterStates::TrackingIdle);
-            }),
-            frc2::cmd::Wait(1_s),
-            this->Run([this]() {
                 activate(constants::ShooterStates::TrackShot);
-            }).Until([this]() {
-                return in_place();
-            }).BeforeStarting([this]() {
-                activate(constants::ShooterStates::TrackShot);
-            }),
-            frc2::cmd::Wait(1.5_s),
+            }).WithTimeout(0.5_s),
             this->RunOnce([this]() {
-                activate(constants::ShooterStates::StableIdle);
+                activate(constants::ShooterStates::Stopped);
             })
         );
     }
 
     frc2::CommandPtr feed() {
         return frc2::cmd::Sequence(
-            this->StartEnd(
+            this->RunEnd(
                 [this]() {
                     activate(constants::ShooterStates::PrepFeeding);
                 },
                 [this]() {
-                    activate(constants::ShooterStates::StableIdle);
+                    activate(constants::ShooterStates::Stopped);
                 }
             ).Until([this]() {
                 return has_piece();
@@ -117,7 +112,19 @@ public:
 
     frc2::CommandPtr stable() {
         return this->RunOnce([this]() {
-            activate(constants::ShooterStates::StableIdle);
+            activate(constants::ShooterStates::Stopped);
+        });
+    }
+
+    frc2::CommandPtr track() {
+        return this->RunOnce([this]() {
+            activate(constants::ShooterStates::TrackingIdle);
+        });
+    }
+
+    frc2::CommandPtr down() {
+        return this->RunOnce([this]() {
+            activate(constants::ShooterStates::Down);
         });
     }
 

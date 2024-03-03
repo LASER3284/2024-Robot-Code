@@ -28,7 +28,7 @@ namespace shoulder {
     /// @brief Whether the motor should be inverted or not (given to SetInverted).
     constexpr bool DIRECTION = true;
 
-    constexpr units::degree_t TOLERANCE = 2_deg;
+    constexpr units::degree_t TOLERANCE = 1_deg;
 }
 
 }
@@ -67,7 +67,7 @@ private:
     units::second_t last_time = frc::Timer::GetFPGATimestamp();
     units::degree_t last_angle = get_position();
 
-    frc::TrapezoidProfile<units::degrees>::Constraints constraints {180_deg / 1_s, 180_deg / 1_s / 1_s};
+    frc::TrapezoidProfile<units::degrees>::Constraints constraints {360_deg / 1_s, 360_deg / 1_s / 1_s};
 
     frc::TrapezoidProfile<units::degrees>::State goal;
     frc::TrapezoidProfile<units::degrees>::State setpoint;
@@ -77,10 +77,10 @@ private:
     /// @brief Ks, Kg, Kv, Ka
     frc::ArmFeedforward ff {0.66118_V, 0.50262_V, 0.01506_V / 1_deg_per_s, 0.00333_V / 1_deg_per_s_sq};
 
-    frc::PIDController pid {0.7, 0, 0};
+    frc::PIDController pid {0.1, 0, 0};
 
     frc2::sysid::SysIdRoutine sysid {
-        frc2::sysid::Config {0.5_V / 1_s, 3_V, std::nullopt, std::nullopt},
+        frc2::sysid::Config {0.5_V / 91_s, 3_V, std::nullopt, std::nullopt},
         frc2::sysid::Mechanism {
             [this](units::volt_t volts) {
                 motor.SetVoltage(volts);

@@ -85,7 +85,7 @@ private:
     frc::DigitalInput piece_sensor {9};
 
      frc::PIDController pid {
-        0.18,
+        0.05,
         0.005,
         0
     };

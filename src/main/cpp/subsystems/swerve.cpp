@@ -22,7 +22,7 @@ subsystems::swerve::Module::Module(const int drive, const int turn, const int en
     if (cancoder_heading) {
         turn_motor->SetPosition(cancoder_heading.value() * constants::TURN_RATIO);
     }
-    //encoder->OptimizeBusUtilization();
+    encoder->OptimizeBusUtilization();
 }
 
 frc::SwerveModuleState subsystems::swerve::Module::get_state() const {

@@ -75,7 +75,7 @@ private:
     frc::ElevatorFeedforward ff {0.54078_V, 0.50262_V, 1.21088_V / 1_fps, 0.08067_V / 1_fps_sq};
 
     // Integral gain must be 0 or a deadband must be set
-    frc::PIDController pid {0.5, 0, 0};
+    frc::PIDController pid {0.6, 0, 0};
 
     frc2::sysid::SysIdRoutine sysid {
         frc2::sysid::Config {0.5_V / 1_s, 3_V, std::nullopt, std::nullopt},

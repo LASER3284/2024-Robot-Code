@@ -20,7 +20,7 @@ namespace constants {
     constexpr bool DIRECTION = true;
     // CHANGE IF INVERTED      ^----
 
-    constexpr units::degree_t TOLERANCE = 2.5_deg;
+    constexpr units::degree_t TOLERANCE = 1.25_deg;
 }
 
 class Turret : public frc2::SubsystemBase{
