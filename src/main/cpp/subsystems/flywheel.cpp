@@ -8,7 +8,6 @@ void subsystems::flywheel::Flywheel::init() {
 
 void subsystems::flywheel::Flywheel::update_nt() {
     frc::SmartDashboard::PutNumber("shooter_flywheel_velocity", get_exit_vel().value());
-    frc::SmartDashboard::PutNumber("flywheel_goal_feed", goal_feed.value());
 }
 
 

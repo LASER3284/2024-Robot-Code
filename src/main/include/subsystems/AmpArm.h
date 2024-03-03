@@ -81,7 +81,10 @@ public:
     /// @brief Returns true when both the shoulder and the extension have
     /// reached their goals.
     /// @return See brief :)
-    bool in_place() { return shoulder.in_place() && extension.in_place();}
+    bool in_place() {
+        return units::math::abs(shoulder.get_position() - shoulder_goal) < constants::shoulder::TOLERANCE
+            && units::math::abs(extension.get_position() - extension_goal) < constants::extension::TOLERANCE;
+    }
 
     /// @brief Runs a score routine, assuming a note is present.
     /// @return The corresponding CommandPtr that will run the routine.
@@ -180,6 +183,9 @@ private:
     Roller roller;
     Shoulder shoulder;
     Extension extension;
+
+    units::degree_t shoulder_goal;
+    units::inch_t extension_goal;
 };
 
 }

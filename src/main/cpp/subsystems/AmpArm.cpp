@@ -13,19 +13,6 @@ void subsystems::amparm::AmpArm::init() {
 }
 
 void subsystems::amparm::AmpArm::tick() {
-    shoulder.tick();
-    extension.tick();
-}
-
-void subsystems::amparm::AmpArm::update_nt() {
-    shoulder.update_nt();
-    extension.update_nt();
-
-    frc::SmartDashboard::PutBoolean("amparm_inplace", in_place());
-    frc::SmartDashboard::PutBoolean("amparm_haspiece", has_piece());
-}
-
-void subsystems::amparm::AmpArm::activate(constants::States state) {
     switch (state) {
         default:
         case constants::States::Stopped:
@@ -61,6 +48,36 @@ void subsystems::amparm::AmpArm::activate(constants::States state) {
         case constants::States::Spit:
             roller.spin();
             break;
+    }
+    shoulder.tick();
+    extension.tick();
+}
+
+void subsystems::amparm::AmpArm::update_nt() {
+    shoulder.update_nt();
+    extension.update_nt();
+
+    frc::SmartDashboard::PutBoolean("amparm_inplace", in_place());
+    frc::SmartDashboard::PutBoolean("amparm_haspiece", has_piece());
+}
+
+void subsystems::amparm::AmpArm::activate(constants::States state) {
+    this->state = state;
+
+    switch (state) {
+        default:
+        case constants::States::Feed:
+        case constants::States::ReverseFeed:
+        case constants::States::Intake:
+        case constants::States::Stopped: {
+            shoulder_goal = 0_deg;
+            extension_goal = constants::DOWN_EXTENSION;
+        } break;
+        case constants::States::AmpScore: {
+            shoulder_goal = constants::AMPSCORE_ANGLE;
+            extension_goal = constants::AMPSCORE_EXTENSION;
+        } break;
+        case constants::States::Spit: break;
     }
 }
 

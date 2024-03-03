@@ -107,7 +107,7 @@ public:
             shooter.stable()
         );
     
-    frc2::CommandPtr tele_shoot = shooter.score().WithTimeout(5_s);
+    frc2::CommandPtr tele_shoot = shooter.score();
     frc2::CommandPtr tele_feed = frc2::cmd::Parallel(shooter.feed(), amp_arm.feed());
     frc2::CommandPtr tele_track =
         frc2::cmd::Sequence(

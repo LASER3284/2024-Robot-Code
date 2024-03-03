@@ -10,6 +10,9 @@ void subsystems::shooter::Shooter::init() {
     turret.init();
     flywheel.init();
     pivot.init();
+
+    turret.set_angle(constants::TURRET_IDLE);
+    pivot.set_angle(constants::PIVOT_IDLE);
 }
 
 void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {

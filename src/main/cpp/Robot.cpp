@@ -79,8 +79,6 @@ void Robot::RobotPeriodic() {
 
     amp_arm.update_nt();
 
-    happy_face.tick();
-
     frc2::CommandScheduler::GetInstance().Run();
 }
 
