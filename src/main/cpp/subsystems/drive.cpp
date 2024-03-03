@@ -1,7 +1,7 @@
 #include "subsystems/drive.h"
+#include "frc/geometry/Pose2d.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DataLogManager.h>
-#include <iostream>
 #include <frc2/command/Commands.h>
 #include <pathplanner/lib/util/PathPlannerLogging.h>
 
@@ -121,20 +121,26 @@ void subsystems::drive::Drivetrain::reset_odometry() {
 }
 
 void subsystems::drive::Drivetrain::update_odometry() {
-    pose_estimator.Update(
+    frc::Pose2d last_pose = get_pose();
+    frc::Pose2d newpose = pose_estimator.Update(
         gyro->GetRotation2d(),
         {
             front_left.get_position(), front_right.get_position(),
             back_left.get_position(), back_right.get_position()
         }
     );
+
+    if (units::math::abs(newpose.X() - last_pose.X()) > 10_m || units::math::abs(newpose.Y() - last_pose.Y()) > 10_m) {
+        set_pose(last_pose);
+    }
+
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
         double uncertainty = 1.0;
         int num_targets = 0;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 1 / v.GetArea();
+            uncertainty *= 1 / v.GetArea() / 2;
             num_targets++;
         }
         uncertainty = uncertainty / num_targets;
@@ -150,12 +156,12 @@ void subsystems::drive::Drivetrain::update_odometry() {
     if (vision_est) {
         double uncertainty = 1.0;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 100 / v.GetArea();
+            uncertainty *= 1 / v.GetArea() / 2;
         }
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
             frc::Timer::GetFPGATimestamp(),
-            {2 * uncertainty, 2 * uncertainty, 2 * uncertainty}
+            {uncertainty, uncertainty, uncertainty}
         );
     }
 }

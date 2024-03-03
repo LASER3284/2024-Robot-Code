@@ -71,10 +71,13 @@ public:
     Drivetrain(std::shared_ptr<frc::XboxController>);
 
     /// @brief Runs the main loop for the drivetrain. This is what gets the
-    /// motors in the modules to move and updates odometry.
+    /// motors in the modules to move according to joysticks.
     /// @param is_field_oriented Whether or not to use field-oriented drive.
     void tick(bool);
 
+    /// @brief Updates the swerve modules to do the correct movements on every
+    /// periodic. Called by tick, but should be called in AutonomousPeriodic
+    /// where tick is not allowed.
     void swerve_tick();
 
     /// @brief Updates the Network Tables data.
@@ -87,9 +90,13 @@ public:
     /// @see Robot::SysIdChooser
     void run_sysid(int);
 
-    /// @brief Runs in the tick in order to estimate the pose of the robot.
+    /// @brief Runs with update_nt in RobotPeriodic to update values of the
+    /// robot pose.
+    /// @see update_nt
     void update_odometry();
 
+    /// @brief Checkes for a estimation from the back camera and, if one is
+    /// found, will reset the pose of the drive train to the esitmated pose.
     void reset_pose_to_vision();
 
     /// @brief Returns the translational and rotational components of the robot
