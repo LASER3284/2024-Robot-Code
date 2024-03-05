@@ -94,6 +94,10 @@ public:
     std::optional<units::degree_t> get_cancoder_heading() const;
 
     void force_update_azimuth();
+
+    double get_drive_current() {
+        return drive_motor->GetOutputCurrent();
+    }
 private:
     /// @brief Sets the raw voltage of the motor for azimuth. Private b/c
     /// azimuth angle is important for drive power.
@@ -112,12 +116,12 @@ private:
     };
 
     frc::PIDController drive_controller {
-        0.1,
+        0.95,
         0.0,
         0.0
     };
 
-    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.01965_V, 0.75773_V / 1_fps, 0.09844_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.23396_V, 1.75_V / 1_fps, 0.09844_V / 1_fps_sq};
 
     std::unique_ptr<rev::CANSparkFlex> drive_motor;
     std::unique_ptr<rev::SparkRelativeEncoder> drive_enc;

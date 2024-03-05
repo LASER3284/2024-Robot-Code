@@ -140,6 +140,7 @@ void subsystems::amparm::Shoulder::update_nt() {
     // Do other things
     frc::SmartDashboard::PutNumber("amparm_shoulder_pos", get_position().value());
     frc::SmartDashboard::PutBoolean("amp_shoulder_inplace", in_place());
+    frc::SmartDashboard::PutNumber("amp_shoulder_current", motor.GetSupplyCurrent().GetValueAsDouble());
 
     // Set last_position and last_time
     last_time = frc::Timer::GetFPGATimestamp();
@@ -260,6 +261,7 @@ void subsystems::amparm::Extension::update_nt() {
     frc::SmartDashboard::PutNumber("amparm_extension", get_position().value());
     frc::SmartDashboard::PutBoolean("amp_extension_inplace", in_place());
     frc::SmartDashboard::PutBoolean("amp_ext_limit", !limit.Get());
+    frc::SmartDashboard::PutNumber("amp_extension_current", motor.GetSupplyCurrent().GetValueAsDouble());
 
     if (!limit.Get()) {
         _set_position(0_in);

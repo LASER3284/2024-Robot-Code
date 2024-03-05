@@ -16,17 +16,17 @@ void subsystems::shooter::Shooter::init() {
 }
 
 void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
-    units::foot_t x = robot_pose.Translation().X() - (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.X() : constants::GOAL_BLUE_POSITION.X());
-    units::foot_t y = robot_pose.Translation().Y() - (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.Y() : constants::GOAL_BLUE_POSITION.Y());
+    units::foot_t x = robot_pose.Translation().X() - 3_in - (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.X() : constants::GOAL_BLUE_POSITION.X());
+    units::foot_t y = robot_pose.Translation().Y() - 3_in - (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.Y() : constants::GOAL_BLUE_POSITION.Y());
     turret_angle = robot_pose.Rotation().Degrees() * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? 1 : -1) - (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? 180_deg : 0_deg);
-    turret_angle += units::math::atan2(y, x);
 
     units::foot_t hypotenuse = units::math::sqrt(y * y + x * x);
+    turret_angle += units::math::atan2(y, x) + constants::TURRET_CORRECTION * hypotenuse;
 
-    pivot_angle = units::math::atan2(constants::DELTA_Y, hypotenuse);
+    pivot_angle = units::math::atan2(constants::DELTA_Y, hypotenuse) + constants::PIVOT_CORRECTION * hypotenuse;
 
     frc::SmartDashboard::PutNumber("shooter_pivotangle_goal", pivot_angle.value() - 2);
-    frc::SmartDashboard::PutNumber("shooter_turretangle_goal", turret_angle.value() - 12);
+    frc::SmartDashboard::PutNumber("shooter_turretangle_goal", turret_angle.value() - 4);
     frc::SmartDashboard::PutBoolean("shooter_haspiece", has_piece());
     frc::SmartDashboard::PutBoolean("shooter_pivot_inplace", pivot.at_angle());
     frc::SmartDashboard::PutBoolean("shooter_turret_inplace", turret.at_goal_point());
@@ -93,7 +93,7 @@ void subsystems::shooter::Shooter::tick() {
         case constants::ShooterStates::TrackShot: {
             pivot.set_angle(pivot_angle - 2_deg);
             if (pivot_ok())
-                turret.set_angle(turret_angle - 12_deg);
+                turret.set_angle(turret_angle - 4_deg);
 
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
 
@@ -105,7 +105,7 @@ void subsystems::shooter::Shooter::tick() {
         case constants::ShooterStates::TrackingIdle: {
             pivot.set_angle(pivot_angle - 2_deg);
             if (pivot_ok())
-                turret.set_angle(turret_angle - 12_deg);
+                turret.set_angle(turret_angle - 4_deg);
 
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }

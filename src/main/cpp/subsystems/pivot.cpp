@@ -14,6 +14,7 @@ void subsystems::pivot::Pivot::update_nt() {
 
     // update nt
     frc::SmartDashboard::PutNumber("shooter_pivot_current_angle", get_angle().value());
+    frc::SmartDashboard::PutNumber("shooter_pivot_current", motor.GetOutputCurrent());
 
     last_angle = get_angle();
     last_time = frc::Timer::GetFPGATimestamp();
@@ -22,7 +23,11 @@ void subsystems::pivot::Pivot::update_nt() {
 void subsystems::pivot::Pivot::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    motor.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
+    if (get_angle() < 55_deg) {
+        motor.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
+    } else {
+        motor.SetVoltage(0_V);
+    }
 }
 
 void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
@@ -32,7 +37,7 @@ void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
 
 units::degree_t subsystems::pivot::Pivot::get_angle() {
     units::degree_t initial_offset = 0_deg;
-    const units::degree_t constant_offset = 59_deg;
+    const units::degree_t constant_offset = -179_deg;
     while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }

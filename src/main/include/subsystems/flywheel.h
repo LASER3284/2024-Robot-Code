@@ -22,7 +22,7 @@ namespace constants {
     /// @brief The value to give to SetInverted
     constexpr bool FEED_DIRECTION = true;
 
-    constexpr units::feet_per_second_t TOLERANCE = 4_fps;
+    constexpr units::feet_per_second_t TOLERANCE = 8_fps;
 
     /// @brief this is the pid values for proportional gain(kp)
      constexpr double FLY_KP = 0.0;
@@ -64,7 +64,7 @@ public:
     
 private:
     units::turn_t goal_feed = units::turn_t{0};
-    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0.26286_V, 0.08371_V / 1_fps, 0.01204_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0.24182_V, 0.08283_V / 1_fps, 0.02161_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
     rev::CANSparkFlex motor {20, rev::CANSparkLowLevel::MotorType::kBrushless};
@@ -85,8 +85,8 @@ private:
     frc::DigitalInput piece_sensor {9};
 
      frc::PIDController pid {
-        0.05,
-        0.005,
+        0.025,
+        0.035,
         0
     };
     /// this is my attempt at sysid with my very limited knowledge

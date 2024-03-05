@@ -39,8 +39,8 @@ namespace constants {
 
     constexpr units::degree_t DOWN_ANGLE = -20_deg;
     constexpr units::inch_t DOWN_EXTENSION = 0_in;
-    constexpr units::degree_t AMPSCORE_ANGLE = 91_deg;
-    constexpr units::inch_t AMPSCORE_EXTENSION = 14.8_in;
+    constexpr units::degree_t AMPSCORE_ANGLE = 93_deg;
+    constexpr units::inch_t AMPSCORE_EXTENSION = 18.9_in;
     constexpr units::degree_t TRAPSCORE_ANGLE = 90_deg;
     constexpr units::inch_t TRAPSCORE_EXTESNION = 20_in;
 }

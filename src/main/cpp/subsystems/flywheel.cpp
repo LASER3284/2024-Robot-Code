@@ -8,6 +8,7 @@ void subsystems::flywheel::Flywheel::init() {
 
 void subsystems::flywheel::Flywheel::update_nt() {
     frc::SmartDashboard::PutNumber("shooter_flywheel_velocity", get_exit_vel().value());
+    frc::SmartDashboard::PutNumber("shooter_flywheel_current", motor.GetOutputCurrent());
 }
 
 
@@ -37,7 +38,7 @@ void subsystems::flywheel::Flywheel::feed(bool fire) {
         feedwheel_motor.SetVoltage(12_V);
     } else {
         if (!has_piece())
-            feedwheel_motor.SetVoltage(1.5_V);
+            feedwheel_motor.SetVoltage(1_V);
         else
             feedwheel_motor.SetVoltage(0_V);
     }

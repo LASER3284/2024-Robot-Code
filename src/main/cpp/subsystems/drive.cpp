@@ -22,8 +22,8 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(4.15, 0.0, 0.0),
-            PIDConstants(2.0, 0.0, 0.0),
+            PIDConstants(6.5, 0.0, 0.0),
+            PIDConstants(2, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
             ReplanningConfig(false, false)
@@ -75,7 +75,7 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
         x_velocity,
         y_velocity,
         r_velocity,
-        gyro->GetRotation2d()
+        get_pose().Rotation()
     );
 
     if (!is_field_oriented) {
@@ -84,21 +84,31 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
         chassis_speeds.vy = y_velocity;
     }
 
-    wpi::array<frc::SwerveModuleState, 4> states = kinematics.ToSwerveModuleStates(chassis_speeds);
-    kinematics.DesaturateWheelSpeeds(
-        &states,
-        chassis_speeds,
-        swerve::constants::kMAX_WHEEL_SPEED,
-        constants::MAX_SPEED,
-        constants::MAX_ROT_SPEED
-    );
+    if (!joystick->GetXButtonPressed()) {
+        wpi::array<frc::SwerveModuleState, 4> states = kinematics.ToSwerveModuleStates(chassis_speeds);
+        kinematics.DesaturateWheelSpeeds(
+            &states,
+            chassis_speeds,
+            swerve::constants::kMAX_WHEEL_SPEED,
+            constants::MAX_SPEED,
+            constants::MAX_ROT_SPEED
+        );
 
-    auto [fl, fr, bl, br] = states;
+        auto [fl, fr, bl, br] = states;
 
-    front_left.set_desired_goal(fl);
-    front_right.set_desired_goal(fr);
-    back_left.set_desired_goal(bl);
-    back_right.set_desired_goal(br);
+        front_left.set_desired_goal(fl);
+        front_right.set_desired_goal(fr);
+        back_left.set_desired_goal(bl);
+        back_right.set_desired_goal(br);
+    } else {
+        frc::SwerveModuleState left = {0_fps, frc::Rotation2d{45_deg}};
+        frc::SwerveModuleState right = {0_fps, frc::Rotation2d{135_deg}};
+
+        front_left.set_desired_goal(left);
+        front_right.set_desired_goal(right);
+        back_left.set_desired_goal(right);
+        back_right.set_desired_goal(left);
+    }
 
     if (units::math::fabs(front_left.get_velocity()) > max_detected_velocity) {
         max_detected_velocity = units::math::fabs(front_left.get_velocity());
@@ -137,10 +147,10 @@ void subsystems::drive::Drivetrain::update_odometry() {
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
-        double uncertainty = 1.0;
+        double uncertainty = 2.0;
         int num_targets = 0;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 1 / v.GetArea() / 2;
+            uncertainty *= 1 / v.GetArea();
             num_targets++;
         }
         uncertainty = uncertainty / num_targets;
@@ -154,9 +164,9 @@ void subsystems::drive::Drivetrain::update_odometry() {
     vision_est = photon_estimator_front.Update();
 
     if (vision_est) {
-        double uncertainty = 1.0;
+        double uncertainty = 2.0;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 1 / v.GetArea() / 2;
+            uncertainty *= 1 / v.GetArea();
         }
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
@@ -270,6 +280,8 @@ void subsystems::drive::Drivetrain::update_nt() {
 
 
     field_drawing.SetRobotPose(get_pose());
+
+    frc::SmartDashboard::PutNumber("Drivetrain_fl_current", front_left.get_drive_current());
 
     frc::SmartDashboard::PutNumber("Drivetrain_fl_heading", units::degree_t{front_left.get_heading()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_speed_fps", units::feet_per_second_t{front_left.get_velocity()}.value());

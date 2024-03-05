@@ -41,7 +41,10 @@ namespace constants {
     constexpr units::feet_per_second_squared_t GRAVITY = 32.175_fps_sq;
     constexpr frc::Translation2d GOAL_BLUE_POSITION { -1.5_in, 218.42_in};
     constexpr frc::Translation2d GOAL_RED_POSITION { 652.75_in, 218.42_in};
-    constexpr units::foot_t DELTA_Y = 6_ft + 6_in;
+    constexpr units::foot_t DELTA_Y = 7_ft;
+
+    constexpr auto PIVOT_CORRECTION = 0.375_deg / 1_ft;
+    constexpr auto TURRET_CORRECTION = 0.075_deg / 1_ft;
 
     constexpr units::degree_t PIVOT_IDLE = 40_deg;
     constexpr units::degree_t TURRET_IDLE = 14_deg;
@@ -104,10 +107,11 @@ public:
     frc2::CommandPtr score() {
         return frc2::cmd::Sequence(
             this->Run([this]() {
+                scratch = state;
                 activate(constants::ShooterStates::TrackShot);
             }).WithTimeout(0.5_s),
             this->RunOnce([this]() {
-                activate(constants::ShooterStates::Stopped);
+                activate(scratch);
             })
         );
     }
@@ -159,6 +163,7 @@ public:
     constants::ShooterStates get_state() const { return state; }
 
 private:
+    constants::ShooterStates scratch = constants::ShooterStates::Stopped;
     constants::ShooterStates state = constants::ShooterStates::Stopped;
     units::degree_t pivot_angle;
     units::degree_t turret_angle;
