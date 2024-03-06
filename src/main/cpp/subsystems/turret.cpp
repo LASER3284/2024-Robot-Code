@@ -10,10 +10,15 @@ void subsystems::turret::Turret::init() {
 void subsystems::turret::Turret::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    motor.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
+    if (units::math::abs(get_angle()) < 170_deg || units::math::abs(setpoint.position) < 170_deg) {
+        motor.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
+    } else {
+        motor.SetVoltage(0_V);
+    }
 }
 
 void subsystems::turret::Turret::set_angle(units::degree_t goal) {
+    goal = units::math::abs(goal) < 160_deg ? goal : (160_deg * (goal < 0_deg ? -1 : 1));
     this->goal = {goal, 0_deg_per_s};
 }
 

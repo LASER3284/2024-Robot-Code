@@ -58,7 +58,18 @@ public:
 
     frc2::CommandPtr intake_cmd =
         frc2::cmd::Parallel(
-            intake.intake(),
+            intake.RunEnd(
+                [this]() {
+                    if (amp_arm.in_place()) {
+                        intake.activate(subsystems::intake::constants::DeployStates::SPIN);
+                    } else {
+                        intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+                    }
+                },
+                [this]() {
+                    intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+                }
+            ),
             amp_arm.intake()
         );
 
