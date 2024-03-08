@@ -23,7 +23,7 @@ void subsystems::pivot::Pivot::update_nt() {
 void subsystems::pivot::Pivot::tick() {
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
-    if (get_angle() < 55_deg) {
+    if (get_angle() < 55_deg || setpoint.position < 55_deg) {
         motor.SetVoltage(ff.Calculate(setpoint.position, setpoint.velocity) + units::volt_t{pid.Calculate(setpoint.position.value(), get_angle().value())});
     } else {
         motor.SetVoltage(0_V);

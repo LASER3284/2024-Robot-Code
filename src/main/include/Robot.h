@@ -56,8 +56,8 @@ public:
         amp_arm.stop()
     );
 
-    frc2::CommandPtr intake_cmd =
-        frc2::cmd::Parallel(
+    frc2::CommandPtr intake_cmd() {
+        return frc2::cmd::Parallel(
             intake.RunEnd(
                 [this]() {
                     if (amp_arm.in_place()) {
@@ -72,6 +72,18 @@ public:
             ),
             amp_arm.intake()
         );
+    }
+
+    frc2::CommandPtr intake_ignore() {
+        return intake.RunEnd(
+            [this]() {
+                intake.activate(subsystems::intake::constants::DeployStates::SPIN);
+            },
+            [this]() {
+                intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+            }
+        );
+    }
 
     frc2::CommandPtr intake_continuous =
         frc2::cmd::Parallel(
@@ -82,7 +94,7 @@ public:
                 return shooter.has_piece();
             }),
             shooter.feed()
-        );
+        ).WithTimeout(2.5_s);
 
     frc2::CommandPtr auto_shoot = 
         frc2::cmd::Sequence(
@@ -99,7 +111,7 @@ public:
             shooter.RunOnce([this]() {
                 shooter.activate(subsystems::shooter::constants::ShooterStates::TrackingIdle);
             }).WithTimeout(3_s),
-            shooter.score(),
+            shooter.force_score(),
             shooter.stable()
         );
     frc2::CommandPtr auto_shoot2 = 
@@ -114,7 +126,7 @@ public:
             }).BeforeStarting([this]() {
                 shooter.activate(subsystems::shooter::constants::ShooterStates::TrackingIdle);
             }).WithTimeout(3_s),
-            shooter.score(),
+            shooter.force_score(),
             shooter.stable()
         );
     
@@ -127,7 +139,7 @@ public:
         );
     frc2::CommandPtr shooter_stable = shooter.stable();
 
-    frc2::CommandPtr reverse_feed = frc2::cmd::None();
+    frc2::CommandPtr reverse_feed = shooter.reverse_feed();
 
     enum SysIdChooser {
         QsFwd = 0,

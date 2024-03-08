@@ -1,5 +1,5 @@
 #include "subsystems/drive.h"
-#include "frc/geometry/Pose2d.h"
+#include <frc/geometry/Pose2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DataLogManager.h>
 #include <frc2/command/Commands.h>
@@ -23,7 +23,7 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
             PIDConstants(6.5, 0.0, 0.0),
-            PIDConstants(2, 0.0, 0.0),
+            PIDConstants(2.2, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
             ReplanningConfig(false, false)
@@ -59,6 +59,9 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     x_axis = fabs(x_axis) > 0.1 ? x_axis : 0.0;
     y_axis = fabs(y_axis) > 0.1 ? y_axis : 0.0;
 
+    x_axis *= frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1;
+    y_axis *= frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1;
+
     double r_axis = -joystick->GetRightX();
     r_axis = fabs(r_axis) > 0.1 ? r_axis : 0.0;
 
@@ -84,7 +87,25 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
         chassis_speeds.vy = y_velocity;
     }
 
-    if (!joystick->GetXButtonPressed()) {
+    if (joystick->GetYButton()) {
+        chassis_speeds.omega = units::radians_per_second_t{heading_controller.Calculate(
+            frc::AngleModulus(get_pose().Rotation().Radians()).value(),
+            units::radian_t{
+                -90_deg
+            }.value()
+        )};
+    }
+
+    if (joystick->GetBButton()) {
+        chassis_speeds.omega = units::radians_per_second_t{heading_controller.Calculate(
+            frc::AngleModulus(get_pose().Rotation().Radians()).value(),
+            units::radian_t{
+                frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -135_deg : -45_deg
+            }.value()
+        )};
+    }
+
+    if (!joystick->GetXButton()) {
         wpi::array<frc::SwerveModuleState, 4> states = kinematics.ToSwerveModuleStates(chassis_speeds);
         kinematics.DesaturateWheelSpeeds(
             &states,
@@ -104,10 +125,10 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
         frc::SwerveModuleState left = {0_fps, frc::Rotation2d{45_deg}};
         frc::SwerveModuleState right = {0_fps, frc::Rotation2d{135_deg}};
 
-        front_left.set_desired_goal(left);
-        front_right.set_desired_goal(right);
-        back_left.set_desired_goal(right);
-        back_right.set_desired_goal(left);
+        front_left.set_desired_goal(left, true);
+        front_right.set_desired_goal(right, true);
+        back_left.set_desired_goal(right, true);
+        back_right.set_desired_goal(left, true);
     }
 
     if (units::math::fabs(front_left.get_velocity()) > max_detected_velocity) {

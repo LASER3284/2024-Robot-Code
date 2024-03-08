@@ -24,8 +24,10 @@ namespace constants {
     enum ShooterStates {
         TrackingIdle = 0,
         TrackShot,
+        TrackForceShot,
         StableIdle,
         StableShot,
+        ReverseFeed,
         LowStableShot,
         PrepFeeding,
         Stopped,
@@ -43,7 +45,7 @@ namespace constants {
     constexpr frc::Translation2d GOAL_RED_POSITION { 652.75_in, 218.42_in};
     constexpr units::foot_t DELTA_Y = 7_ft;
 
-    constexpr auto PIVOT_CORRECTION = 0.375_deg / 1_ft;
+    constexpr auto PIVOT_CORRECTION = 0_deg / 1_ft;
     constexpr auto TURRET_CORRECTION = 0.075_deg / 1_ft;
 
     constexpr units::degree_t PIVOT_IDLE = 40_deg;
@@ -110,6 +112,32 @@ public:
                 scratch = state;
                 activate(constants::ShooterStates::TrackShot);
             }).WithTimeout(0.5_s),
+            this->RunOnce([this]() {
+                activate(scratch);
+            })
+        );
+    }
+
+    frc2::CommandPtr force_score() {
+        return frc2::cmd::Sequence(
+            this->Run([this]() {
+                scratch = state;
+                activate(constants::ShooterStates::TrackForceShot);
+            }).WithTimeout(0.5_s),
+            this->RunOnce([this]() {
+                activate(scratch);
+            })
+        );
+    }
+
+    frc2::CommandPtr reverse_feed() {
+        return frc2::cmd::Sequence(
+            this->Run([this]() {
+                scratch = state;
+                activate(constants::ShooterStates::ReverseFeed);
+            }).Until([this]() {
+                return !has_piece();
+            }),
             this->RunOnce([this]() {
                 activate(scratch);
             })

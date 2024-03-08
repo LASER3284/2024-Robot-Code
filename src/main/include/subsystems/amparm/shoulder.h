@@ -28,7 +28,7 @@ namespace shoulder {
     /// @brief Whether the motor should be inverted or not (given to SetInverted).
     constexpr bool DIRECTION = true;
 
-    constexpr units::degree_t TOLERANCE = 1_deg;
+    constexpr units::degree_t TOLERANCE = 2_deg;
 }
 
 }

@@ -48,7 +48,7 @@ void subsystems::flywheel::Flywheel::reverse_feed() {
     if (piece_sensor.Get()) {
         feedwheel_motor.SetVoltage(0_V);
     } else {
-        feedwheel_motor.SetVoltage(-7.5_V);
+        feedwheel_motor.SetVoltage(-0.6_V);
     }
 }
 

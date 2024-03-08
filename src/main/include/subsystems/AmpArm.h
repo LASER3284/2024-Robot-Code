@@ -39,7 +39,7 @@ namespace constants {
 
     constexpr units::degree_t DOWN_ANGLE = -20_deg;
     constexpr units::inch_t DOWN_EXTENSION = 0_in;
-    constexpr units::degree_t AMPSCORE_ANGLE = 93_deg;
+    constexpr units::degree_t AMPSCORE_ANGLE = 95_deg;
     constexpr units::inch_t AMPSCORE_EXTENSION = 18.9_in;
     constexpr units::degree_t TRAPSCORE_ANGLE = 90_deg;
     constexpr units::inch_t TRAPSCORE_EXTESNION = 20_in;
@@ -158,7 +158,7 @@ public:
             }).BeforeStarting([this]() {
                 activate(constants::States::Feed);
             }),
-            frc2::cmd::Wait(0.5_s),
+            frc2::cmd::Wait(0.06_s),
             this->RunOnce([this]() {
                 activate(constants::States::Stopped);
             })

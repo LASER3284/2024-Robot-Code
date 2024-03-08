@@ -141,6 +141,12 @@ private:
 
     std::string current_traj;
 
+    frc::PIDController heading_controller {
+        2.0,
+        0,
+        0
+    };
+
     units::feet_per_second_t max_detected_velocity = 0_fps;
 
     std::unique_ptr<ctre::phoenix6::hardware::Pigeon2> gyro = std::make_unique<ctre::phoenix6::hardware::Pigeon2>(62);

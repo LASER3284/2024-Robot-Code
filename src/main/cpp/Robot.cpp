@@ -49,6 +49,12 @@ void Robot::RobotInit() {
 
     aux_controller.B()
         .WhileTrue(std::move(reverse_feed));
+    aux_controller.X()
+        .WhileTrue(intake_ignore());
+    aux_controller.Y()
+        .WhileTrue(drive.Run([this]() {
+            drive.reset_pose_to_vision();
+        }));
     aux_controller.A()
         .OnTrue(std::move(tele_track))
         .OnFalse(std::move(shooter_stable));
@@ -64,7 +70,7 @@ void Robot::RobotInit() {
     });
     aux_controller.RightBumper().OnTrue(std::move(amp_score));
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
-    chassis_controller->LeftBumper().WhileTrue(std::move(intake_cmd));
+    chassis_controller->LeftBumper().WhileTrue(intake_cmd());
 
     intake.init();
     shooter.init();
@@ -84,7 +90,13 @@ void Robot::RobotPeriodic() {
 
 void Robot::AutonomousInit() {
     amp_arm.reset();
-    auto_cmd = drive.get_auto_path(auto_chooser.GetSelected());
+    auto choice = auto_chooser.GetSelected();
+
+    if (choice != "None") {
+        auto_cmd = drive.get_auto_path(choice);
+    } else {
+        auto_cmd = frc2::cmd::None();
+    }
     auto_cmd.Schedule();
 }
 void Robot::AutonomousPeriodic() {

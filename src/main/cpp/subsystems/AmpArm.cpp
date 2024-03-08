@@ -117,7 +117,7 @@ void subsystems::amparm::Shoulder::init() {
 
 units::degree_t subsystems::amparm::Shoulder::get_position() const {
     units::degree_t initial_offset = 0_deg;
-    const units::degree_t constant_offset = -225_deg;
+    const units::degree_t constant_offset = -304_deg;
 
     while (units::math::abs(encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (encoder.Get() + constant_offset < 0_deg ? -1 : 1);
@@ -156,7 +156,7 @@ void subsystems::amparm::Shoulder::tick() {
     frc::SmartDashboard::PutNumber("amp_shoulder_volts", ff.Calculate(setpoint.position, setpoint.velocity).value());
 
 
-    if (get_position() > -0.5_deg || setpoint.position > -0.5_deg) {
+    if (get_position() > 0_deg || setpoint.position > 0_deg) {
         motor.SetVoltage(units::volt_t{pid.Calculate(get_position().value(), setpoint.position.value())}
             + ff.Calculate(setpoint.position, setpoint.velocity)
         );
