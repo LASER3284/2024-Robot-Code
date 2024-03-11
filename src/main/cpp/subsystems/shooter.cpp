@@ -17,18 +17,19 @@ void subsystems::shooter::Shooter::init() {
 }
 
 void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
-    units::foot_t x = robot_pose.Translation().X() - 3_in - (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.X() : constants::GOAL_BLUE_POSITION.X());
-    units::foot_t y = robot_pose.Translation().Y() - 3_in - (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.Y() : constants::GOAL_BLUE_POSITION.Y());
+    units::foot_t x = robot_pose.Translation().X() - 3_in - (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.X() : constants::GOAL_BLUE_POSITION.X());
+    units::foot_t y = robot_pose.Translation().Y() - 3_in - (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.Y() : constants::GOAL_BLUE_POSITION.Y());
     turret_angle = -robot_pose.Rotation().Degrees();
 
-    if (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed) {
-        turret_angle = turret_angle + 180_deg;
+    if (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed) {
+        turret_angle = turret_angle;
+        frc::SmartDashboard::PutNumber("REACHED THE THING", 12);
     }
 
     units::foot_t hypotenuse = units::math::sqrt(y * y + x * x);
     turret_angle += units::math::atan2(y, x) + constants::TURRET_CORRECTION * hypotenuse;
 
-    turret_angle = frc::AngleModulus(turret_angle);
+    turret_angle = frc::AngleModulus(turret_angle - 6_deg);
 
     pivot_angle = units::math::atan2(constants::DELTA_Y, hypotenuse);
     if (hypotenuse > 5_ft) {

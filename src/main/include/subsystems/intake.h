@@ -19,7 +19,8 @@ namespace intake {
 namespace constants {
     enum DeployStates {
         NOSPIN = 0,
-        SPIN
+        SPIN,
+        REVSPIN
     };
 
     /// @brief The CAN ID for the roller motor.
@@ -60,6 +61,17 @@ public:
         return this->RunOnce(
             [this]() {
                 activate(constants::DeployStates::SPIN);
+            }
+        );
+    }
+
+    frc2::CommandPtr reverse() {
+        return this->RunEnd(
+            [this]() {
+                activate(constants::DeployStates::REVSPIN);
+            },
+            [this]() {
+                activate(constants::DeployStates::NOSPIN);
             }
         );
     }

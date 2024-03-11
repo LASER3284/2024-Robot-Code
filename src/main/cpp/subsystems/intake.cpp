@@ -12,9 +12,19 @@ void intake::Intake::tick() {
 }
 
 void intake::Intake::activate(intake::constants::DeployStates state) {
-    if (state % 2 == 0)
-        roller_voltage = 0_V;
-    else {
-        roller_voltage = intake::constants::ROLLER_INTAKE_SETPOINT;
+    switch (state) {
+        default:
+        case constants::DeployStates::NOSPIN: {
+            roller_voltage = 0_V;
+        }
+        break;
+        case constants::DeployStates::SPIN: {
+            roller_voltage = constants::ROLLER_INTAKE_SETPOINT;
+        }
+        break;
+        case constants::DeployStates::REVSPIN: {
+            roller_voltage = -constants::ROLLER_INTAKE_SETPOINT;
+        }
+        break;
     }
 }

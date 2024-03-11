@@ -32,6 +32,7 @@ namespace constants {
         Feed,
         Intake,
         ReverseFeed,
+        ReverseIntake,
         AmpScore,
         TrapScore,
         Spit
@@ -39,7 +40,7 @@ namespace constants {
 
     constexpr units::degree_t DOWN_ANGLE = -20_deg;
     constexpr units::inch_t DOWN_EXTENSION = 0_in;
-    constexpr units::degree_t AMPSCORE_ANGLE = 95_deg;
+    constexpr units::degree_t AMPSCORE_ANGLE = 96_deg;
     constexpr units::inch_t AMPSCORE_EXTENSION = 18.9_in;
     constexpr units::degree_t TRAPSCORE_ANGLE = 90_deg;
     constexpr units::inch_t TRAPSCORE_EXTESNION = 20_in;
@@ -84,6 +85,18 @@ public:
     bool in_place() {
         return units::math::abs(shoulder.get_position() - shoulder_goal) < constants::shoulder::TOLERANCE
             && units::math::abs(extension.get_position() - extension_goal) < constants::extension::TOLERANCE;
+    }
+
+    frc2::CommandPtr spit() {
+        return this->StartEnd(
+            [this]() {
+                scratch = state;
+                activate(constants::States::Spit);
+            },
+            [this]() {
+                activate(scratch);
+            }
+        );
     }
 
     /// @brief Runs a score routine, assuming a note is present.
@@ -178,7 +191,19 @@ public:
         );
     }
 
+    frc2::CommandPtr reverse() {
+        return this->StartEnd(
+            [this]() {
+                activate(constants::States::ReverseIntake);
+            },
+            [this]() {
+                activate(constants::States::Stopped);
+            }
+        );
+    }
+
 private:
+    constants::States scratch;
     constants::States state;
     Roller roller;
     Shoulder shoulder;

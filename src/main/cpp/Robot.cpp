@@ -58,19 +58,20 @@ void Robot::RobotInit() {
     aux_controller.A()
         .OnTrue(std::move(tele_track))
         .OnFalse(std::move(shooter_stable));
-    aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
+    aux_controller.POVUp(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
         if (!amp_prepscore.IsScheduled()) {
             amp_prepscore.Schedule();
         }
     });
-    aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Falling().IfHigh([this]() {
-        if (!amp_stop.IsScheduled()) {
-            amp_stop.Schedule();
+    aux_controller.POVDown(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
+        if (!amp_stop_l.IsScheduled()) {
+            amp_stop_l.Schedule();
         }
     });
-    aux_controller.RightBumper().OnTrue(std::move(amp_score));
+    aux_controller.RightBumper().WhileTrue(std::move(amp_spit));
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
+    chassis_controller->A().WhileTrue(reverse_intake());
 
     intake.init();
     shooter.init();

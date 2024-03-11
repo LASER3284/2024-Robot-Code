@@ -59,7 +59,7 @@ private:
 
     frc::TrapezoidProfile<units::degrees> profile {constraints};
 
-    frc::ArmFeedforward ff {0.02242_V, 0.46541_V, 0.0087_V / 1_deg_per_s, 0.01302_V / 1_deg_per_s_sq};
+    frc::ArmFeedforward ff {0.43058_V, 0.13126_V, 0.0088_V / 1_deg_per_s, 0.00086_V / 1_deg_per_s_sq};
 
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 

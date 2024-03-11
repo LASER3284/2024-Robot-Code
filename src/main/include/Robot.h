@@ -43,18 +43,20 @@ public:
         ).WithTimeout(1.2_s)
     );
 
-    frc2::CommandPtr amp_stop = frc2::cmd::Sequence(shooter.down(), amp_arm.stop(), frc2::cmd::Wait(0.5_s), shooter.stable());
+    frc2::CommandPtr amp_stop() {
+        return frc2::cmd::Sequence(shooter.down(), amp_arm.stop(), shooter.stable());
+    }
 
-    frc2::CommandPtr amp_score = frc2::cmd::Sequence(
-        shooter.down(),
-        amp_arm.RunOnce(
-            [this]() {
-                amp_arm.activate(subsystems::amparm::constants::States::Spit);
-            }
-        ),
-        frc2::cmd::Wait(1.33_s),
-        amp_arm.stop()
-    );
+    frc2::CommandPtr amp_stop_l = amp_stop();
+
+    frc2::CommandPtr amp_spit = amp_arm.spit();
+
+    frc2::CommandPtr reverse_intake() {
+        return frc2::cmd::Parallel(
+            intake.reverse(),
+            amp_arm.reverse()
+        );
+    }
 
     frc2::CommandPtr intake_cmd() {
         return frc2::cmd::Parallel(
@@ -75,13 +77,16 @@ public:
     }
 
     frc2::CommandPtr intake_ignore() {
-        return intake.RunEnd(
-            [this]() {
-                intake.activate(subsystems::intake::constants::DeployStates::SPIN);
-            },
-            [this]() {
-                intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
-            }
+        return frc2::cmd::Parallel(
+            intake.RunEnd(
+                [this]() {
+                    intake.activate(subsystems::intake::constants::DeployStates::SPIN);
+                },
+                [this]() {
+                    intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+                }
+            ),
+            amp_arm.intake()
         );
     }
 

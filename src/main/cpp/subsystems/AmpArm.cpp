@@ -18,32 +18,39 @@ void subsystems::amparm::AmpArm::tick() {
         case constants::States::Stopped:
             roller.stop();
             extension.set_goal(constants::DOWN_EXTENSION);
-            if (extension.in_place())
+            if (units::math::abs(extension.get_position() - constants::DOWN_EXTENSION) < constants::extension::TOLERANCE)
                 shoulder.set_goal(constants::DOWN_ANGLE);
             break;
         case constants::States::Intake:
-            shoulder.set_goal(constants::DOWN_ANGLE);
+            extension.set_goal(constants::DOWN_EXTENSION);
+            if (units::math::abs(extension.get_position() - constants::DOWN_EXTENSION) < constants::extension::TOLERANCE)
+                shoulder.set_goal(constants::DOWN_ANGLE);
             if (!has_piece())
                 roller.spin();
             else
                 roller.stop();
-            extension.set_goal(constants::DOWN_EXTENSION);
             break;
         case constants::States::Feed:
-            shoulder.set_goal(constants::DOWN_ANGLE);
-            roller.spin();
             extension.set_goal(constants::DOWN_EXTENSION);
+            roller.spin();
+            if (units::math::abs(extension.get_position() - constants::DOWN_EXTENSION) < constants::extension::TOLERANCE)
+                shoulder.set_goal(constants::DOWN_ANGLE);
             break;
         case constants::States::ReverseFeed:
-            shoulder.set_goal(constants::DOWN_ANGLE);
+            extension.set_goal(constants::DOWN_EXTENSION);
+            if (units::math::abs(extension.get_position() - constants::DOWN_EXTENSION) < constants::extension::TOLERANCE)
+                shoulder.set_goal(constants::DOWN_ANGLE);
             if (!has_piece())
                 roller.reverse();
-            extension.set_goal(constants::DOWN_EXTENSION);
+            break;
+        case constants::States::ReverseIntake:
+                roller.reverse();
             break;
         case constants::States::AmpScore:
             shoulder.set_goal(constants::AMPSCORE_ANGLE);
-            if (shoulder.in_place())
+            if (units::math::abs(shoulder.get_position() - constants::AMPSCORE_ANGLE) < constants::shoulder::TOLERANCE)
                 extension.set_goal(constants::AMPSCORE_EXTENSION);
+            roller.stop();
             break;
         case constants::States::Spit:
             roller.spin();
