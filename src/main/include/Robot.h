@@ -13,6 +13,8 @@
 #include "subsystems/AmpArm.h"
 #include <frc2/command/button/CommandXboxController.h>
 
+#include "lib/tracktracker/TrackTracker.h"
+
 class Robot : public frc::TimedRobot {
 public:
     void RobotInit() override;
@@ -90,8 +92,8 @@ public:
         );
     }
 
-    frc2::CommandPtr intake_continuous =
-        frc2::cmd::Parallel(
+    frc2::CommandPtr intake_continuous() {
+        return frc2::cmd::Parallel(
             intake.intake_continuous(),
             amp_arm.Run([this]() {
                 amp_arm.activate(subsystems::amparm::constants::States::Feed);
@@ -100,9 +102,10 @@ public:
             }),
             shooter.feed()
         ).WithTimeout(2.5_s);
+    }
 
-    frc2::CommandPtr auto_shoot = 
-        frc2::cmd::Sequence(
+    frc2::CommandPtr auto_shoot() {
+        return frc2::cmd::Sequence(
             intake.RunOnce([this]() {
                 intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
             }),
@@ -119,6 +122,7 @@ public:
             shooter.force_score(),
             shooter.stable()
         );
+    }
     frc2::CommandPtr auto_shoot2 = 
         frc2::cmd::Sequence(
             intake.RunOnce([this]() {
@@ -136,6 +140,8 @@ public:
         );
     
     frc2::CommandPtr tele_shoot = shooter.score();
+    frc2::CommandPtr tele_sub_score = shooter.sub_score();
+    frc2::CommandPtr tele_creamy_shot = shooter.creamy_shot();
     frc2::CommandPtr tele_feed = frc2::cmd::Parallel(shooter.feed(), amp_arm.feed());
     frc2::CommandPtr tele_track =
         frc2::cmd::Sequence(
@@ -165,6 +171,17 @@ public:
     };
 
 private:
+    tracktracker::TrackTracker tracker {
+        [this](frc::ChassisSpeeds s) { drive.drive_robo(s); },
+        [this]() { return drive.get_pose(); },
+        {1, 0, 0},
+        {1, 0, 0},
+        {2, 0, 0},
+        {{5_fps, 10_fps_sq}, {135_deg_per_s, 180_deg_per_s_sq}},
+        []() { return frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed; },
+        {&drive}
+    };
+
     std::shared_ptr<frc2::CommandXboxController> chassis_controller = std::make_shared<frc2::CommandXboxController>(0);
     frc2::CommandXboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};

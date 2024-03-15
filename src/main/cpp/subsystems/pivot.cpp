@@ -37,7 +37,10 @@ void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
 
 units::degree_t subsystems::pivot::Pivot::get_angle() {
     units::degree_t initial_offset = 0_deg;
-    const units::degree_t constant_offset = 63_deg;
+    // this is the angle offset, change it keaton and cameron *yeehaw*
+    // TO DEPLOY
+    // ctrl shift p, deploy robot code, hit enter
+    const units::degree_t constant_offset = 130_deg;
     while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }

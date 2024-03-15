@@ -26,7 +26,7 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
             PIDConstants(2.2, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
-            ReplanningConfig(false, false)
+            ReplanningConfig(false, true)
         ),
         []() {
             auto alliance = frc::DriverStation::GetAlliance();

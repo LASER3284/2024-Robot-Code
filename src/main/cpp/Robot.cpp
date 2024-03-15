@@ -8,6 +8,8 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <pathplanner/lib/auto/NamedCommands.h>
 
+#include "lib/tracktracker/TrackTracker.h"
+
 #include <filesystem>
 #include <frc/Filesystem.h>
 
@@ -29,11 +31,10 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
-    pathplanner::NamedCommands::registerCommand("shoot", std::move(auto_shoot));
+    pathplanner::NamedCommands::registerCommand("shoot", std::move(auto_shoot()));
     pathplanner::NamedCommands::registerCommand("shoot start", std::move(auto_shoot2));
-    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous));
+    pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous()));
     // pathplanner::NamedCommands::registerCommand("amp", amp_score());
-
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
 
@@ -46,6 +47,9 @@ void Robot::RobotInit() {
     }
 
     frc::SmartDashboard::PutData("AutoChooser", &auto_chooser);
+
+    tracktracker::TrackTracker::register_namedpoint("shoot", std::move(auto_shoot()));
+    tracktracker::TrackTracker::register_namedpoint("goto1", tracker.generate({frc::Pose2d{{2.75_m, 4.1_m}, {0_deg}}, frc::ChassisSpeeds{}}));
 
     aux_controller.B()
         .WhileTrue(std::move(reverse_feed));
@@ -72,6 +76,8 @@ void Robot::RobotInit() {
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
     chassis_controller->A().WhileTrue(reverse_intake());
+    chassis_controller->RightBumper().OnTrue(std::move(tele_sub_score));
+    chassis_controller->Y().OnTrue(std::move(tele_creamy_shot));
 
     intake.init();
     shooter.init();

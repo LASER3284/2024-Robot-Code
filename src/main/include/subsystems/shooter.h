@@ -25,10 +25,12 @@ namespace constants {
         TrackingIdle = 0,
         TrackShot,
         TrackForceShot,
+        SubScore,
         StableIdle,
         StableShot,
         ReverseFeed,
         LowStableShot,
+        CreamyShot,
         PrepFeeding,
         Stopped,
         Down
@@ -59,6 +61,12 @@ namespace constants {
 
     constexpr units::feet_per_second_t SHOT_VELOCITY = 77.5_fps;
     constexpr units::feet_per_second_t IDLE_VELOCITY = 45_fps;
+
+    // change these number keaton and cameron 
+    constexpr units::degree_t SUB_PIVOT_ANGLE = 70_deg;
+    constexpr units::degree_t SUB_TURRET_ANGLE = 0_deg;
+
+    constexpr units::degree_t CREAMY_PIVOT_ANGLE = 35_deg;
 }
 
 class Shooter : public frc2::SubsystemBase {
@@ -123,6 +131,30 @@ public:
             this->Run([this]() {
                 scratch = state;
                 activate(constants::ShooterStates::TrackForceShot);
+            }).WithTimeout(0.5_s),
+            this->RunOnce([this]() {
+                activate(scratch);
+            })
+        );
+    }
+
+    frc2::CommandPtr sub_score() {
+        return frc2::cmd::Sequence(
+            this->Run([this]() {
+                scratch = state;
+                activate(constants::ShooterStates::SubScore);
+            }).WithTimeout(0.5_s),
+            this->RunOnce([this]() {
+                activate(scratch);
+            })
+        );
+    }
+
+    frc2::CommandPtr creamy_shot() {
+        return frc2::cmd::Sequence(
+            this->Run([this]() {
+                scratch = state;
+                activate(constants::ShooterStates::CreamyShot);
             }).WithTimeout(0.5_s),
             this->RunOnce([this]() {
                 activate(scratch);
