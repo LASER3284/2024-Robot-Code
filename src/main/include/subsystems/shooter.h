@@ -10,6 +10,8 @@
 #include <units/velocity.h>
 #include <units/acceleration.h>
 #include <units/angle.h>
+#include <frc/DriverStation.h>
+
 
 // sysid
 #include <frc2/command/Commands.h>
@@ -49,6 +51,7 @@ namespace constants {
 
     constexpr auto PIVOT_CORRECTION = 0.2_deg / 1_ft;
     constexpr auto TURRET_CORRECTION = -0.075_deg / 1_ft;
+    constexpr auto FLYWHEEL_CORRECTION_CREAMY = 2.1_fps / 1_ft;
 
     constexpr units::degree_t PIVOT_IDLE = 40_deg;
     constexpr units::degree_t TURRET_IDLE = 14_deg;
@@ -66,7 +69,9 @@ namespace constants {
     constexpr units::degree_t SUB_PIVOT_ANGLE = 70_deg;
     constexpr units::degree_t SUB_TURRET_ANGLE = 0_deg;
 
-    constexpr units::degree_t CREAMY_PIVOT_ANGLE = 35_deg;
+    constexpr units::degree_t CREAMY_PIVOT_ANGLE = 45_deg;
+    constexpr units::degree_t CREAMY_TURRET_ANGLE = 0_deg;
+    constexpr units::feet_per_second_t CREAMY_VELOCITY = 65_fps;
 }
 
 class Shooter : public frc2::SubsystemBase {
@@ -102,7 +107,44 @@ public:
     /// @brief Returns true if all three submechanisms are within their
     /// tolerances.
     bool in_place() {
-        return turret.at_goal_point() && flywheel.at_speed() && pivot.at_angle();
+        switch (state) {
+        case constants::ShooterStates::Stopped: {
+            return units::math::abs(turret.get_angle() - constants::TURRET_IDLE) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - constants::PIVOT_IDLE) < pivot::constants::TOLERANCE
+                && units::math::abs(flywheel.get_exit_vel()) < flywheel::constants::TOLERANCE; 
+        }
+        break;
+        case constants::ShooterStates::Down: {
+            return units::math::abs(turret.get_angle() - constants::TURRET_DOWN) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - constants::PIVOT_DOWN) < pivot::constants::TOLERANCE
+                && units::math::abs(flywheel.get_exit_vel()) < flywheel::constants::TOLERANCE; 
+        }
+        break;
+        case constants::ShooterStates::TrackShot:
+        case constants::ShooterStates::TrackForceShot:
+        case constants::ShooterStates::TrackingIdle: {
+            return units::math::abs(turret.get_angle() - (turret_angle - 4_deg)) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - pivot_angle) < pivot::constants::TOLERANCE
+                && units::math::abs(flywheel.get_exit_vel() - constants::SHOT_VELOCITY) < flywheel::constants::TOLERANCE; 
+        }
+        break;
+        case constants::ShooterStates::SubScore: {
+            return units::math::abs(turret.get_angle() - constants::SUB_TURRET_ANGLE) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - constants::SUB_PIVOT_ANGLE) < pivot::constants::TOLERANCE
+                && units::math::abs(flywheel.get_exit_vel() - constants::SHOT_VELOCITY) < flywheel::constants::TOLERANCE; 
+        }
+        break;
+        case constants::ShooterStates::CreamyShot: {
+            return units::math::abs(turret.get_angle() - (turret_angle - 15_deg * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1))) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - constants::CREAMY_PIVOT_ANGLE) < pivot::constants::TOLERANCE
+                && units::math::abs(flywheel.get_exit_vel() - (hypot * constants::FLYWHEEL_CORRECTION_CREAMY)) < flywheel::constants::TOLERANCE; 
+        }
+        break;
+        default: {
+            return false;
+        }
+        break;
+    }
     }
 
     /// @brief Cancels the SysId command for each of the submechanisms.
@@ -152,10 +194,11 @@ public:
 
     frc2::CommandPtr creamy_shot() {
         return frc2::cmd::Sequence(
-            this->Run([this]() {
+            this->RunOnce([this]() {
                 scratch = state;
                 activate(constants::ShooterStates::CreamyShot);
-            }).WithTimeout(0.5_s),
+            }),
+            frc2::cmd::Wait(1.5_s),
             this->RunOnce([this]() {
                 activate(scratch);
             })
@@ -227,6 +270,7 @@ private:
     constants::ShooterStates state = constants::ShooterStates::Stopped;
     units::degree_t pivot_angle;
     units::degree_t turret_angle;
+    units::foot_t hypot;
     subsystems::turret::Turret turret;
     subsystems::flywheel::Flywheel flywheel;
     subsystems::pivot::Pivot pivot;

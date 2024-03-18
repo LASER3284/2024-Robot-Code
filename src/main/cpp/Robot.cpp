@@ -72,12 +72,19 @@ void Robot::RobotInit() {
             amp_stop_l.Schedule();
         }
     });
+    aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).IfHigh([this]() {
+        drive.reset_pose_to_vision();
+    });
+    chassis_controller->POVDown(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this](){
+        if (!tele_creamy_shot.IsScheduled()) {
+            tele_creamy_shot.Schedule();
+        }
+    });
     aux_controller.RightBumper().WhileTrue(std::move(amp_spit));
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
     chassis_controller->A().WhileTrue(reverse_intake());
     chassis_controller->RightBumper().OnTrue(std::move(tele_sub_score));
-    chassis_controller->Y().OnTrue(std::move(tele_creamy_shot));
 
     intake.init();
     shooter.init();

@@ -49,7 +49,7 @@ private:
 
     frc::TrapezoidProfile<units::degrees>::Constraints constraints {135_deg_per_s, 180_deg_per_s_sq};
 
-    frc::TrapezoidProfile<units::degrees>::State goal;
+    frc::TrapezoidProfile<units::degrees>::State goal {14_deg, 0_deg_per_s};
     frc::TrapezoidProfile<units::degrees>::State setpoint;
 
     frc::TrapezoidProfile<units::degrees> profile {constraints};
@@ -67,7 +67,7 @@ private:
     
     frc::PIDController pid {
         0.125,
-        0.00375,
+        0.004,
         0
     };
 

@@ -22,11 +22,11 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(6.5, 0.0, 0.0),
-            PIDConstants(2.2, 0.0, 0.0),
+            PIDConstants(5.5, 0.0, 0.0),
+            PIDConstants(1.76, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
-            ReplanningConfig(false, true)
+            ReplanningConfig(false, false)
         ),
         []() {
             auto alliance = frc::DriverStation::GetAlliance();
@@ -168,10 +168,10 @@ void subsystems::drive::Drivetrain::update_odometry() {
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
-        double uncertainty = 2.0;
+        double uncertainty = 0.7;
         int num_targets = 0;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 1 / v.GetArea();
+            uncertainty *= 1 / (v.GetArea() / 10);
             num_targets++;
         }
         uncertainty = uncertainty / num_targets;
@@ -185,9 +185,9 @@ void subsystems::drive::Drivetrain::update_odometry() {
     vision_est = photon_estimator_front.Update();
 
     if (vision_est) {
-        double uncertainty = 2.0;
+        double uncertainty = 0.7;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 1 / v.GetArea();
+            uncertainty *= 1 / (v.GetArea() / 10);
         }
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),

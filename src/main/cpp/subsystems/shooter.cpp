@@ -26,14 +26,14 @@ void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
         frc::SmartDashboard::PutNumber("REACHED THE THING", 12);
     }
 
-    units::foot_t hypotenuse = units::math::sqrt(y * y + x * x);
-    turret_angle += units::math::atan2(y, x) + constants::TURRET_CORRECTION * hypotenuse;
+    hypot = units::math::sqrt(y * y + x * x);
+    turret_angle += units::math::atan2(y, x) + constants::TURRET_CORRECTION * hypot;
 
     turret_angle = frc::AngleModulus(turret_angle - 6_deg);
 
-    pivot_angle = units::math::atan2(constants::DELTA_Y, hypotenuse);
-    if (hypotenuse > 5_ft) {
-        pivot_angle += units::foot_t(pow(hypotenuse.value(), 1.1)) * constants::PIVOT_CORRECTION;
+    pivot_angle = units::math::atan2(constants::DELTA_Y, hypot);
+    if (hypot > 5_ft) {
+        pivot_angle += units::foot_t(pow(hypot.value(), 1.1)) * constants::PIVOT_CORRECTION;
     }
 
     pivot_angle = frc::AngleModulus(pivot_angle);
@@ -92,6 +92,7 @@ void subsystems::shooter::Shooter::tick() {
             pivot.set_angle(constants::PIVOT_FEED);
             if (pivot_ok())
                 turret.set_angle(constants::TURRET_FEED);
+
             if (!has_piece()) {
                 flywheel.feed(false);
             } else {
@@ -147,9 +148,15 @@ void subsystems::shooter::Shooter::tick() {
         break;
         case constants::ShooterStates::CreamyShot: {
             pivot.set_angle(constants::CREAMY_PIVOT_ANGLE);
-            turret.set_angle(turret_angle - 4_deg);
-            flywheel.set_exit_vel(constants::SHOT_VELOCITY);
+            if (pivot_ok())
+                turret.set_angle(turret_angle - 15_deg * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1));
+            flywheel.set_exit_vel(hypot * constants::FLYWHEEL_CORRECTION_CREAMY);
+
+            if (in_place() && has_piece()) {
+                flywheel.feed(true);
+            }
         }
+        break;
         default: {
             state = constants::ShooterStates::Stopped;
         }

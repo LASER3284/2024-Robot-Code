@@ -40,7 +40,7 @@ units::degree_t subsystems::pivot::Pivot::get_angle() {
     // this is the angle offset, change it keaton and cameron *yeehaw*
     // TO DEPLOY
     // ctrl shift p, deploy robot code, hit enter
-    const units::degree_t constant_offset = 130_deg;
+    const units::degree_t constant_offset = 128_deg;
     while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }
