@@ -46,12 +46,15 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
         reset_odometry();
     }
 
-    const double fast_mode_mul = joystick->GetLeftTriggerAxis() > 0.60 ? joystick->GetLeftTriggerAxis() : 0.60;
+    if (joystick->GetLeftTriggerAxis() > 0.7) {
+        maintain_heading = frc::AngleModulus(get_pose().Rotation().Degrees()) - units::math::fmod(frc::AngleModulus(get_pose().Rotation().Degrees()), 5_deg);
+    } else {
+        maintain_heading = std::nullopt;
+    }
+
     double slow_mode_mul = joystick->GetRightTriggerAxis() > 0.60 ? 1.0 - joystick->GetRightTriggerAxis() : 1.0;
     slow_mode_mul = slow_mode_mul < 0.1 ? 0.1 : slow_mode_mul;
-    const double mode_mul = slow_mode_mul != 1.0 ? slow_mode_mul : fast_mode_mul;
-
-    frc::SmartDashboard::PutNumber("Drivetrain_fast_mul", fast_mode_mul);
+    const double mode_mul = slow_mode_mul;
 
     double x_axis = -joystick->GetLeftX();
     double y_axis = -joystick->GetLeftY();
@@ -96,12 +99,17 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
         )};
     }
 
-    if (joystick->GetBButton()) {
+    if (joystick->GetBButton() && !maintain_heading) {
         chassis_speeds.omega = units::radians_per_second_t{heading_controller.Calculate(
             frc::AngleModulus(get_pose().Rotation().Radians()).value(),
             units::radian_t{
                 frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -135_deg : -45_deg
             }.value()
+        )};
+    } else if (maintain_heading) {
+        chassis_speeds.omega = units::radians_per_second_t{heading_controller.Calculate(
+            frc::AngleModulus(get_pose().Rotation().Radians()).value(),
+            units::radian_t{maintain_heading.value()}.value()
         )};
     }
 

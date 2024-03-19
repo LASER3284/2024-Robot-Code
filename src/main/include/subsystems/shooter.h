@@ -49,8 +49,8 @@ namespace constants {
     constexpr frc::Translation2d GOAL_RED_POSITION { 652.75_in, 218.42_in};
     constexpr units::foot_t DELTA_Y = 7_ft;
 
-    constexpr auto PIVOT_CORRECTION = 0.2_deg / 1_ft;
-    constexpr auto TURRET_CORRECTION = -0.075_deg / 1_ft;
+    constexpr auto PIVOT_CORRECTION = 0.425_deg / 1_ft;
+    constexpr auto TURRET_CORRECTION = -.15_deg / 1_ft;
     constexpr auto FLYWHEEL_CORRECTION_CREAMY = 2.1_fps / 1_ft;
 
     constexpr units::degree_t PIVOT_IDLE = 40_deg;
@@ -62,10 +62,9 @@ namespace constants {
     constexpr units::degree_t PIVOT_FEED = 40_deg;
     constexpr units::degree_t TURRET_FEED = 14_deg;
 
-    constexpr units::feet_per_second_t SHOT_VELOCITY = 77.5_fps;
+    constexpr units::feet_per_second_t SHOT_VELOCITY = 82_fps;
     constexpr units::feet_per_second_t IDLE_VELOCITY = 45_fps;
 
-    // change these number keaton and cameron 
     constexpr units::degree_t SUB_PIVOT_ANGLE = 70_deg;
     constexpr units::degree_t SUB_TURRET_ANGLE = 0_deg;
 

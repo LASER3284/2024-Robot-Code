@@ -24,7 +24,7 @@ namespace swerve {
 namespace constants {
     constexpr double kDRIVE_RATIO = 6.12;
 
-    constexpr units::inch_t kWHEEL_DIAM = 3.9_in;
+    constexpr units::inch_t kWHEEL_DIAM = 3.885_in;
 
     constexpr units::inch_t kWHEEL_CIRC = kWHEEL_DIAM * std::numbers::pi;
 

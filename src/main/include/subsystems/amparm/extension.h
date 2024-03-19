@@ -61,7 +61,7 @@ private:
 
     ctre::phoenix6::hardware::TalonFX motor {18};
 
-    frc::TrapezoidProfile<units::inches>::Constraints constraints {30_in / 1_s, 36_in / 1_s / 1_s};
+    frc::TrapezoidProfile<units::inches>::Constraints constraints {48_in / 1_s, 60_in / 1_s / 1_s};
 
     frc::TrapezoidProfile<units::inches>::State goal;
     frc::TrapezoidProfile<units::inches>::State setpoint;

@@ -137,6 +137,8 @@ public:
 private:
     std::shared_ptr<frc::XboxController> joystick;
 
+    std::optional<units::degree_t> maintain_heading;
+
     frc::Field2d field_drawing;
 
     std::string current_traj;

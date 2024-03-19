@@ -18,7 +18,8 @@ namespace pivot {
 
 namespace constants {
     /// @brief The value to give to SetInverted
-    constexpr bool DIRECTION = false;
+    constexpr bool DIRECTION = 
+    false;
     // CHANGE THIS IF INVERTED ^----
 
     constexpr units::degree_t TOLERANCE = 1_deg;
