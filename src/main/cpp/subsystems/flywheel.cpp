@@ -4,6 +4,9 @@
 void subsystems::flywheel::Flywheel::init() {
     motor.SetInverted(constants::FLYWHEEL_DIRECTION);
     feedwheel_motor.SetInverted(constants::FEED_DIRECTION);
+
+    motor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+    feedwheel_motor.SetNeutralMode(ctre::phoenix6::signals::NeutralModeValue::Brake);
 }
 
 void subsystems::flywheel::Flywheel::update_nt() {
@@ -37,33 +40,18 @@ void subsystems::flywheel::Flywheel::feed(bool fire) {
     if (fire) {
         feedwheel_motor.SetVoltage(12_V);
     } else {
-        if (!has_piece())
+        //if (!has_piece())
             feedwheel_motor.SetVoltage(1_V);
-        else
-            feedwheel_motor.SetVoltage(0_V);
+        //else
+        //    feedwheel_motor.SetVoltage(0_V);
     }
 }
 
 void subsystems::flywheel::Flywheel::reverse_feed() {
-    if (piece_sensor.Get()) {
-        feedwheel_motor.SetVoltage(0_V);
-    } else {
-        feedwheel_motor.SetVoltage(-0.6_V);
-    }
+    feedwheel_motor.SetVoltage(-1_V);
 }
 
 bool subsystems::flywheel::Flywheel::has_piece() {
-    /*
-    if (piece_sensor.Get()) {
-        return false;
-    } else {
-        if (units::math::abs(goal_feed - units::turn_t{feed_enc.GetPosition()}) < units::turn_t{0.1}) {
-            return true;
-        }
-        goal_feed = units::turn_t{feed_enc.GetPosition()} + units::turn_t{0.25};
-        return false;
-    }
-    */
    return !piece_sensor.Get();
 };
 

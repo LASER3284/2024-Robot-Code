@@ -192,13 +192,26 @@ public:
     }
 
     frc2::CommandPtr reverse() {
-        return this->StartEnd(
-            [this]() {
-                activate(constants::States::ReverseIntake);
-            },
-            [this]() {
-                activate(constants::States::Stopped);
-            }
+        return frc2::cmd::Sequence(
+            this->Run(
+                [this]() {
+                    activate(constants::States::ReverseIntake);
+                }
+            ).Until([this]() {
+                return has_piece();
+            }),
+            this->StartEnd(
+                [this]() {
+                    activate(constants::States::ReverseIntake);
+                }, 
+                [this]() {
+                    activate(constants::States::Stopped);
+                }
+            ).Until(
+                [this]() {
+                    return !has_piece();
+                }
+            )
         );
     }
 

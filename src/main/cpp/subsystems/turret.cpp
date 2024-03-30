@@ -25,7 +25,7 @@ void subsystems::turret::Turret::set_angle(units::degree_t goal) {
 units::degree_t subsystems::turret::Turret::get_angle() {
     // negative bc thrubore is wrong direction on physical bot
     units::degree_t initial_offset = 0_deg;
-    const units::degree_t constant_offset = 228_deg;
+    const units::degree_t constant_offset = 278.2_deg;
     while (units::math::abs(turret_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (turret_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }

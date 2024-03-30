@@ -47,7 +47,7 @@ private:
     
     units::degree_t goal_angle;
 
-    frc::TrapezoidProfile<units::degrees>::Constraints constraints {135_deg_per_s, 180_deg_per_s_sq};
+    frc::TrapezoidProfile<units::degrees>::Constraints constraints {190_deg_per_s, 210_deg_per_s_sq};
 
     frc::TrapezoidProfile<units::degrees>::State goal {14_deg, 0_deg_per_s};
     frc::TrapezoidProfile<units::degrees>::State setpoint;

@@ -11,7 +11,7 @@ subsystems::swerve::Module::Module(const int drive, const int turn, const int en
     drive_motor->SetIdleMode(rev::CANSparkFlex::IdleMode::kBrake);
     turn_motor->SetNeutralMode(signals::NeutralModeValue::Brake);
 
-    drive_enc = std::make_unique<rev::SparkRelativeEncoder>(drive_motor->GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor));
+    drive_enc = std::make_unique<rev::SparkRelativeEncoder>(drive_motor->GetEncoder());
 
     heading_controller.EnableContinuousInput(
         -std::numbers::pi,
@@ -22,7 +22,7 @@ subsystems::swerve::Module::Module(const int drive, const int turn, const int en
     if (cancoder_heading) {
         turn_motor->SetPosition(cancoder_heading.value() * constants::TURN_RATIO);
     }
-    encoder->OptimizeBusUtilization();
+    //encoder->OptimizeBusUtilization();
 }
 
 frc::SwerveModuleState subsystems::swerve::Module::get_state() const {
@@ -74,7 +74,7 @@ void subsystems::swerve::Module::tick() {
 }
 
 units::radian_t subsystems::swerve::Module::get_heading() const {
-    return turn_motor->GetPosition().GetValue() / constants::TURN_RATIO;
+    return encoder->GetPosition().GetValue();
 }
 
 units::feet_per_second_t subsystems::swerve::Module::get_velocity() const {

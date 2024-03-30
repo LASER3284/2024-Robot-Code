@@ -64,7 +64,7 @@ public:
     
 private:
     units::turn_t goal_feed = units::turn_t{0};
-    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0.24182_V, 0.08283_V / 1_fps, 0.02161_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0.08283_V / 1_fps, 0.02161_V / 1_fps_sq};
 
     /// @brief this is the flywheel motor
     rev::CANSparkFlex motor {20, rev::CANSparkLowLevel::MotorType::kBrushless};
@@ -78,7 +78,7 @@ private:
     std::unique_ptr<ctre::phoenix6::hardware::CANcoder> feed_enc;
 
     /// @brief this is the can spark flex encoder
-    rev::SparkRelativeEncoder flywheel_encoder = motor.GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor);
+    rev::SparkRelativeEncoder flywheel_encoder = motor.GetEncoder();
     /// @brief Creates a PIDController with gains kP, kI, and kD
      
     /// @brief this is the sensor for the shooter

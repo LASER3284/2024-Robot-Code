@@ -23,7 +23,7 @@ void intake::Intake::activate(intake::constants::DeployStates state) {
         }
         break;
         case constants::DeployStates::REVSPIN: {
-            roller_voltage = -constants::ROLLER_INTAKE_SETPOINT;
+            roller_voltage = -12_V;
         }
         break;
     }

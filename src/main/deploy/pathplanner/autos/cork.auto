@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3676672858340169,
-      "y": 2.7369809234624016
+      "x": 1.37,
+      "y": 2.74
     },
     "rotation": 0
   },
@@ -24,7 +24,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "35b"
+                  "pathName": "cork-a"
                 }
               },
               {
@@ -34,7 +34,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.4
+                        "waitTime": 1.7
                       }
                     },
                     {
@@ -52,7 +52,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "35c"
+            "pathName": "cork-b"
           }
         },
         {
@@ -68,7 +68,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "35d"
+                  "pathName": "cork-c"
                 }
               },
               {
@@ -91,12 +91,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "35e"
           }
         }
       ]

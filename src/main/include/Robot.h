@@ -57,38 +57,41 @@ public:
         return frc2::cmd::Parallel(
             intake.reverse(),
             amp_arm.reverse()
-        );
+        ).WithTimeout(6.5_s);
     }
 
     frc2::CommandPtr intake_cmd() {
         return frc2::cmd::Parallel(
-            intake.RunEnd(
+            intake.intake(),
+            amp_arm.RunEnd(
                 [this]() {
-                    if (amp_arm.in_place()) {
-                        intake.activate(subsystems::intake::constants::DeployStates::SPIN);
-                    } else {
-                        intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
-                    }
+                    amp_arm.activate(subsystems::amparm::constants::States::Feed);
                 },
                 [this]() {
-                    intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+                    amp_arm.activate(subsystems::amparm::constants::States::Stopped);
                 }
-            ),
-            amp_arm.intake()
-        );
+            ).Until([this]() {
+                return shooter.has_piece();
+            }),
+            shooter.feed()
+        ).Until([this]() {
+            return shooter.has_piece();
+        });
     }
 
     frc2::CommandPtr intake_ignore() {
         return frc2::cmd::Parallel(
-            intake.RunEnd(
+            intake.intake(),
+            amp_arm.RunEnd(
                 [this]() {
-                    intake.activate(subsystems::intake::constants::DeployStates::SPIN);
+                    amp_arm.activate(subsystems::amparm::constants::States::Feed);
                 },
                 [this]() {
-                    intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
-                }
-            ),
-            amp_arm.intake()
+                    amp_arm.activate(subsystems::amparm::constants::States::Stopped);
+                }).Until([this]() {
+                return shooter.has_piece();
+            }),
+            shooter.feed()
         );
     }
 
@@ -101,6 +104,17 @@ public:
                 return shooter.has_piece();
             }),
             shooter.feed()
+        ).WithTimeout(3_s);
+    }
+
+    frc2::CommandPtr intake_continuous_amp() {
+        return frc2::cmd::Parallel(
+            intake.intake_continuous(),
+            amp_arm.Run([this]() {
+                amp_arm.activate(subsystems::amparm::constants::States::Intake);
+            }).Until([this]() {
+                return amp_arm.has_piece();
+            })
         ).WithTimeout(2.5_s);
     }
 
@@ -114,11 +128,12 @@ public:
             }).Until([this]() {
                 return shooter.in_place();
             }).BeforeStarting([this]() {
+                //drive.reset_pose_to_vision();
                 shooter.activate(subsystems::shooter::constants::ShooterStates::TrackingIdle);
-            }),
+            }).WithTimeout(1.75_s),
             shooter.RunOnce([this]() {
                 shooter.activate(subsystems::shooter::constants::ShooterStates::TrackingIdle);
-            }).WithTimeout(3_s),
+            }),
             shooter.force_score(),
             shooter.stable()
         );
@@ -141,16 +156,15 @@ public:
     
     frc2::CommandPtr tele_shoot = shooter.score();
     frc2::CommandPtr tele_sub_score = shooter.sub_score();
+    frc2::CommandPtr tele_feed() { return frc2::cmd::Parallel(shooter.feed(), amp_arm.feed()).Until([this]() { return shooter.has_piece(); }); }
+    frc2::CommandPtr tele_track = shooter.track();
     frc2::CommandPtr tele_creamy_shot = shooter.creamy_shot();
-    frc2::CommandPtr tele_feed = frc2::cmd::Parallel(shooter.feed(), amp_arm.feed());
-    frc2::CommandPtr tele_track =
-        frc2::cmd::Sequence(
-            std::move(tele_feed),
-            shooter.track()
-        );
     frc2::CommandPtr shooter_stable = shooter.stable();
 
-    frc2::CommandPtr reverse_feed = shooter.reverse_feed();
+    frc2::CommandPtr reverse_feed = frc2::cmd::Race(
+            shooter.reverse_feed(),
+            amp_arm.reverse()
+        );
 
     enum SysIdChooser {
         QsFwd = 0,

@@ -39,17 +39,14 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
     );
 
     pose_estimator.SetVisionMeasurementStdDevs({2.7, 2.7, 2.7});
+
+    // Radians :)
+    heading_controller.EnableContinuousInput(-std::numbers::pi, std::numbers::pi);
 }
 
 void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     if (joystick->GetStartButton()) {
         reset_odometry();
-    }
-
-    if (joystick->GetLeftTriggerAxis() > 0.7) {
-        maintain_heading = frc::AngleModulus(get_pose().Rotation().Degrees()) - units::math::fmod(frc::AngleModulus(get_pose().Rotation().Degrees()), 5_deg);
-    } else {
-        maintain_heading = std::nullopt;
     }
 
     double slow_mode_mul = joystick->GetRightTriggerAxis() > 0.60 ? 1.0 - joystick->GetRightTriggerAxis() : 1.0;
@@ -99,17 +96,21 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
         )};
     }
 
-    if (joystick->GetBButton() && !maintain_heading) {
+    if (joystick->GetBButton()) {
         chassis_speeds.omega = units::radians_per_second_t{heading_controller.Calculate(
             frc::AngleModulus(get_pose().Rotation().Radians()).value(),
             units::radian_t{
                 frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -135_deg : -45_deg
             }.value()
         )};
-    } else if (maintain_heading) {
+    }
+
+    if (joystick->GetLeftTriggerAxis() > 0.7) {
         chassis_speeds.omega = units::radians_per_second_t{heading_controller.Calculate(
             frc::AngleModulus(get_pose().Rotation().Radians()).value(),
-            units::radian_t{maintain_heading.value()}.value()
+            units::radian_t{
+                frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? 180_deg : 0_deg
+            }.value()
         )};
     }
 
@@ -176,10 +177,10 @@ void subsystems::drive::Drivetrain::update_odometry() {
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
-        double uncertainty = 0.7;
+        double uncertainty = 0.545;
         int num_targets = 0;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 1 / (v.GetArea() / 10);
+            uncertainty *= 1 / v.GetArea();
             num_targets++;
         }
         uncertainty = uncertainty / num_targets;
@@ -193,9 +194,9 @@ void subsystems::drive::Drivetrain::update_odometry() {
     vision_est = photon_estimator_front.Update();
 
     if (vision_est) {
-        double uncertainty = 0.7;
+        double uncertainty = 0.545;
         for (const auto &v : vision_est->targetsUsed) {
-            uncertainty *= 1 / (v.GetArea() / 10);
+            uncertainty *= 1 / v.GetArea();
         }
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
@@ -311,8 +312,11 @@ void subsystems::drive::Drivetrain::update_nt() {
     field_drawing.SetRobotPose(get_pose());
 
     frc::SmartDashboard::PutNumber("Drivetrain_fl_current", front_left.get_drive_current());
+    frc::SmartDashboard::PutNumber("Drivetrain_fl_position", units::foot_t{front_left.get_position().distance}.value());
 
     frc::SmartDashboard::PutNumber("Drivetrain_fl_heading", units::degree_t{front_left.get_heading()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_speed_fps", units::feet_per_second_t{front_left.get_velocity()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_br_heading", units::degree_t{back_right.get_heading()}.value());
+    frc::SmartDashboard::PutNumber("Drivetrain_bl_heading", units::degree_t{back_left.get_heading()}.value());
+    frc::SmartDashboard::PutNumber("Drivetrain_fr_heading", units::degree_t{front_right.get_heading()}.value());
 }

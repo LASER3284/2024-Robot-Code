@@ -34,6 +34,8 @@ void Robot::RobotInit() {
     pathplanner::NamedCommands::registerCommand("shoot", std::move(auto_shoot()));
     pathplanner::NamedCommands::registerCommand("shoot start", std::move(auto_shoot2));
     pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous()));
+    pathplanner::NamedCommands::registerCommand("evil", std::move(reverse_intake()));
+    pathplanner::NamedCommands::registerCommand("intake amp", std::move(intake_continuous_amp()));
     // pathplanner::NamedCommands::registerCommand("amp", amp_score());
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
@@ -95,6 +97,10 @@ void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
 
+    if (frc::SmartDashboard::GetBoolean("drive_force_id7", false)) {
+        drive.set_pose({{ 88_in, 159.5_in }, {}});
+    }
+
     shooter.update_nt(drive.get_pose());
 
     amp_arm.update_nt();
@@ -122,6 +128,10 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {
     amp_arm.reset();
+    frc::SmartDashboard::PutBoolean("drive_force_id7", false);
+    frc::SmartDashboard::PutBoolean("drive_force_id7", false);
+    frc::SmartDashboard::PutBoolean("drive_force_id7", false);
+    frc::SmartDashboard::PutBoolean("drive_force_id7", false);
 }
 
 void Robot::TeleopPeriodic() {

@@ -49,9 +49,9 @@ namespace constants {
     constexpr frc::Translation2d GOAL_RED_POSITION { 652.75_in, 218.42_in};
     constexpr units::foot_t DELTA_Y = 7_ft;
 
-    constexpr auto PIVOT_CORRECTION = 0.425_deg / 1_ft;
-    constexpr auto TURRET_CORRECTION = -.15_deg / 1_ft;
-    constexpr auto FLYWHEEL_CORRECTION_CREAMY = 2.1_fps / 1_ft;
+    constexpr auto PIVOT_CORRECTION = 0.4075_deg / 1_ft;
+    constexpr auto TURRET_CORRECTION = 0.15_deg / 1_ft;
+    constexpr auto FLYWHEEL_CORRECTION_CREAMY = 1.8_fps / 1_ft;
 
     constexpr units::degree_t PIVOT_IDLE = 40_deg;
     constexpr units::degree_t TURRET_IDLE = 14_deg;
@@ -205,16 +205,14 @@ public:
     }
 
     frc2::CommandPtr reverse_feed() {
-        return frc2::cmd::Sequence(
-            this->Run([this]() {
+        return this->StartEnd(
+            [this]() {
                 scratch = state;
                 activate(constants::ShooterStates::ReverseFeed);
-            }).Until([this]() {
-                return !has_piece();
-            }),
-            this->RunOnce([this]() {
+            },
+            [this]() {
                 activate(scratch);
-            })
+            }
         );
     }
 
