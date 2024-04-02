@@ -4,14 +4,12 @@
 using namespace ctre::phoenix6;
 
 subsystems::swerve::Module::Module(const int drive, const int turn, const int enc) {
-    drive_motor = std::make_unique<rev::CANSparkFlex>(drive, rev::CANSparkLowLevel::MotorType::kBrushless);
+    drive_motor = std::make_unique<hardware::TalonFX>(turn);
     turn_motor = std::make_unique<hardware::TalonFX>(turn);
     encoder = std::make_unique<hardware::CANcoder>(enc);
 
-    drive_motor->SetIdleMode(rev::CANSparkFlex::IdleMode::kBrake);
+    drive_motor->SetNeutralMode(signals::NeutralModeValue::Brake);
     turn_motor->SetNeutralMode(signals::NeutralModeValue::Brake);
-
-    drive_enc = std::make_unique<rev::SparkRelativeEncoder>(drive_motor->GetEncoder());
 
     heading_controller.EnableContinuousInput(
         -std::numbers::pi,
@@ -35,7 +33,7 @@ frc::SwerveModuleState subsystems::swerve::Module::get_state() const {
 frc::SwerveModulePosition subsystems::swerve::Module::get_position() const {
     return {
         units::meter_t{
-            drive_enc->GetPosition() / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC
+            drive_motor->GetPosition().GetValue() / units::turn_t{1} / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC
         },
         get_heading()
     };
@@ -79,12 +77,12 @@ units::radian_t subsystems::swerve::Module::get_heading() const {
 
 units::feet_per_second_t subsystems::swerve::Module::get_velocity() const {
     return units::feet_per_second_t{
-        drive_enc->GetVelocity() / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC / 60_s
+        drive_motor->GetVelocity().GetValue() / units::turn_t{1} / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC / 60_s
     };
 }
 
 void subsystems::swerve::Module::reset_drive_position() {
-    drive_enc->SetPosition(0);
+    drive_motor->SetPosition(units::turn_t{0});
 }
 
 void subsystems::swerve::Module::set_drive_power(const units::volt_t volts) {
@@ -102,7 +100,7 @@ void subsystems::swerve::Module::apply_heading_goal(const units::radian_t angle)
 }
 
 units::volt_t subsystems::swerve::Module::get_drive_power() const {
-    return drive_motor->GetAppliedOutput() * frc::RobotController::GetBatteryVoltage();
+    return drive_motor->Get() * frc::RobotController::GetBatteryVoltage();
 }
 
 void subsystems::swerve::Module::force_update_azimuth() {

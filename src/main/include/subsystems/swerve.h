@@ -96,7 +96,7 @@ public:
     void force_update_azimuth();
 
     double get_drive_current() {
-        return drive_motor->GetOutputCurrent();
+        return drive_motor->GetSupplyCurrent().GetValueAsDouble();
     }
 private:
     /// @brief Sets the raw voltage of the motor for azimuth. Private b/c
@@ -123,8 +123,7 @@ private:
 
     frc::SimpleMotorFeedforward<units::feet> drive_ff {0.23396_V, 1.75_V / 1_fps, 0.09844_V / 1_fps_sq};
 
-    std::unique_ptr<rev::CANSparkFlex> drive_motor;
-    std::unique_ptr<rev::SparkRelativeEncoder> drive_enc;
+    std::unique_ptr<ctre::phoenix6::hardware::TalonFX> drive_motor;
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> turn_motor;
     std::unique_ptr<ctre::phoenix6::hardware::CANcoder> encoder;
 
