@@ -193,7 +193,7 @@ private:
         std::move(photon::PhotonCamera{"rightCam"}),
         frc::Transform3d {
             frc::Translation3d(-15.75_in, -7_in, 8_in),
-            frc::Rotation3d{0_deg, 30_deg, -90_deg} // might need to switch this and the positive 90, not sure!
+            frc::Rotation3d{0_deg, 30_deg, -90_deg}
         }
     };
 
