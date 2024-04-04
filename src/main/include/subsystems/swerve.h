@@ -100,7 +100,10 @@ public:
     }
 
     frc::SwerveModuleState get_goal() const {
-        return goal;
+        const frc::Rotation2d encoder_rotation {get_heading()};
+
+        auto state = frc::SwerveModuleState::Optimize(goal, encoder_rotation);
+        return state;
     }
 private:
     /// @brief Sets the raw voltage of the motor for azimuth. Private b/c
