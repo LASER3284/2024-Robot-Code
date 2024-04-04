@@ -316,6 +316,7 @@ void subsystems::drive::Drivetrain::update_nt() {
 
     frc::SmartDashboard::PutNumber("Drivetrain_fl_heading", units::degree_t{front_left.get_heading()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_speed_fps", units::feet_per_second_t{front_left.get_velocity()}.value());
+    frc::SmartDashboard::PutNumber("Drivetrain_speed_goal", units::feet_per_second_t{front_left.get_velocity_goal()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_br_heading", units::degree_t{back_right.get_heading()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_bl_heading", units::degree_t{back_left.get_heading()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_fr_heading", units::degree_t{front_right.get_heading()}.value());

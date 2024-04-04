@@ -98,6 +98,10 @@ public:
     double get_drive_current() {
         return drive_motor->GetSupplyCurrent().GetValueAsDouble();
     }
+
+    units::feet_per_second_t get_velocity_goal() const {
+        return goal.speed;
+    }
 private:
     /// @brief Sets the raw voltage of the motor for azimuth. Private b/c
     /// azimuth angle is important for drive power.
