@@ -4,7 +4,7 @@
 using namespace ctre::phoenix6;
 
 subsystems::swerve::Module::Module(const int drive, const int turn, const int enc) {
-    drive_motor = std::make_unique<hardware::TalonFX>(turn);
+    drive_motor = std::make_unique<hardware::TalonFX>(drive);
     turn_motor = std::make_unique<hardware::TalonFX>(turn);
     encoder = std::make_unique<hardware::CANcoder>(enc);
 
@@ -77,7 +77,7 @@ units::radian_t subsystems::swerve::Module::get_heading() const {
 
 units::feet_per_second_t subsystems::swerve::Module::get_velocity() const {
     return units::feet_per_second_t{
-        drive_motor->GetVelocity().GetValue() / units::turn_t{1} / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC / 60_s
+        drive_motor->GetVelocity().GetValue() / units::turn_t{1} / constants::kDRIVE_RATIO * constants::kWHEEL_CIRC
     };
 }
 

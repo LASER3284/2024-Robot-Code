@@ -182,12 +182,12 @@ private:
         photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
         std::move(photon::PhotonCamera{"mainCam"}),
         frc::Transform3d {
-            frc::Translation3d{-16.75_in, -6_in, 8_in},
+            frc::Translation3d{-14.75_in, -6_in, 8_in},
             frc::Rotation3d{0_deg, 30_deg, 180_deg}
         }
     };
 
-    photon::PhotonPoseEstimator photon_estimator_right {
+   /* photon::PhotonPoseEstimator photon_estimator_right {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
         photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
         std::move(photon::PhotonCamera{"rightCam"}),
@@ -205,7 +205,7 @@ private:
             frc::Translation3d(-15.75_in, -5_in, 8_in),
             frc::Rotation3d{0_deg, 30_deg, 90_deg}
         }
-    };
+    }; */
 
     photon::PhotonPoseEstimator photon_estimator_front {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),

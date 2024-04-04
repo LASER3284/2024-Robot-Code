@@ -39,7 +39,7 @@ namespace constants {
 class Module {
 public:
     /// @brief Swerve module constructor for the various encoder+motors
-    /// @param drive The CAN ID of the drive motor (SparkFlex)
+    /// @param drive The CAN ID of the drive motor (TalonFX)
     /// @param turn The CAN ID of the turn motor (TalonFX)
     /// @param enc The CAN ID of the CANCoder
     Module(const int, const int, const int);
@@ -116,12 +116,12 @@ private:
     };
 
     frc::PIDController drive_controller {
-        0.95,
+        0.095,
         0.0,
         0.0
     };
 
-    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.23396_V, 1.75_V / 1_fps, 0.09844_V / 1_fps_sq};
+    frc::SimpleMotorFeedforward<units::feet> drive_ff {0.60187_V, 1.57483_V / 1_fps, 0.34455_V / 1_fps_sq};
 
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> drive_motor;
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> turn_motor;
