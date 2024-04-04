@@ -99,8 +99,8 @@ public:
         return drive_motor->GetSupplyCurrent().GetValueAsDouble();
     }
 
-    units::feet_per_second_t get_velocity_goal() const {
-        return goal.speed;
+    frc::SwerveModuleState get_goal() const {
+        return goal;
     }
 private:
     /// @brief Sets the raw voltage of the motor for azimuth. Private b/c
