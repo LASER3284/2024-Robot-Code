@@ -40,10 +40,10 @@ void subsystems::flywheel::Flywheel::feed(bool fire) {
     if (fire) {
         feedwheel_motor.SetVoltage(12_V);
     } else {
-        //if (!has_piece())
+        if (!has_piece())
             feedwheel_motor.SetVoltage(1_V);
-        //else
-        //    feedwheel_motor.SetVoltage(0_V);
+        else
+            feedwheel_motor.SetVoltage(0_V);
     }
 }
 

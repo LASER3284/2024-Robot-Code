@@ -57,10 +57,8 @@ void Robot::RobotInit() {
         .WhileTrue(std::move(reverse_feed));
     aux_controller.X()
         .WhileTrue(intake_ignore());
-    aux_controller.Y()
-        .WhileTrue(drive.Run([this]() {
-            drive.reset_pose_to_vision();
-        }));
+    // aux_controller.Y()
+    //    .WhileTrue(std::move(tele_sub_score));
     aux_controller.A()
         .OnTrue(std::move(tele_track))
         .OnFalse(std::move(shooter_stable));
@@ -86,7 +84,7 @@ void Robot::RobotInit() {
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
     chassis_controller->A().WhileTrue(reverse_intake());
-    chassis_controller->RightBumper().OnTrue(std::move(tele_sub_score));
+    // chassis_controller->RightBumper().OnTrue(std::move(tele_sub_score));
 
     intake.init();
     shooter.init();

@@ -27,7 +27,7 @@ namespace constants {
         TrackingIdle = 0,
         TrackShot,
         TrackForceShot,
-        SubScore,
+       // SubScore,
         StableIdle,
         StableShot,
         ReverseFeed,
@@ -47,22 +47,22 @@ namespace constants {
     constexpr units::feet_per_second_squared_t GRAVITY = 32.175_fps_sq;
     constexpr frc::Translation2d GOAL_BLUE_POSITION { -1.5_in, 218.42_in};
     constexpr frc::Translation2d GOAL_RED_POSITION { 652.75_in, 218.42_in};
-    constexpr units::foot_t DELTA_Y = 7_ft;
+    constexpr units::foot_t DELTA_Y = 6.8_ft;
 
     constexpr auto PIVOT_CORRECTION = 0.4075_deg / 1_ft;
     constexpr auto TURRET_CORRECTION = 0.15_deg / 1_ft;
     constexpr auto FLYWHEEL_CORRECTION_CREAMY = 1.8_fps / 1_ft;
 
-    constexpr units::degree_t PIVOT_IDLE = 40_deg;
+    constexpr units::degree_t PIVOT_IDLE = 46_deg;
     constexpr units::degree_t TURRET_IDLE = 14_deg;
 
     constexpr units::degree_t PIVOT_DOWN = 10_deg;
     constexpr units::degree_t TURRET_DOWN = 0_deg;
 
-    constexpr units::degree_t PIVOT_FEED = 40_deg;
+    constexpr units::degree_t PIVOT_FEED = 46_deg;
     constexpr units::degree_t TURRET_FEED = 14_deg;
 
-    constexpr units::feet_per_second_t SHOT_VELOCITY = 82_fps;
+    constexpr units::feet_per_second_t SHOT_VELOCITY = 87_fps;
     constexpr units::feet_per_second_t IDLE_VELOCITY = 45_fps;
 
     constexpr units::degree_t SUB_PIVOT_ANGLE = 70_deg;
@@ -127,12 +127,6 @@ public:
                 && units::math::abs(flywheel.get_exit_vel() - constants::SHOT_VELOCITY) < flywheel::constants::TOLERANCE; 
         }
         break;
-        case constants::ShooterStates::SubScore: {
-            return units::math::abs(turret.get_angle() - constants::SUB_TURRET_ANGLE) < turret::constants::TOLERANCE
-                && units::math::abs(pivot.get_angle() - constants::SUB_PIVOT_ANGLE) < pivot::constants::TOLERANCE
-                && units::math::abs(flywheel.get_exit_vel() - constants::SHOT_VELOCITY) < flywheel::constants::TOLERANCE; 
-        }
-        break;
         case constants::ShooterStates::CreamyShot: {
             return units::math::abs(turret.get_angle() - (turret_angle - 15_deg * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1))) < turret::constants::TOLERANCE
                 && units::math::abs(pivot.get_angle() - constants::CREAMY_PIVOT_ANGLE) < pivot::constants::TOLERANCE
@@ -179,7 +173,7 @@ public:
         );
     }
 
-    frc2::CommandPtr sub_score() {
+  /* frc2::CommandPtr sub_score() {
         return frc2::cmd::Sequence(
             this->Run([this]() {
                 scratch = state;
@@ -189,7 +183,7 @@ public:
                 activate(scratch);
             })
         );
-    }
+    } */
 
     frc2::CommandPtr creamy_shot() {
         return frc2::cmd::Sequence(

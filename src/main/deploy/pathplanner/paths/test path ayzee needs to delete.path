@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 0.0,
-        "y": 4.0
+        "y": 5.0
       },
       "prevControl": {
         "x": -6.123233995736766e-17,
-        "y": 3.0
+        "y": 4.0
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.0,
-    "maxAcceleration": 4.25,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 720.0,
     "maxAngularAcceleration": 720.0
   },
@@ -45,7 +45,7 @@
   "reversed": false,
   "folder": null,
   "previewStartingState": {
-    "rotation": 2.516357884936331,
+    "rotation": 89.00511793992442,
     "velocity": 0
   },
   "useDefaultConstraints": false

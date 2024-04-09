@@ -140,12 +140,12 @@ void subsystems::shooter::Shooter::tick() {
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
         break;
-        case constants::ShooterStates::SubScore: {
+      /*  case constants::ShooterStates::SubScore: {
             pivot.set_angle(constants::SUB_PIVOT_ANGLE);
             turret.set_angle(constants::SUB_TURRET_ANGLE);
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
-        break;
+        break; */
         case constants::ShooterStates::CreamyShot: {
             pivot.set_angle(constants::CREAMY_PIVOT_ANGLE);
             if (pivot_ok())
