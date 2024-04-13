@@ -18,10 +18,10 @@ namespace subsystems{
 namespace climi{
 
 namespace constants {
-    constexpr double GEAR_RATIO = 44.5;
-    constexpr units::inch_t PULLEY_DIAMETER = 1.2_in;
+    constexpr double GEAR_RATIO = 44.44;
+    constexpr units::inch_t PULLEY_DIAMETER = 1.25_in;
 
-    constexpr bool DIRECTION = false;
+    constexpr bool DIRECTION = true;
 
 
 
@@ -35,8 +35,6 @@ class Climi : public frc2::SubsystemBase {
 public:
     void init();
 
-    void update_nt();
-
     void tick();
 
     void reset();
@@ -44,8 +42,6 @@ public:
     void set_goal(units::inch_t);
 
     units::inch_t get_position();
-
-    units::feet_per_second_t get_velocity();
 
     bool in_place();
 
@@ -56,6 +52,8 @@ public:
     void uppy();
 
     void downy();
+
+    void stop();
 
 private:
     void set_position(units::inch_t);
@@ -72,24 +70,6 @@ private:
     frc::ElevatorFeedforward ff{0.54078_V, 0.50262_V, 1.21088_V / 1_fps, 0.08067_V / 1_fps_sq};
 
     frc::PIDController pid {0.6, 0, 0};
-
-    frc2::sysid::SysIdRoutine sysid {
-        frc2::sysid::Config {0.5_V / 1_s, 3_V, std::nullopt, std::nullopt},
-        frc2::sysid::Mechanism {
-            [this](units::volt_t volts) {
-                motor.SetVoltage(volts);
-            },
-            [this](auto log) {
-                log->Motor("motor")
-                    .position(units::meter_t{get_position()})
-                    .velocity(units::meters_per_second_t{get_velocity()})
-                    .voltage(motor.Get() * frc::RobotController::GetBatteryVoltage());
-            },
-            this
-        }
-    };
-
-    std::optional<frc2::CommandPtr> sysid_command;
 
     units::volt_t motor_voltage = 0_V;
 };

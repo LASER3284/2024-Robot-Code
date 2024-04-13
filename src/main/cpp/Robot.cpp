@@ -91,6 +91,7 @@ void Robot::RobotInit() {
     intake.init();
     shooter.init();
     amp_arm.init();
+    climi.init();
 }
 
 void Robot::RobotPeriodic() {
@@ -138,14 +139,16 @@ void Robot::TeleopPeriodic() {
     amp_arm.tick();
     intake.tick();
     shooter.tick();
+    climi.tick();
     drive.tick(true);
-    if (aux_controller.GetLeftY() > 0.6)
-    {
+    if (aux_controller.GetLeftY() < -0.6) {
         climi.uppy();
     }
-    if (aux_controller.GetLeftY() < -0.6)
-    {
+    else if (aux_controller.GetLeftY() > 0.6) {
         climi.downy();
+    }
+    else {
+        climi.stop();
     }
 }
 
