@@ -11,6 +11,7 @@
 #include "subsystems/shooter.h"
 #include "subsystems/intake.h"
 #include "subsystems/AmpArm.h"
+#include "subsystems/arm.h"
 #include <frc2/command/button/CommandXboxController.h>
 
 #include "lib/tracktracker/TrackTracker.h"
@@ -138,6 +139,10 @@ public:
             shooter.stable()
         );
     }
+
+    frc2::CommandPtr spit() {
+        return shooter.spit();
+    }
     frc2::CommandPtr auto_shoot2 = 
         frc2::cmd::Sequence(
             intake.RunOnce([this]() {
@@ -181,6 +186,7 @@ public:
         ShooterFlywheel,
         ShooterTurret,
         AmpArmShoulder,
+        Climi,
         AmpArmExtension
     };
 
@@ -200,6 +206,7 @@ private:
     frc2::CommandXboxController aux_controller {1};
     subsystems::drive::Drivetrain drive {chassis_controller};
     subsystems::amparm::AmpArm amp_arm{};
+    subsystems::climi::Climi climi{};
 
     subsystems::useless::Useless happy_face{};
     subsystems::shooter::Shooter shooter{};

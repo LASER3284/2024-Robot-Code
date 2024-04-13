@@ -157,6 +157,16 @@ void subsystems::shooter::Shooter::tick() {
             }
         }
         break;
+        case constants::ShooterStates::Spit: {
+            pivot.set_angle(constants::PIVOT_FEED);
+            turret.set_angle(constants::TURRET_SPIT);
+            flywheel.set_exit_vel(constants::IDLE_VELOCITY);
+
+            if (in_place() && has_piece()) {
+                flywheel.feed(true);
+            }
+        }
+        break;
         default: {
             state = constants::ShooterStates::Stopped;
         }

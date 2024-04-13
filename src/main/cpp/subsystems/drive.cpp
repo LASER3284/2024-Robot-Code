@@ -177,7 +177,7 @@ void subsystems::drive::Drivetrain::update_odometry() {
     auto vision_est = photon_estimator.Update();
 
     if (vision_est) {
-        double uncertainty = 0.545;
+        double uncertainty = 10.75;
         int num_targets = 0;
         for (const auto &v : vision_est->targetsUsed) {
             uncertainty *= 1 / v.GetArea();
@@ -194,7 +194,7 @@ void subsystems::drive::Drivetrain::update_odometry() {
     vision_est = photon_estimator_front.Update();
 
     if (vision_est) {
-        double uncertainty = 0.545;
+        double uncertainty = 10.75;
         for (const auto &v : vision_est->targetsUsed) {
             uncertainty *= 1 / v.GetArea();
         }

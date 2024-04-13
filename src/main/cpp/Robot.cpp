@@ -28,6 +28,7 @@ void Robot::RobotInit() {
     mech_chooser.AddOption("Shooter Turret", MechanismChooser::ShooterTurret);
     mech_chooser.AddOption("Amp Arm Shoulder", MechanismChooser::AmpArmShoulder);
     mech_chooser.AddOption("Amp Arm Extension", MechanismChooser::AmpArmExtension);
+    mech_chooser.AddOption("Climbing Arm", MechanismChooser::Climi);
     frc::SmartDashboard::PutData("MechChooser", &mech_chooser);
 
     pathplanner::NamedCommands::registerCommand("useless", happy_face.add_one());
@@ -36,6 +37,7 @@ void Robot::RobotInit() {
     pathplanner::NamedCommands::registerCommand("intake", std::move(intake_continuous()));
     pathplanner::NamedCommands::registerCommand("evil", std::move(reverse_intake()));
     pathplanner::NamedCommands::registerCommand("intake amp", std::move(intake_continuous_amp()));
+    pathplanner::NamedCommands::registerCommand("spit", std::move(spit()));
     // pathplanner::NamedCommands::registerCommand("amp", amp_score());
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
@@ -137,6 +139,14 @@ void Robot::TeleopPeriodic() {
     intake.tick();
     shooter.tick();
     drive.tick(true);
+    if (aux_controller.GetLeftY() > 0.6)
+    {
+        climi.uppy();
+    }
+    if (aux_controller.GetLeftY() < -0.6)
+    {
+        climi.downy();
+    }
 }
 
 void Robot::DisabledInit() {

@@ -35,6 +35,7 @@ namespace constants {
         CreamyShot,
         PrepFeeding,
         Stopped,
+        Spit,
         Down
     };
 
@@ -62,8 +63,10 @@ namespace constants {
     constexpr units::degree_t PIVOT_FEED = 46_deg;
     constexpr units::degree_t TURRET_FEED = 14_deg;
 
+    constexpr units::degree_t TURRET_SPIT = -50_deg;
+
     constexpr units::feet_per_second_t SHOT_VELOCITY = 87_fps;
-    constexpr units::feet_per_second_t IDLE_VELOCITY = 45_fps;
+    constexpr units::feet_per_second_t IDLE_VELOCITY = 55_fps;
 
     constexpr units::degree_t SUB_PIVOT_ANGLE = 70_deg;
     constexpr units::degree_t SUB_TURRET_ANGLE = 0_deg;
@@ -131,6 +134,12 @@ public:
             return units::math::abs(turret.get_angle() - (turret_angle - 15_deg * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1))) < turret::constants::TOLERANCE
                 && units::math::abs(pivot.get_angle() - constants::CREAMY_PIVOT_ANGLE) < pivot::constants::TOLERANCE
                 && units::math::abs(flywheel.get_exit_vel() - (hypot * constants::FLYWHEEL_CORRECTION_CREAMY)) < flywheel::constants::TOLERANCE; 
+        }
+        break;
+        case constants::ShooterStates::Spit: {
+            return units::math::abs(turret.get_angle() - constants::TURRET_SPIT) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - constants::PIVOT_IDLE) < 5_deg
+                && units::math::abs(flywheel.get_exit_vel() - constants::IDLE_VELOCITY) < flywheel::constants::TOLERANCE; 
         }
         break;
         default: {
@@ -255,6 +264,19 @@ public:
     /// @brief Returns the active state of the shooter.
     /// @return See brief :)
     constants::ShooterStates get_state() const { return state; }
+
+    frc2::CommandPtr spit() {
+        return frc2::cmd::Sequence(
+            this->RunOnce([this]() {
+                scratch = state;
+                activate(constants::ShooterStates::Spit);
+            }),
+            frc2::cmd::Wait(2_s),
+            this->RunOnce([this]() {
+                activate(scratch);
+            })
+        );
+    }
 
 private:
     constants::ShooterStates scratch = constants::ShooterStates::Stopped;
