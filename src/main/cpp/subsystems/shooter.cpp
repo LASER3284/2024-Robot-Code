@@ -21,6 +21,7 @@ void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
     units::foot_t y = robot_pose.Translation().Y() - 3_in - (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.Y() : constants::GOAL_BLUE_POSITION.Y());
     turret_angle = -robot_pose.Rotation().Degrees();
 
+    // This should be dead code, but it's being left bc it works anyway.
     if (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed) {
         turret_angle = turret_angle;
         frc::SmartDashboard::PutNumber("REACHED THE THING", 12);
@@ -88,7 +89,7 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::PrepFeeding: {
-            flywheel.set_exit_vel(0_fps);
+    flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_FEED);
             if (pivot_ok())
                 turret.set_angle(constants::TURRET_FEED);
@@ -163,6 +164,16 @@ void subsystems::shooter::Shooter::tick() {
             flywheel.set_exit_vel(constants::IDLE_VELOCITY);
 
             if (in_place() && has_piece()) {
+                flywheel.feed(true);
+            }
+        }
+        break;
+        case constants::ShooterStates::Override: {
+            pivot.set_angle(or_pivot_angle);
+            turret.set_angle(or_turret_angle);
+            flywheel.set_exit_vel(or_flywheel_speed);
+
+            if (or_fire) {
                 flywheel.feed(true);
             }
         }

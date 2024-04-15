@@ -161,7 +161,7 @@ void subsystems::drive::Drivetrain::reset_odometry() {
 }
 
 void subsystems::drive::Drivetrain::update_odometry() {
-    frc::Pose2d last_pose = get_pose();
+    frc::Pose2d last_pose = pose_estimator.GetEstimatedPosition();
     frc::Pose2d newpose = pose_estimator.Update(
         gyro->GetRotation2d(),
         {
@@ -260,7 +260,19 @@ void subsystems::drive::Drivetrain::cancel_sysid() {
     sysid_command = std::nullopt;
 }
 
-frc::Pose2d subsystems::drive::Drivetrain::get_pose() const {
+frc::Pose2d subsystems::drive::Drivetrain::get_pose() {
+    frc::Pose2d last_pose = pose_estimator.GetEstimatedPosition();
+    frc::Pose2d newpose = pose_estimator.Update(
+        gyro->GetRotation2d(),
+        {
+            front_left.get_position(), front_right.get_position(),
+            back_left.get_position(), back_right.get_position()
+        }
+    );
+
+    if (units::math::abs(newpose.X() - last_pose.X()) > 10_m || units::math::abs(newpose.Y() - last_pose.Y()) > 10_m) {
+        set_pose(last_pose);
+    }
     return pose_estimator.GetEstimatedPosition();
 }
 

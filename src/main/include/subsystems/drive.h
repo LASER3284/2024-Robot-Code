@@ -102,7 +102,7 @@ public:
     /// @brief Returns the translational and rotational components of the robot
     /// based on known odometry. Used by PathPlanner.
     /// @return See brief :)
-    frc::Pose2d get_pose() const;
+    frc::Pose2d get_pose();
 
     /// @brief Sets the odometry to use the new translational and rotational
     /// components of robot position. Used by PathPlanner.

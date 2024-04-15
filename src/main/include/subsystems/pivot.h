@@ -65,7 +65,7 @@ private:
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     frc::PIDController pid {
-        0.115,
+        0.125,
         0.05,
         0
     };

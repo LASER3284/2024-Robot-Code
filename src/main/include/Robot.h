@@ -16,6 +16,8 @@
 
 #include "lib/tracktracker/TrackTracker.h"
 
+#include "commands/SmarterShooter.h"
+
 class Robot : public frc::TimedRobot {
 public:
     void RobotInit() override;

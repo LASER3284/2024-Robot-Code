@@ -36,7 +36,8 @@ namespace constants {
         PrepFeeding,
         Stopped,
         Spit,
-        Down
+        Down,
+        Override,
     };
 
     enum SubMech {
@@ -140,6 +141,12 @@ public:
             return units::math::abs(turret.get_angle() - constants::TURRET_SPIT) < turret::constants::TOLERANCE
                 && units::math::abs(pivot.get_angle() - constants::PIVOT_IDLE) < 5_deg
                 && units::math::abs(flywheel.get_exit_vel() - constants::IDLE_VELOCITY) < flywheel::constants::TOLERANCE; 
+        }
+        break;
+        case constants::ShooterStates::Override: {
+            return units::math::abs(turret.get_angle() - or_turret_angle) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - or_pivot_angle) < pivot::constants::TOLERANCE
+                && units::math::abs(flywheel.get_exit_vel() - or_flywheel_speed) < flywheel::constants::TOLERANCE; 
         }
         break;
         default: {
@@ -278,7 +285,14 @@ public:
         );
     }
 
+    // This is the group for the override goals and actions.
+    bool or_fire = false;
+    units::degree_t or_pivot_angle;
+    units::degree_t or_turret_angle;
+    units::feet_per_second_t or_flywheel_speed;
+
 private:
+
     constants::ShooterStates scratch = constants::ShooterStates::Stopped;
     constants::ShooterStates state = constants::ShooterStates::Stopped;
     units::degree_t pivot_angle;
