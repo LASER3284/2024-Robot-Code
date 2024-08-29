@@ -63,6 +63,14 @@ public:
         ).WithTimeout(6.5_s);
     }
 
+    // frc2::CommandPtr test_pid_angle() {
+    //     return frc2::cmd::Parallel(
+    //         shooter.Run([this]() {
+    //             shooter.activate(subsystems::shooter::constants::ShooterStates::TestAngle);
+    //         }
+    //     ));
+    // }
+
     frc2::CommandPtr intake_cmd() {
         return frc2::cmd::Parallel(
             intake.intake(),
@@ -167,6 +175,7 @@ public:
     frc2::CommandPtr tele_track = shooter.track();
     frc2::CommandPtr tele_creamy_shot = shooter.creamy_shot();
     frc2::CommandPtr shooter_stable = shooter.stable();
+    frc2::CommandPtr test_pid_angle = shooter.test_pid_angle();
 
     frc2::CommandPtr reverse_feed = frc2::cmd::Race(
             shooter.reverse_feed(),

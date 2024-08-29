@@ -178,6 +178,11 @@ void subsystems::shooter::Shooter::tick() {
             }
         }
         break;
+        case constants::ShooterStates::TestAngle: {
+            pivot.set_angle(constants::TEST_PIVOT_ANGLE);
+            turret.set_angle(constants::TEST_TURRET_ANGLE);
+            flywheel.set_exit_vel(constants::IDLE_VELOCITY);
+        }
         default: {
             state = constants::ShooterStates::Stopped;
         }

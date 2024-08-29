@@ -54,9 +54,9 @@ void Robot::RobotInit() {
 
     tracktracker::TrackTracker::register_namedpoint("shoot", std::move(auto_shoot()));
     tracktracker::TrackTracker::register_namedpoint("goto1", tracker.generate({frc::Pose2d{{2.75_m, 4.1_m}, {0_deg}}, frc::ChassisSpeeds{}}));
-
-    aux_controller.B()
-        .WhileTrue(std::move(reverse_feed));
+    /// this will be put back in after pid tuning
+    // aux_controller.B()
+    //     .WhileTrue(std::move(reverse_feed));
     aux_controller.X()
         .WhileTrue(intake_ignore());
     // aux_controller.Y()
@@ -84,9 +84,10 @@ void Robot::RobotInit() {
     });
     aux_controller.RightBumper().WhileTrue(std::move(amp_spit));
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
+    aux_controller.B()
+        .WhileTrue(shooter.test_pid_angle());
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
     chassis_controller->A().WhileTrue(reverse_intake());
-    // chassis_controller->RightBumper().OnTrue(std::move(tele_sub_score));
 
     intake.init();
     shooter.init();

@@ -38,6 +38,7 @@ namespace constants {
         Spit,
         Down,
         Override,
+        TestAngle,
     };
 
     enum SubMech {
@@ -75,6 +76,12 @@ namespace constants {
     constexpr units::degree_t CREAMY_PIVOT_ANGLE = 45_deg;
     constexpr units::degree_t CREAMY_TURRET_ANGLE = 0_deg;
     constexpr units::feet_per_second_t CREAMY_VELOCITY = 65_fps;
+
+
+    // this is specifcally for pid tuning the turret
+    constexpr units::degree_t TEST_PIVOT_ANGLE = 45_deg;
+    constexpr units::degree_t TEST_TURRET_ANGLE = 45_deg;
+
 }
 
 class Shooter : public frc2::SubsystemBase {
@@ -149,6 +156,11 @@ public:
                 && units::math::abs(flywheel.get_exit_vel() - or_flywheel_speed) < flywheel::constants::TOLERANCE; 
         }
         break;
+        case constants::ShooterStates::TestAngle: {
+            return units::math::abs(turret.get_angle() - constants::TEST_TURRET_ANGLE) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - constants::TEST_PIVOT_ANGLE) < pivot::constants::TOLERANCE
+                && units::math::abs(flywheel.get_exit_vel()) < flywheel::constants::TOLERANCE; 
+        }
         default: {
             return false;
         }
@@ -256,6 +268,13 @@ public:
     frc2::CommandPtr track() {
         return this->RunOnce([this]() {
             activate(constants::ShooterStates::TrackingIdle);
+        });
+    }
+
+    // test pid angle
+    frc2::CommandPtr test_pid_angle() {
+        return this->RunOnce([this]() {
+            activate(constants::ShooterStates::TestAngle);
         });
     }
 

@@ -18,8 +18,7 @@ namespace pivot {
 
 namespace constants {
     /// @brief The value to give to SetInverted
-    constexpr bool DIRECTION = 
-    false;
+    constexpr bool DIRECTION = false;
     // CHANGE THIS IF INVERTED ^----
 
     constexpr units::degree_t TOLERANCE = 1_deg;
@@ -65,9 +64,12 @@ private:
     rev::CANSparkMax motor {23, rev::CANSparkLowLevel::MotorType::kBrushless};
 
     frc::PIDController pid {
-        0.125,
-        0.05,
-        0
+        //0.12, OG
+        0.115,
+        //0.090816, OG
+        0.04504,
+        //0.005767 OG
+        0.00675
     };
 
     frc2::sysid::SysIdRoutine sysid {

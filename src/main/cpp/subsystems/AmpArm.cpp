@@ -124,7 +124,7 @@ void subsystems::amparm::Shoulder::init() {
 
 units::degree_t subsystems::amparm::Shoulder::get_position() const {
     units::degree_t initial_offset = 0_deg;
-    const units::degree_t constant_offset = -315_deg;
+    const units::degree_t constant_offset = -349_deg;
 
     while (units::math::abs(encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (encoder.Get() + constant_offset < 0_deg ? -1 : 1);
@@ -247,8 +247,9 @@ void subsystems::amparm::Extension::set_goal(units::inch_t goal) {
 
 void subsystems::amparm::Extension::tick() {
     if (setpoint.position <= 0_in) {
-        motor.SetVoltage(-0.575_V);
+        motor.SetVoltage(-0.2_V);
     }
+    // amp retraction passive vcoltage when keaton is mad
     setpoint = profile.Calculate(20_ms, setpoint, goal);
 
     if (setpoint.position > 0_in) {

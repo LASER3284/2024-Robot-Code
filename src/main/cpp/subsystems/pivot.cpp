@@ -13,8 +13,10 @@ void subsystems::pivot::Pivot::update_nt() {
     velocity = dtheta / dt;
 
     // update nt
+
     frc::SmartDashboard::PutNumber("shooter_pivot_current_angle", get_angle().value());
     frc::SmartDashboard::PutNumber("shooter_pivot_current", motor.GetOutputCurrent());
+    //frc::SmartDashboard::PutString("pivot_encoder", std::to_string(pivot_encoder.Get()));
 
     last_angle = get_angle();
     last_time = frc::Timer::GetFPGATimestamp();
@@ -37,9 +39,6 @@ void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
 
 units::degree_t subsystems::pivot::Pivot::get_angle() {
     units::degree_t initial_offset = 0_deg;
-    // this is the angle offset, change it keaton and cameron *yeehaw*
-    // TO DEPLOY
-    // ctrl shift p, deploy robot code, hit enter
     const units::degree_t constant_offset = 128.25_deg;
     while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
