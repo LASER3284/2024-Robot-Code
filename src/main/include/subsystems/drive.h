@@ -180,7 +180,7 @@ private:
     photon::PhotonPoseEstimator photon_estimator {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
         photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
-        std::move(photon::PhotonCamera{"mainCam"}),
+        std::move(photon::PhotonCamera{"back_camera"}),
         frc::Transform3d {
             frc::Translation3d{-14.75_in, -6_in, 8_in},
             frc::Rotation3d{0_deg, 30_deg, 180_deg}
@@ -210,12 +210,12 @@ private:
     photon::PhotonPoseEstimator photon_estimator_front {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
         photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
-        std::move(photon::PhotonCamera{"frontCam"}),
+        std::move(photon::PhotonCamera{"front_camera"}),
         frc::Transform3d {
             frc::Translation3d{14.5_in, -2.75_in, 7.75_in},
             frc::Rotation3d{0_deg, 30_deg, 0_deg}
         }
-    };\
+    };
 
     frc2::sysid::SysIdRoutine sysid {
         frc2::sysid::Config {std::nullopt, std::nullopt, std::nullopt, std::nullopt},

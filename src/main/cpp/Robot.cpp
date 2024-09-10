@@ -84,10 +84,11 @@ void Robot::RobotInit() {
     });
     aux_controller.RightBumper().WhileTrue(std::move(amp_spit));
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
-    aux_controller.B()
-        .WhileTrue(shooter.test_pid_angle());
+    // aux_controller.B()
+        // .WhileTrue(shooter.test_pid_angle);
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
     chassis_controller->A().WhileTrue(reverse_intake());
+    aux_controller.Y().OnTrue(std::move(tele_creamy_shot));
 
     intake.init();
     shooter.init();

@@ -32,14 +32,16 @@ void subsystems::pivot::Pivot::tick() {
     }
 }
 
+// this acts as a softstop by the way
 void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
-    goal = goal > 48.5_deg ? 48.5_deg : goal;
+    goal = goal > 75_deg ? 75_deg : goal;
     this->goal = {goal, 0_deg_per_s};
 }
 
 units::degree_t subsystems::pivot::Pivot::get_angle() {
     units::degree_t initial_offset = 0_deg;
-    const units::degree_t constant_offset = 128.25_deg;
+    //offset for uppy downy, is added to total
+    const units::degree_t constant_offset = 134.5_deg;
     while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }

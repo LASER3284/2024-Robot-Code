@@ -27,7 +27,7 @@ namespace constants {
         TrackingIdle = 0,
         TrackShot,
         TrackForceShot,
-       // SubScore,
+        SubScore,
         StableIdle,
         StableShot,
         ReverseFeed,
@@ -67,15 +67,23 @@ namespace constants {
 
     constexpr units::degree_t TURRET_SPIT = -50_deg;
 
-    constexpr units::feet_per_second_t SHOT_VELOCITY = 87_fps;
+// SHOT_VELOCTIY stuff
+// 100 works for near flopless
+//87 was value ran at worlds
+//loud vibration = flop / 75 fps is peak vibration
+
+
+    constexpr units::feet_per_second_t SHOT_VELOCITY = 110_fps;
     constexpr units::feet_per_second_t IDLE_VELOCITY = 55_fps;
 
     constexpr units::degree_t SUB_PIVOT_ANGLE = 70_deg;
     constexpr units::degree_t SUB_TURRET_ANGLE = 0_deg;
 
-    constexpr units::degree_t CREAMY_PIVOT_ANGLE = 45_deg;
-    constexpr units::degree_t CREAMY_TURRET_ANGLE = 0_deg;
-    constexpr units::feet_per_second_t CREAMY_VELOCITY = 65_fps;
+    constexpr units::degree_t CREAMY_PIVOT_ANGLE = 55_deg;
+    constexpr units::degree_t CREAMY_TURRET_ANGLE = 35_deg;
+
+
+    constexpr units::feet_per_second_t CREAMY_VELOCITY = 0_fps;
 
 
     // this is specifcally for pid tuning the turret
@@ -139,9 +147,10 @@ public:
         }
         break;
         case constants::ShooterStates::CreamyShot: {
-            return units::math::abs(turret.get_angle() - (turret_angle - 15_deg * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1))) < turret::constants::TOLERANCE
-                && units::math::abs(pivot.get_angle() - constants::CREAMY_PIVOT_ANGLE) < pivot::constants::TOLERANCE
-                && units::math::abs(flywheel.get_exit_vel() - (hypot * constants::FLYWHEEL_CORRECTION_CREAMY)) < flywheel::constants::TOLERANCE; 
+            // return units::math::abs(turret.get_angle() - (turret_angle - 15_deg * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1))) < turret::constants::TOLERANCE
+            return units::math::abs(turret.get_angle() - constants::CREAMY_TURRET_ANGLE) < turret::constants::TOLERANCE
+                && units::math::abs(pivot.get_angle() - constants::CREAMY_PIVOT_ANGLE) < pivot::constants::TOLERANCE;
+               // && units::math::abs(flywheel.get_exit_vel() - (hypot * constants::FLYWHEEL_CORRECTION_CREAMY)) < flywheel::constants::TOLERANCE; 
         }
         break;
         case constants::ShooterStates::Spit: {
@@ -201,7 +210,7 @@ public:
         );
     }
 
-  /* frc2::CommandPtr sub_score() {
+   frc2::CommandPtr sub_score() {
         return frc2::cmd::Sequence(
             this->Run([this]() {
                 scratch = state;
@@ -211,12 +220,12 @@ public:
                 activate(scratch);
             })
         );
-    } */
+    } 
 
     frc2::CommandPtr creamy_shot() {
         return frc2::cmd::Sequence(
-            this->RunOnce([this]() {
-                scratch = state;
+            this->Run([this]() {
+               scratch = state;
                 activate(constants::ShooterStates::CreamyShot);
             }),
             frc2::cmd::Wait(1.5_s),

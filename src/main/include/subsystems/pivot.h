@@ -65,7 +65,7 @@ private:
 
     frc::PIDController pid {
         //0.12, OG
-        0.115,
+        0.35,
         //0.090816, OG
         0.04504,
         //0.005767 OG

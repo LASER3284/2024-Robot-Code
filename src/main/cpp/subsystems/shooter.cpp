@@ -22,15 +22,15 @@ void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
     turret_angle = -robot_pose.Rotation().Degrees();
 
     // This should be dead code, but it's being left bc it works anyway.
-    if (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed) {
-        turret_angle = turret_angle;
-        frc::SmartDashboard::PutNumber("REACHED THE THING", 12);
-    }
+    // if (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed) {
+    //     turret_angle = turret_angle;
+    //     frc::SmartDashboard::PutNumber("REACHED THE THING", 12);
+    // }
 
     hypot = units::math::sqrt(y * y + x * x);
     turret_angle += units::math::atan2(y, x) + constants::TURRET_CORRECTION * hypot;
 
-    turret_angle = frc::AngleModulus(turret_angle - 6_deg);
+    turret_angle = frc::AngleModulus(turret_angle);
 
     pivot_angle = units::math::atan2(constants::DELTA_Y, hypot);
     if (hypot > 5_ft) {
@@ -141,12 +141,12 @@ void subsystems::shooter::Shooter::tick() {
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
         break;
-      /*  case constants::ShooterStates::SubScore: {
+        case constants::ShooterStates::SubScore: {
             pivot.set_angle(constants::SUB_PIVOT_ANGLE);
             turret.set_angle(constants::SUB_TURRET_ANGLE);
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
-        break; */
+        break; 
         case constants::ShooterStates::CreamyShot: {
             pivot.set_angle(constants::CREAMY_PIVOT_ANGLE);
             if (pivot_ok())
@@ -181,7 +181,7 @@ void subsystems::shooter::Shooter::tick() {
         case constants::ShooterStates::TestAngle: {
             pivot.set_angle(constants::TEST_PIVOT_ANGLE);
             turret.set_angle(constants::TEST_TURRET_ANGLE);
-            flywheel.set_exit_vel(constants::IDLE_VELOCITY);
+            // flywheel.set_exit_vel(constants::IDLE_VELOCITY);
         }
         default: {
             state = constants::ShooterStates::Stopped;
