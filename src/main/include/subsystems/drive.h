@@ -144,9 +144,9 @@ private:
     std::string current_traj;
 
     frc::PIDController heading_controller {
-        2.0,
-        0,
-        0
+        1.25,
+        0.001,
+        0.05
     };
 
     units::feet_per_second_t max_detected_velocity = 0_fps;

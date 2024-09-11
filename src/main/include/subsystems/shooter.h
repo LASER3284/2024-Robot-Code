@@ -142,6 +142,7 @@ public:
         case constants::ShooterStates::TrackShot:
         case constants::ShooterStates::TrackForceShot:
         case constants::ShooterStates::Prespin:
+        //more might need to go here, not sure
         case constants::ShooterStates::TrackingIdle: {
             return units::math::abs(turret.get_angle() - (turret_angle - 4_deg)) < turret::constants::TOLERANCE
                 && units::math::abs(pivot.get_angle() - pivot_angle) < pivot::constants::TOLERANCE
@@ -172,6 +173,7 @@ public:
                 && units::math::abs(pivot.get_angle() - constants::TEST_PIVOT_ANGLE) < pivot::constants::TOLERANCE
                 && units::math::abs(flywheel.get_exit_vel()) < flywheel::constants::TOLERANCE; 
         }
+        break;
         default: {
             return false;
         }
@@ -315,7 +317,7 @@ public:
         );
     }
 
-    // prespin so the flywheel
+    // prespin so the flywheel is not taking longer than the turret and pivot
     frc2::CommandPtr prespin() {
         return this->RunOnce([this]() {
             activate(constants::ShooterStates::Prespin);

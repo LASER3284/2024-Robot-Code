@@ -61,9 +61,7 @@ public:
     void run_sysid(int);
 
     bool has_piece();
-
-    // void prespin();
-    
+   
 private:
     units::turn_t goal_feed = units::turn_t{0};
     frc::SimpleMotorFeedforward<units::feet> flywheel_ff {0_V, 0.08283_V / 1_fps, 0.02161_V / 1_fps_sq};

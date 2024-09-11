@@ -118,14 +118,14 @@ private:
 
     frc::PIDController heading_controller {
         1.85,
-        0.6,
+        0.0,
         0.0
     };
 
     frc::PIDController drive_controller {
-        0.095,
+        0.225,
         0.0,
-        0.0
+        0.001
     };
 
     frc::SimpleMotorFeedforward<units::feet> drive_ff {0.60187_V, 0.702_V / 1_fps, 0.34455_V / 1_fps_sq};

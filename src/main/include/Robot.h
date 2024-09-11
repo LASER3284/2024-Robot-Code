@@ -223,7 +223,6 @@ private:
 
     subsystems::useless::Useless happy_face{};
     subsystems::shooter::Shooter shooter{};
-    subsystems::flywheel::Flywheel flywheel{};
     subsystems::intake::Intake intake{};
 
     frc2::CommandPtr auto_cmd = frc2::cmd::None();

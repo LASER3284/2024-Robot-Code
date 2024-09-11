@@ -119,7 +119,6 @@ void subsystems::shooter::Shooter::tick() {
         //useless
         case constants::ShooterStates::TrackShot: {
             //moved this up to try and get it to shoot faster!
-            flywheel.set_exit_vel(constants::IDLE_VELOCITY);
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
             //turret 4 degree offset because shooter doesn't shoot straight
@@ -148,7 +147,6 @@ void subsystems::shooter::Shooter::tick() {
         case constants::ShooterStates::TrackingIdle: { 
             //hi its emma i put this in to see if we shoot faster \/
             // flywheel.prespin();
-            flywheel.set_exit_vel(constants::SHOT_VELOCITY);
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
             // pivot okay means withing soft stop zone not at aimed goal
@@ -201,9 +199,10 @@ void subsystems::shooter::Shooter::tick() {
             turret.set_angle(constants::TEST_TURRET_ANGLE);
             // flywheel.set_exit_vel(constants::IDLE_VELOCITY);
         }
-         case constants::ShooterStates::Prespin: {
-            flywheel.set_exit_vel(SHOT_VELOCITY);
+        case constants::ShooterStates::Prespin: {
+            flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
+        break;
         default: {
             state = constants::ShooterStates::Stopped;
         }
