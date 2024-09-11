@@ -61,6 +61,8 @@ public:
     void run_sysid(int);
 
     bool has_piece();
+
+    // void prespin();
     
 private:
     units::turn_t goal_feed = units::turn_t{0};
@@ -87,7 +89,7 @@ private:
      frc::PIDController pid {
         0.025,
         0.035,
-        0
+        0.001
     };
     /// this is my attempt at sysid with my very limited knowledge
     frc2::sysid::SysIdRoutine sysid{

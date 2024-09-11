@@ -70,6 +70,7 @@ void subsystems::shooter::Shooter::run_sysid(int test_num, subsystems::shooter::
 void subsystems::shooter::Shooter::tick() {
     switch (state) {
         case constants::ShooterStates::Stopped: {
+            //idle position
             flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_IDLE);
             flywheel.stop_feed();
@@ -78,6 +79,7 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::Down: {
+            //amp arm scoring shooter position
             flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_DOWN);
             flywheel.stop_feed();
@@ -85,11 +87,14 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::ReverseFeed: {
+            //feed back into amp arm?
             flywheel.reverse_feed();
         }
         break;
+        
         case constants::ShooterStates::PrepFeeding: {
-    flywheel.set_exit_vel(0_fps);
+            //cameron is asking if this is the old load button?
+            flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_FEED);
             if (pivot_ok())
                 turret.set_angle(constants::TURRET_FEED);
@@ -102,6 +107,7 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::StableIdle: {
+            //emma? is this the pre spin up case
             flywheel.set_exit_vel(constants::IDLE_VELOCITY);
             flywheel.stop_feed();
             pivot.set_angle(constants::PIVOT_IDLE);
@@ -109,12 +115,17 @@ void subsystems::shooter::Shooter::tick() {
                 turret.set_angle(constants::TURRET_IDLE);
         }
         break;
+
+        //useless
         case constants::ShooterStates::TrackShot: {
+            //moved this up to try and get it to shoot faster!
+            flywheel.set_exit_vel(constants::IDLE_VELOCITY);
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
+            //turret 4 degree offset because shooter doesn't shoot straight
                 turret.set_angle(turret_angle - 4_deg);
 
-            flywheel.set_exit_vel(constants::SHOT_VELOCITY);
+            //flywheel.set_exit_vel(constants::SHOT_VELOCITY);
 
             if (in_place() && has_piece()) {
                 flywheel.feed(true);
@@ -122,6 +133,7 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::TrackForceShot: {
+            // is this for auto? cameron asked inquisitevely
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
                 turret.set_angle(turret_angle - 4_deg);
@@ -133,9 +145,13 @@ void subsystems::shooter::Shooter::tick() {
             }
         }
         break;
-        case constants::ShooterStates::TrackingIdle: {
+        case constants::ShooterStates::TrackingIdle: { 
+            //hi its emma i put this in to see if we shoot faster \/
+            // flywheel.prespin();
+            flywheel.set_exit_vel(constants::SHOT_VELOCITY);
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
+            // pivot okay means withing soft stop zone not at aimed goal
                 turret.set_angle(turret_angle - 4_deg);
 
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
@@ -168,7 +184,8 @@ void subsystems::shooter::Shooter::tick() {
             }
         }
         break;
-        case constants::ShooterStates::Override: {
+        case constants::ShooterStates::Override: { 
+            //huh? what is this
             pivot.set_angle(or_pivot_angle);
             turret.set_angle(or_turret_angle);
             flywheel.set_exit_vel(or_flywheel_speed);
@@ -179,9 +196,13 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::TestAngle: {
+            // is this what emma tried to make?
             pivot.set_angle(constants::TEST_PIVOT_ANGLE);
             turret.set_angle(constants::TEST_TURRET_ANGLE);
             // flywheel.set_exit_vel(constants::IDLE_VELOCITY);
+        }
+         case constants::ShooterStates::Prespin: {
+            flywheel.set_exit_vel(SHOT_VELOCITY);
         }
         default: {
             state = constants::ShooterStates::Stopped;

@@ -39,6 +39,7 @@ namespace constants {
         Down,
         Override,
         TestAngle,
+        Prespin,
     };
 
     enum SubMech {
@@ -140,6 +141,7 @@ public:
         break;
         case constants::ShooterStates::TrackShot:
         case constants::ShooterStates::TrackForceShot:
+        case constants::ShooterStates::Prespin:
         case constants::ShooterStates::TrackingIdle: {
             return units::math::abs(turret.get_angle() - (turret_angle - 4_deg)) < turret::constants::TOLERANCE
                 && units::math::abs(pivot.get_angle() - pivot_angle) < pivot::constants::TOLERANCE
@@ -313,6 +315,12 @@ public:
         );
     }
 
+    // prespin so the flywheel
+    frc2::CommandPtr prespin() {
+        return this->RunOnce([this]() {
+            activate(constants::ShooterStates::Prespin);
+        });
+    }
     // This is the group for the override goals and actions.
     bool or_fire = false;
     units::degree_t or_pivot_angle;

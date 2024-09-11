@@ -66,9 +66,9 @@ private:
     frc::DutyCycleEncoder turret_encoder {8};
     
     frc::PIDController pid {
-        0.175,
+        0.3,
         0.004,
-        0.0055
+        0.0085
     };
 
     frc2::sysid::SysIdRoutine sysid {

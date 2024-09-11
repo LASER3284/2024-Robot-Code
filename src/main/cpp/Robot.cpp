@@ -12,6 +12,8 @@
 
 #include <filesystem>
 #include <frc/Filesystem.h>
+#include <frc/filter/Debouncer.h>
+#include <frc2/command/Command.h>
 
 void Robot::RobotInit() {
     sysid_chooser.SetDefaultOption("No SysID", SysIdChooser::None);
@@ -54,16 +56,19 @@ void Robot::RobotInit() {
 
     tracktracker::TrackTracker::register_namedpoint("shoot", std::move(auto_shoot()));
     tracktracker::TrackTracker::register_namedpoint("goto1", tracker.generate({frc::Pose2d{{2.75_m, 4.1_m}, {0_deg}}, frc::ChassisSpeeds{}}));
-    /// this will be put back in after pid tuning
-    // aux_controller.B()
-    //     .WhileTrue(std::move(reverse_feed));
+    aux_controller.B()
+         .WhileTrue(std::move(reverse_feed));
     aux_controller.X()
         .WhileTrue(intake_ignore());
-    // aux_controller.Y()
-    //    .WhileTrue(std::move(tele_sub_score));
     aux_controller.A()
         .OnTrue(std::move(tele_track))
         .OnFalse(std::move(shooter_stable));
+
+    // aux_controller.B()
+    //     .OnTrue(std::move(shoot_prespin));
+
+    aux_controller.B().Debounce(100_ms, Debouncer::DebounceType::Both).OnTrue(shooter.prespin().ToPtr());
+    
     aux_controller.POVUp(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
         if (!amp_prepscore.IsScheduled()) {
             amp_prepscore.Schedule();
@@ -143,6 +148,7 @@ void Robot::TeleopPeriodic() {
     shooter.tick();
     climi.tick();
     drive.tick(true);
+    //climber control
     if (aux_controller.GetLeftY() < -0.6) {
         climi.uppy();
     }

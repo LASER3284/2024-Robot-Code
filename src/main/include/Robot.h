@@ -9,6 +9,7 @@
 #include "subsystems/drive.h"
 #include "subsystems/uselessthing.h"
 #include "subsystems/shooter.h"
+#include "subsystems/flywheel.h"
 #include "subsystems/intake.h"
 #include "subsystems/AmpArm.h"
 #include "subsystems/arm.h"
@@ -176,6 +177,7 @@ public:
     frc2::CommandPtr tele_creamy_shot = shooter.creamy_shot();
     frc2::CommandPtr shooter_stable = shooter.stable();
     frc2::CommandPtr test_pid_angle = shooter.test_pid_angle();
+    frc2::CommandPtr shoot_prespin = shooter.prespin();
 
     frc2::CommandPtr reverse_feed = frc2::cmd::Race(
             shooter.reverse_feed(),
@@ -221,6 +223,7 @@ private:
 
     subsystems::useless::Useless happy_face{};
     subsystems::shooter::Shooter shooter{};
+    subsystems::flywheel::Flywheel flywheel{};
     subsystems::intake::Intake intake{};
 
     frc2::CommandPtr auto_cmd = frc2::cmd::None();

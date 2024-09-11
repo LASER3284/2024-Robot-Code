@@ -51,6 +51,10 @@ void subsystems::flywheel::Flywheel::reverse_feed() {
     feedwheel_motor.SetVoltage(-1_V);
 }
 
+// void subsystems::flywheel::Flywheel::prespin() {
+//     motor.SetVoltage(4_V);
+// }
+
 bool subsystems::flywheel::Flywheel::has_piece() {
    return !piece_sensor.Get();
 };
