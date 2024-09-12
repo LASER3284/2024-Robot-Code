@@ -58,19 +58,21 @@ void Robot::RobotInit() {
     tracktracker::TrackTracker::register_namedpoint("goto1", tracker.generate({frc::Pose2d{{2.75_m, 4.1_m}, {0_deg}}, frc::ChassisSpeeds{}}));
     //  aux_controller.B()
     //       .WhileTrue(std::move(reverse_feed));
+    aux_controller.B()
+        .OnTrue(shooter.prespin());
+        // this might switch back to reverse feed
     aux_controller.X()
         .WhileTrue(intake_ignore());
     aux_controller.A()
         .OnTrue(std::move(tele_track))
         .OnFalse(std::move(shooter_stable));
 
-    aux_controller.B()
-        .OnTrue(shooter.prespin());
-
-    // aux_controller.B()
-    //     .OnTrue(std::move(shoot_prespin));
-
-    //aux_controller.B().Debounce(100_ms, Debouncer::DebounceType::Both).OnTrue(shooter.prespin().ToPtr());
+    aux_controller.POVRight(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
+        if (!reverse_feed.IsScheduled()) {
+            reverse_feed.Schedule();
+        }
+    });
+    // this might switch to the prespin of the flywheel
     
     aux_controller.POVUp(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
         if (!amp_prepscore.IsScheduled()) {

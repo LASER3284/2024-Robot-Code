@@ -171,7 +171,6 @@ public:
         );
     
     frc2::CommandPtr tele_shoot = shooter.score();
-   // frc2::CommandPtr tele_sub_score = shooter.sub_score();
     frc2::CommandPtr tele_feed() { return frc2::cmd::Parallel(shooter.feed(), amp_arm.feed()).Until([this]() { return shooter.has_piece(); }); }
     frc2::CommandPtr tele_track = shooter.track();
     frc2::CommandPtr tele_creamy_shot = shooter.creamy_shot();

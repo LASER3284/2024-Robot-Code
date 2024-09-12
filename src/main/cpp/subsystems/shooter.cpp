@@ -87,13 +87,12 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::ReverseFeed: {
-            //feed back into amp arm?
+            //feed back into amp arm
             flywheel.reverse_feed();
         }
         break;
         
         case constants::ShooterStates::PrepFeeding: {
-            //cameron is asking if this is the old load button?
             flywheel.set_exit_vel(0_fps);
             pivot.set_angle(constants::PIVOT_FEED);
             if (pivot_ok())
@@ -107,7 +106,6 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::StableIdle: {
-            //emma? is this the pre spin up case
             flywheel.set_exit_vel(constants::IDLE_VELOCITY);
             flywheel.stop_feed();
             pivot.set_angle(constants::PIVOT_IDLE);
@@ -118,7 +116,6 @@ void subsystems::shooter::Shooter::tick() {
 
         //useless
         case constants::ShooterStates::TrackShot: {
-            //moved this up to try and get it to shoot faster!
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
             //turret 4 degree offset because shooter doesn't shoot straight
@@ -132,7 +129,6 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::TrackForceShot: {
-            // is this for auto? cameron asked inquisitevely
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
                 turret.set_angle(turret_angle - 4_deg);
@@ -156,12 +152,14 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::SubScore: {
+            // sub shot, may not be necessary anymore with the changes to the soft stop and the shock
             pivot.set_angle(constants::SUB_PIVOT_ANGLE);
             turret.set_angle(constants::SUB_TURRET_ANGLE);
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
         break; 
         case constants::ShooterStates::CreamyShot: {
+            // shot from the source to ferry notes over near the speaker: UNTESTED
             pivot.set_angle(constants::CREAMY_PIVOT_ANGLE);
             if (pivot_ok())
                 turret.set_angle(turret_angle - 15_deg * (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1));
@@ -183,7 +181,6 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::Override: { 
-            //huh? what is this
             pivot.set_angle(or_pivot_angle);
             turret.set_angle(or_turret_angle);
             flywheel.set_exit_vel(or_flywheel_speed);
@@ -194,7 +191,8 @@ void subsystems::shooter::Shooter::tick() {
         }
         break;
         case constants::ShooterStates::TestAngle: {
-            // is this what emma tried to make?
+            //this was for testing if the pivot and turret would go to set angles, specifically for PID
+            //should not be assigned to a controller unless we are testing
             pivot.set_angle(constants::TEST_PIVOT_ANGLE);
             turret.set_angle(constants::TEST_TURRET_ANGLE);
             // flywheel.set_exit_vel(constants::IDLE_VELOCITY);
