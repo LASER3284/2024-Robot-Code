@@ -53,8 +53,8 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     slow_mode_mul = slow_mode_mul < 0.1 ? 0.1 : slow_mode_mul;
     const double mode_mul = slow_mode_mul;
 
-    double x_axis = -joystick->GetLeftX();
-    double y_axis = -joystick->GetLeftY();
+    double x_axis = joystick->GetLeftX();
+    double y_axis = joystick->GetLeftY();
 
     x_axis = fabs(x_axis) > 0.1 ? x_axis : 0.0;
     y_axis = fabs(y_axis) > 0.1 ? y_axis : 0.0;
