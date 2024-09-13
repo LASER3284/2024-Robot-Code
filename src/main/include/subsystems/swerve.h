@@ -24,7 +24,7 @@ namespace swerve {
 namespace constants {
     constexpr double kDRIVE_RATIO = 6.12;
 
-    constexpr units::inch_t kWHEEL_DIAM = 3.824_in;
+    constexpr units::inch_t kWHEEL_DIAM = 3.97_in;
 
     constexpr units::inch_t kWHEEL_CIRC = kWHEEL_DIAM * std::numbers::pi;
 
@@ -123,9 +123,9 @@ private:
     };
 
     frc::PIDController drive_controller {
-        0.225,
+        0.4,
         0.0,
-        0.001
+        0.0
     };
 
     frc::SimpleMotorFeedforward<units::feet> drive_ff {0.60187_V, 0.702_V / 1_fps, 0.34455_V / 1_fps_sq};

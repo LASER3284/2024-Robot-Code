@@ -22,7 +22,7 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(5.5, 0.0, 0.0),
+            PIDConstants(0.0, 0.0, 0.0),
             PIDConstants(1.76, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,

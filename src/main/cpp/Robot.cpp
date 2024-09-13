@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "Robot.h"
+#include "subsystems/drive.h"
 
 #include <frc2/command/CommandScheduler.h>
 #include <frc/smartdashboard/SmartDashboard.h>
@@ -14,6 +15,10 @@
 #include <frc/Filesystem.h>
 #include <frc/filter/Debouncer.h>
 #include <frc2/command/Command.h>
+
+using namespace ctre::phoenix6;
+
+constexpr units::time::second_t print_period{500_ms};
 
 void Robot::RobotInit() {
     sysid_chooser.SetDefaultOption("No SysID", SysIdChooser::None);
@@ -104,6 +109,7 @@ void Robot::RobotInit() {
     shooter.init();
     amp_arm.init();
     climi.init();
+
 }
 
 void Robot::RobotPeriodic() {
