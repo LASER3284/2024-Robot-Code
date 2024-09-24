@@ -22,8 +22,8 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(0.0, 0.0, 0.0),
-            PIDConstants(1.76, 0.0, 0.0),
+            PIDConstants(4.6, 0.0, 0.2),
+            PIDConstants(2, 0.0, 0.0),
             constants::MAX_AUTO_SPEED,
             16_in,
             ReplanningConfig(false, false)
@@ -62,7 +62,8 @@ void subsystems::drive::Drivetrain::tick(bool is_field_oriented) {
     x_axis *= frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1;
     y_axis *= frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed ? -1 : 1;
 
-    double r_axis = -joystick->GetRightX();
+    // was negative
+    double r_axis = joystick->GetRightX();
     r_axis = fabs(r_axis) > 0.1 ? r_axis : 0.0;
 
     // Swapped bc forward is Vx but x_axis is side to side
@@ -162,17 +163,17 @@ void subsystems::drive::Drivetrain::reset_odometry() {
 
 void subsystems::drive::Drivetrain::update_odometry() {
     frc::Pose2d last_pose = pose_estimator.GetEstimatedPosition();
-    frc::Pose2d newpose = pose_estimator.Update(
-        gyro->GetRotation2d(),
-        {
-            front_left.get_position(), front_right.get_position(),
-            back_left.get_position(), back_right.get_position()
-        }
-    );
+    // frc::Pose2d newpose = pose_estimator.Update(
+    //     gyro->GetRotation2d(),
+    //     {
+    //         front_left.get_position(), front_right.get_position(),
+    //         back_left.get_position(), back_right.get_position()
+    //     }
+    // );
 
-    if (units::math::abs(newpose.X() - last_pose.X()) > 10_m || units::math::abs(newpose.Y() - last_pose.Y()) > 10_m) {
-        set_pose(last_pose);
-    }
+    // if (units::math::abs(newpose.X() - last_pose.X()) > 10_m || units::math::abs(newpose.Y() - last_pose.Y()) > 10_m) {
+    //     set_pose(last_pose);
+    // }
 
     auto vision_est = photon_estimator.Update();
 

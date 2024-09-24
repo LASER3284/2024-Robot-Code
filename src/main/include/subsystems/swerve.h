@@ -117,13 +117,13 @@ private:
     bool force_angle = false;
 
     frc::PIDController heading_controller {
-        1.85,
+        0.95,
         0.0,
-        0.0
+        0.15
     };
 
     frc::PIDController drive_controller {
-        0.4,
+        0.7,
         0.0,
         0.0
     };
