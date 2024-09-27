@@ -116,10 +116,6 @@ void Robot::RobotPeriodic() {
     drive.update_odometry();
     drive.update_nt();
 
-    if (frc::SmartDashboard::GetBoolean("drive_force_id7", false)) {
-        drive.set_pose({{ 88_in, 159.5_in }, {}});
-    }
-
     shooter.update_nt(drive.get_pose());
 
     amp_arm.update_nt();

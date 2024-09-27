@@ -128,6 +128,12 @@ private:
         0.0
     };
 
+    frc::PIDController rotation_controller {
+        0,
+        0,
+        0
+    };
+
     frc::SimpleMotorFeedforward<units::feet> drive_ff {0.60187_V, 0.702_V / 1_fps, 0.34455_V / 1_fps_sq};
 
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> drive_motor;
