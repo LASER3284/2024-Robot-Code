@@ -85,12 +85,11 @@ void commands::SmarterShooterCommand::Execute() {
 
     shooter->or_turret_angle = a;
 
-    // Pivot
 
     units::degree_t p = units::math::atan2(shooter::constants::DELTA_Y, moving_rtog.Norm());
 
     if (moving_rtog.Norm() > 5_ft) {
-        p += units::foot_t(pow(units::foot_t{moving_rtog.Norm()}.value(), 1.1)) * shooter::constants::PIVOT_CORRECTION;
+     p += units::foot_t(pow(units::foot_t{moving_rtog.Norm()}.value(), 1.1)) * shooter::constants::PIVOT_CORRECTION;
     }
 
     p = frc::AngleModulus(p);

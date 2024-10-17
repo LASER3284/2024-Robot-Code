@@ -39,6 +39,7 @@ public:
     /// @brief set the point for the angle of the turn
     void set_angle(units::degree_t);
     units::degree_t get_angle();
+    units::degree_t get_auto_angle();
     /// @brief checks if at angle
     bool at_angle();
 private:

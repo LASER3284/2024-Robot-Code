@@ -151,6 +151,27 @@ public:
         );
     }
 
+    frc2::CommandPtr auto_offset() {
+        return frc2::cmd::Sequence(
+            intake.RunOnce([this]() {
+                intake.activate(subsystems::intake::constants::DeployStates::NOSPIN);
+            }),
+            shooter.Run([this]() {
+                shooter.activate(subsystems::shooter::constants::ShooterStates::AutoShot);
+            }).Until([this]() {
+                return shooter.in_place();
+            }).BeforeStarting([this]() {
+                //drive.reset_pose_to_vision();
+                shooter.activate(subsystems::shooter::constants::ShooterStates::AutoShot);
+            }).WithTimeout(1.75_s),
+            shooter.RunOnce([this]() {
+                shooter.activate(subsystems::shooter::constants::ShooterStates::AutoShot);
+            }),
+            shooter.force_score(),
+            shooter.stable()
+        );
+    }
+
     frc2::CommandPtr spit() {
         return shooter.spit();
     }
@@ -173,7 +194,7 @@ public:
     frc2::CommandPtr tele_shoot = shooter.score();
     frc2::CommandPtr tele_feed() { return frc2::cmd::Parallel(shooter.feed(), amp_arm.feed()).Until([this]() { return shooter.has_piece(); }); }
     frc2::CommandPtr tele_track = shooter.track();
-    frc2::CommandPtr tele_creamy_shot = shooter.creamy_shot();
+    frc2::CommandPtr sub_shot = shooter.sub_shot();
     frc2::CommandPtr shooter_stable = shooter.stable();
     frc2::CommandPtr test_pid_angle = shooter.test_pid_angle();
     frc2::CommandPtr shoot_prespin = shooter.prespin();

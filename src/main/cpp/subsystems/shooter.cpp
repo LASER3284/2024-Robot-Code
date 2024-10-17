@@ -17,8 +17,19 @@ void subsystems::shooter::Shooter::init() {
 }
 
 void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
-    units::foot_t x = robot_pose.Translation().X() - 3_in - (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.X() : constants::GOAL_BLUE_POSITION.X());
-    units::foot_t y = robot_pose.Translation().Y() - 3_in - (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.Y() : constants::GOAL_BLUE_POSITION.Y());
+    units::length::inch_t offset;
+    if(frc::DriverStation::Alliance::kRed)
+    {
+        //Code for Red alliance
+        offset = 3_in;
+    }else
+    {
+        //Code for Blue alliance
+        offset = -3_in;
+    }
+
+    units::foot_t x = robot_pose.Translation().X() + offset - (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.X() : constants::GOAL_BLUE_POSITION.X());
+    units::foot_t y = robot_pose.Translation().Y() + offset - (frc::DriverStation::GetAlliance().value_or(frc::DriverStation::Alliance::kBlue) == frc::DriverStation::Alliance::kRed ? constants::GOAL_RED_POSITION.Y() : constants::GOAL_BLUE_POSITION.Y());
     turret_angle = -robot_pose.Rotation().Degrees();
 
     // This should be dead code, but it's being left bc it works anyway.
@@ -26,15 +37,17 @@ void subsystems::shooter::Shooter::update_nt(frc::Pose2d robot_pose) {
     //     turret_angle = turret_angle;
     //     frc::SmartDashboard::PutNumber("REACHED THE THING", 12);
     // }
+    constexpr auto PIVOT_CORRECTION = frc::DriverStation::Alliance::kRed ? 0.402_deg / 1_ft : 0.402_deg / 1_ft;
+    constexpr auto TURRET_CORRECTION = frc::DriverStation::Alliance::kRed ? -0.165_deg / 1_ft : 0.165_deg / 1_ft;
 
     hypot = units::math::sqrt(y * y + x * x);
-    turret_angle += units::math::atan2(y, x) + constants::TURRET_CORRECTION * hypot;
+    turret_angle += units::math::atan2(y, x) + TURRET_CORRECTION * hypot;
 
     turret_angle = frc::AngleModulus(turret_angle);
 
     pivot_angle = units::math::atan2(constants::DELTA_Y, hypot);
     if (hypot > 5_ft) {
-        pivot_angle += units::foot_t(pow(hypot.value(), 1.1)) * constants::PIVOT_CORRECTION;
+        pivot_angle += units::foot_t(pow(hypot.value(), 1.1)) * PIVOT_CORRECTION;
     }
 
     pivot_angle = frc::AngleModulus(pivot_angle);
@@ -128,6 +141,17 @@ void subsystems::shooter::Shooter::tick() {
             }
         }
         break;
+        case constants::ShooterStates::AutoShot: {
+            pivot.set_angle(pivot_angle);
+            if (pivot_ok())
+                turret.set_angle(turret_angle - 4_deg);
+
+            if (in_place() && has_piece()) {
+                flywheel.feed(true);
+            }
+            flywheel.set_exit_vel(constants::SHOT_VELOCITY);
+        }
+        break;
         case constants::ShooterStates::TrackForceShot: {
             pivot.set_angle(pivot_angle);
             if (pivot_ok())
@@ -153,9 +177,9 @@ void subsystems::shooter::Shooter::tick() {
         break;
         case constants::ShooterStates::SubScore: {
             // sub shot, may not be necessary anymore with the changes to the soft stop and the shock
-            pivot.set_angle(constants::SUB_PIVOT_ANGLE);
-            turret.set_angle(constants::SUB_TURRET_ANGLE);
-            flywheel.set_exit_vel(constants::SHOT_VELOCITY);
+            // pivot.set_angle(constants::SUB_PIVOT_ANGLE);
+            // turret.set_angle(constants::SUB_TURRET_ANGLE);
+            // flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }
         break; 
         case constants::ShooterStates::CreamyShot: {
@@ -197,6 +221,7 @@ void subsystems::shooter::Shooter::tick() {
             turret.set_angle(constants::TEST_TURRET_ANGLE);
             // flywheel.set_exit_vel(constants::IDLE_VELOCITY);
         }
+        break;
         case constants::ShooterStates::Prespin: {
             flywheel.set_exit_vel(constants::SHOT_VELOCITY);
         }

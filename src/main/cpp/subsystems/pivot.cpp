@@ -41,7 +41,17 @@ void subsystems::pivot::Pivot::set_angle(units::degree_t goal) {
 units::degree_t subsystems::pivot::Pivot::get_angle() {
     units::degree_t initial_offset = 0_deg;
     //offset for uppy downy, is added to total
-    const units::degree_t constant_offset = 134.5_deg;
+    const units::degree_t constant_offset = 134_deg;
+    while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
+        initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
+    }
+    return pivot_encoder.Get() + constant_offset + initial_offset;
+}
+
+units::degree_t subsystems::pivot::Pivot::get_auto_angle() {
+    units::degree_t initial_offset = 0_deg;
+    //offset for uppy downy, is added to total
+    const units::degree_t constant_offset = 140_deg;
     while (units::math::abs(pivot_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (pivot_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }

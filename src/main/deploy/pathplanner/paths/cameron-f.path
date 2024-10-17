@@ -3,32 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.918404239090931,
-        "y": 5.550936522700434
+        "x": 7.9398134378954675,
+        "y": 4.150543084659977
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.185102799125124,
-        "y": 8.708503947713194
+        "x": 4.965825514336934,
+        "y": 4.11382718436913
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "cameron-e-end"
     },
     {
       "anchor": {
-        "x": 8.3,
-        "y": 5.8
+        "x": 4.268223408810858,
+        "y": 4.7747133896043605
       },
       "prevControl": {
-        "x": 6.482562935603127,
-        "y": 5.432840997091539
+        "x": 5.277910666809126,
+        "y": 4.2882277107506495
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "cameron-f-end"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -39,11 +45,11 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": -12.847704858717602,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": null,
+  "folder": "cameron",
   "previewStartingState": {
     "rotation": 0,
     "velocity": 0

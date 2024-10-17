@@ -30,6 +30,7 @@
 #include <pathplanner/lib/util/HolonomicPathFollowerConfig.h>
 #include <pathplanner/lib/util/PIDConstants.h>
 #include <pathplanner/lib/util/ReplanningConfig.h>
+//#include <pathplanner/lib/config/RobotConfig.h>
 #include <frc/DriverStation.h>
 #include <frc/smartdashboard/Field2d.h>
 
@@ -134,6 +135,8 @@ public:
     /// @return The generated CommandPtr for the path, which will call the
     /// associated NamedCommands if they've been registered.
     frc2::CommandPtr get_auto_path(std::string);
+
+    void setYaw();
 private:
     std::shared_ptr<frc::XboxController> joystick;
 
@@ -152,6 +155,7 @@ private:
     units::feet_per_second_t max_detected_velocity = 0_fps;
 
     std::unique_ptr<ctre::phoenix6::hardware::Pigeon2> gyro = std::make_unique<ctre::phoenix6::hardware::Pigeon2>(62);
+    // ctre::phoenix::sensors::Pigeon2Configuration::Pigeon2Configuration (34);
 
     swerve::Module front_left{7, 8, 14};
     swerve::Module front_right{5, 6, 13};
@@ -182,30 +186,30 @@ private:
         photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
         std::move(photon::PhotonCamera{"back_camera"}),
         frc::Transform3d {
-            frc::Translation3d{-14.75_in, -6_in, 8_in},
+            frc::Translation3d{-14_in, -6_in, 8_in},
             frc::Rotation3d{0_deg, 30_deg, 180_deg}
         }
     };
 
-   /* photon::PhotonPoseEstimator photon_estimator_right {
-        frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
-        photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
-        std::move(photon::PhotonCamera{"rightCam"}),
-        frc::Transform3d {
-            frc::Translation3d(-15.75_in, -7_in, 8_in),
-            frc::Rotation3d{0_deg, 30_deg, -90_deg}
-        }
-    };
+    // photon::PhotonPoseEstimator photon_estimator_right {
+    //     frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
+    //     photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
+    //     std::move(photon::PhotonCamera{"rightCam"}),
+    //     frc::Transform3d {
+    //         frc::Translation3d(-15.75_in, -7_in, 8_in),
+    //         frc::Rotation3d{0_deg, 30_deg, -90_deg}
+    //     }
+    // };
 
-    photon::PhotonPoseEstimator photon_estimator_left {
-        frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
-        photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
-        std::move(photon::PhotonCamera("leftCam")),
-        frc::Transform3d {
-            frc::Translation3d(-15.75_in, -5_in, 8_in),
-            frc::Rotation3d{0_deg, 30_deg, 90_deg}
-        }
-    }; */
+    // photon::PhotonPoseEstimator photon_estimator_left {
+    //     frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),
+    //     photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
+    //     std::move(photon::PhotonCamera("leftCam")),
+    //     frc::Transform3d {
+    //         frc::Translation3d(-15.75_in, -5_in, 8_in),
+    //         frc::Rotation3d{0_deg, 30_deg, 90_deg}
+    //     }
+    // }; 
 
     photon::PhotonPoseEstimator photon_estimator_front {
         frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo),

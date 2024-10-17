@@ -24,7 +24,7 @@ namespace swerve {
 namespace constants {
     constexpr double kDRIVE_RATIO = 6.12;
 
-    constexpr units::inch_t kWHEEL_DIAM = 3.97_in;
+    constexpr units::inch_t kWHEEL_DIAM = 3.82_in;
 
     constexpr units::inch_t kWHEEL_CIRC = kWHEEL_DIAM * std::numbers::pi;
 
@@ -122,18 +122,14 @@ private:
         0.15
     };
 
+//wheel velocity controller (because makinig it too high makes the wheels tweak)
     frc::PIDController drive_controller {
+        // PREVIOUSLY .7, 0, 0
         0.7,
         0.0,
         0.0
     };
-
-    frc::PIDController rotation_controller {
-        0,
-        0,
-        0
-    };
-
+    
     frc::SimpleMotorFeedforward<units::feet> drive_ff {0.60187_V, 0.702_V / 1_fps, 0.34455_V / 1_fps_sq};
 
     std::unique_ptr<ctre::phoenix6::hardware::TalonFX> drive_motor;

@@ -26,7 +26,16 @@ units::degree_t subsystems::turret::Turret::get_angle() {
     // negative bc thrubore is wrong direction on physical bot
     units::degree_t initial_offset = 0_deg;
     // making this number MORE NEGATIVE (-165.8) will BECOME MORE POSITIVE (from 0 to 1) CHANGE THIS ONE IF WE HAVE TO REZERO!!!!!
-    const units::degree_t constant_offset = -205.8_deg;
+    const units::degree_t constant_offset = -210.8_deg;
+    while (units::math::abs(turret_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
+        initial_offset -= 360_deg * (turret_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
+    }
+    return -(turret_encoder.Get() + constant_offset + initial_offset);
+}
+
+units::degree_t subsystems::turret::Turret::get_auto_angle() {
+    units::degree_t initial_offset = 0_deg;
+    const units::degree_t constant_offset = -290.1_deg;
     while (units::math::abs(turret_encoder.Get() + constant_offset + initial_offset) > 180_deg) {
         initial_offset -= 360_deg * (turret_encoder.Get() + constant_offset < 0_deg ? -1 : 1);
     }

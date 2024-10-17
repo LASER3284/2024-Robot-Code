@@ -45,6 +45,7 @@ void Robot::RobotInit() {
     pathplanner::NamedCommands::registerCommand("evil", std::move(reverse_intake()));
     pathplanner::NamedCommands::registerCommand("intake amp", std::move(intake_continuous_amp()));
     pathplanner::NamedCommands::registerCommand("spit", std::move(spit()));
+    pathplanner::NamedCommands::registerCommand("autoshoot", std::move(auto_offset()));
     // pathplanner::NamedCommands::registerCommand("amp", amp_score());
 
     std::string path = frc::filesystem::GetDeployDirectory() + "/pathplanner/autos";
@@ -61,24 +62,17 @@ void Robot::RobotInit() {
 
     tracktracker::TrackTracker::register_namedpoint("shoot", std::move(auto_shoot()));
     tracktracker::TrackTracker::register_namedpoint("goto1", tracker.generate({frc::Pose2d{{2.75_m, 4.1_m}, {0_deg}}, frc::ChassisSpeeds{}}));
-    //  aux_controller.B()
-    //       .WhileTrue(std::move(reverse_feed));
     aux_controller.B()
-        .OnTrue(shooter.prespin());
-        // this might switch back to reverse feed
+        .WhileTrue(std::move(reverse_feed));
     aux_controller.X()
-        .WhileTrue(intake_ignore());
+        .WhileTrue(intake_cmd());
     aux_controller.A()
-        .OnTrue(std::move(tele_track))
+        .OnTrue(std::move(tele_track
+        ))
         .OnFalse(std::move(shooter_stable));
-
-    aux_controller.POVRight(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
-        if (!reverse_feed.IsScheduled()) {
-            reverse_feed.Schedule();
-        }
-    });
-    // this might switch to the prespin of the flywheel
-    
+    aux_controller.Y()
+        .WhileTrue(std::move(sub_shot));
+        
     aux_controller.POVUp(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this]() {
         if (!amp_prepscore.IsScheduled()) {
             amp_prepscore.Schedule();
@@ -92,18 +86,21 @@ void Robot::RobotInit() {
     aux_controller.POVLeft(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).IfHigh([this]() {
         drive.reset_pose_to_vision();
     });
-    chassis_controller->POVDown(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this](){
-        if (!tele_creamy_shot.IsScheduled()) {
-            tele_creamy_shot.Schedule();
-        }
+    aux_controller.POVRight(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).IfHigh([this]() {
+        shooter.prespin();
     });
+    // chassis_controller->POVDown(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()).Rising().IfHigh([this](){
+    //     if (!tele_creamy_shot.IsScheduled()) {
+    //         tele_creamy_shot.Schedule();
+    //     }
+    // });
     aux_controller.RightBumper().WhileTrue(std::move(amp_spit));
     aux_controller.LeftBumper().OnTrue(std::move(tele_shoot));
     // aux_controller.B()
         // .WhileTrue(shooter.test_pid_angle);
     chassis_controller->LeftBumper().WhileTrue(intake_cmd());
     chassis_controller->A().WhileTrue(reverse_intake());
-    aux_controller.Y().OnTrue(std::move(tele_creamy_shot));
+
 
     intake.init();
     shooter.init();

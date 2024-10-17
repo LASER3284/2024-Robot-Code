@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3401303606158823,
-      "y": 3.6915943310244006
+      "x": 1.34,
+      "y": 3.69
     },
     "rotation": 0
   },
@@ -90,7 +90,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "autoshoot"
           }
         },
         {
@@ -128,12 +128,12 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "autoshoot"
           }
         }
       ]
     }
   },
-  "folder": "tested and good",
+  "folder": null,
   "choreoAuto": false
 }

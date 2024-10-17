@@ -1,12 +1,6 @@
 {
   "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 1.3401303606158823,
-      "y": 3.6915943310244006
-    },
-    "rotation": 0
-  },
+  "startingPose": null,
   "command": {
     "type": "sequential",
     "data": {
@@ -24,7 +18,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "turny-1"
+                  "pathName": "bad"
                 }
               },
               {
@@ -100,7 +94,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "turny-3"
+                  "pathName": null
                 }
               },
               {

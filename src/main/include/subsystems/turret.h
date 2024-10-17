@@ -36,6 +36,7 @@ public:
     /// @brief set setpoint
     void set_angle(units::degree_t);
     units::degree_t get_angle();
+    units::degree_t get_auto_angle();
     ///@brief checks if a set point
     bool at_goal_point();
 private:

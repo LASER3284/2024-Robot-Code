@@ -1,6 +1,12 @@
 {
   "version": 1.0,
-  "startingPose": null,
+  "startingPose": {
+    "position": {
+      "x": 1.35,
+      "y": 3.68
+    },
+    "rotation": 0
+  },
   "command": {
     "type": "sequential",
     "data": {
@@ -8,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot start"
+            "name": "shoot"
           }
         },
         {
@@ -16,15 +22,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "intake"
+                  "pathName": "465 45 a"
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "6a"
+                  "name": "intake"
                 }
               }
             ]
@@ -41,15 +47,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "intake"
+                  "pathName": "465 45 b"
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "6b"
+                  "name": "intake"
                 }
               }
             ]
@@ -66,15 +72,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "intake"
+                  "pathName": "465 45 c"
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "6c"
+                  "name": "intake"
                 }
               }
             ]
@@ -84,12 +90,6 @@
           "type": "named",
           "data": {
             "name": "shoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "6d"
           }
         }
       ]

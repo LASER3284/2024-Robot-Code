@@ -4,6 +4,7 @@
 #include <frc/DataLogManager.h>
 #include <frc2/command/Commands.h>
 #include <pathplanner/lib/util/PathPlannerLogging.h>
+#include <pathplanner/lib/path/PathPlannerTrajectory.h>
 
 using namespace pathplanner;
 
@@ -16,14 +17,18 @@ subsystems::drive::Drivetrain::Drivetrain(std::shared_ptr<frc::XboxController> j
         field_drawing.GetObject("path")->SetPoses(path);
     });
 
+    //RobotConfig config = RobotConfig::fromGUISettings();
+
     AutoBuilder::configureHolonomic(
         [this]() { return get_pose(); },
         [this](frc::Pose2d pose) { set_pose(pose); },
         [this]() { return get_robo_speeds(); },
         [this](frc::ChassisSpeeds speeds) { drive_robo(speeds); },
         HolonomicPathFollowerConfig(
-            PIDConstants(4.6, 0.0, 0.2),
-            PIDConstants(2, 0.0, 0.0),
+            // previously 4.6, 0 ,.2
+            PIDConstants(4.2, 0, 0.1),
+            //previously 2, 0, 0 heading below this line
+            PIDConstants(1.5, 0.0, 1),
             constants::MAX_AUTO_SPEED,
             16_in,
             ReplanningConfig(false, false)
@@ -188,7 +193,7 @@ void subsystems::drive::Drivetrain::update_odometry() {
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
             frc::Timer::GetFPGATimestamp(),
-            {uncertainty, uncertainty, uncertainty}
+            {0.5, 0.5, 99999999999}
         );
     }
 
@@ -200,11 +205,11 @@ void subsystems::drive::Drivetrain::update_odometry() {
         double uncertainty = 4;
         for (const auto &v : vision_est->targetsUsed) {
             uncertainty *= 1 / v.GetArea();
-        }
+        }   
         pose_estimator.AddVisionMeasurement(
             vision_est.value().estimatedPose.ToPose2d(),
             frc::Timer::GetFPGATimestamp(),
-            {uncertainty, uncertainty, uncertainty}
+            {0.5, 0.5, 99999999999}
         );
     }
 }
@@ -337,3 +342,5 @@ void subsystems::drive::Drivetrain::update_nt() {
     frc::SmartDashboard::PutNumber("Drivetrain_bl_heading", units::degree_t{back_left.get_heading()}.value());
     frc::SmartDashboard::PutNumber("Drivetrain_fr_heading", units::degree_t{front_right.get_heading()}.value());
 }
+
+void subsystems::drive::Drivetrain::setYaw() { gyro.reset(); }
